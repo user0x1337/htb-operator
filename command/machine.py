@@ -160,10 +160,8 @@ class MachineCommand(BaseCommand):
     def _execute_and_wait_for_ip_assigning(self, exec_machine_command: any, machine_name: str) -> None:
         from command import VpnCommand
 
-        vpn_command = VpnCommand(htb_cli=self.htb_cli, args=self.args)
         animation_thread = None
         active_machine : Optional[ActiveMachineInfo] = None
-        accessible_vpn_server = self.client.get_accessible_vpn_server()
         try:
             res, msg = exec_machine_command()
             if res:
@@ -174,7 +172,11 @@ class MachineCommand(BaseCommand):
                 active_machine = self.client.get_active_machine()
 
                 if self.start_vpn and active_machine is not None:
+                    old_id = self.args.id
+                    self.args.id = active_machine.vpn_server_id
+                    vpn_command = VpnCommand(htb_cli=self.htb_cli, args=self.args)
                     vpn_command.start_vpn()
+                    self.args.id = old_id
 
                 animation_thread = threading.Thread(target=self.animate_spinner, args=("Waiting... IP is being assigned.", f'Machine "{machine_name}"'))
                 animation_thread.start()
