@@ -6,17 +6,22 @@
 ![GitHub Repo stars](https://img.shields.io/github/stars/user0x1337/htb-cli)
 
 <div>
-  <img alt="current version" src="https://img.shields.io/badge/linux-supported-success">
-  <img alt="current version" src="https://img.shields.io/badge/WSL-supported-success">
-  <img alt="current version" src="https://img.shields.io/badge/mac-supported-success">
+  <img alt="current version" src="https://img.shields.io/badge/Linux-supported-success">
+  <img alt="current version" src="https://img.shields.io/badge/Windows-unsupported-blue">
+  <img alt="current version" src="https://img.shields.io/badge/MacOS-supported_|_untested-yellow">
   <br>
   <img alt="amd64" src="https://img.shields.io/badge/amd64%20(x86__64)-supported-success">
   <img alt="arm64" src="https://img.shields.io/badge/arm64%20(aarch64)-supported-success">
+  <br>
+  <img alt="current version" src="https://img.shields.io/badge/Python_>=3.12-supported-success">
+  <br>
+  <img alt="current version" src="https://img.shields.io/badge/HTB--API_v4-supported-success">
+  <br><br>
 </div>
 
 HTB-Operator is a project developed and maintained by [user0x1337](https://github.com/user0x1337). It interacts with the API of HackTheBox, a popular cybersecurity training platform. The main objective is to save time while interacting with the platform of HTB. 
 
-This tool is still under development.
+<img alt="current version" src="https://img.shields.io/badge/Status-Under_Development-red">
 
 # Installation
 HTB-Operator is written in Python. In general, it can be executed on every OS if python is installed on this OS. But it was only tested on Linux (Kali, Ubuntu) and has some limitations on Windows (I was not in the mood for migrating some features for Windows...maybe later).
