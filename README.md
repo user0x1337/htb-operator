@@ -26,8 +26,23 @@ HTB-Operator is a project developed and maintained by [user0x1337](https://githu
 # Installation
 HTB-Operator is written in Python. In general, it can be executed on every OS if python is installed on this OS. But it was only tested on Linux (Kali, Ubuntu) and has some limitations on Windows (I was not in the mood for migrating some features for Windows...maybe later).
 
+It is strongly recommended to create a venv:
+```bash
+1. python3 -m venv .venv
+2. source .venv/bin/activate 
+``` 
+
+You can install htb-operator using pip:
+```bash
+pip3 install git+https://github.com/user0x1337/htb-operator
+```
+
 # Configuration
-TBD
+You need an API-token from HTB. For thatL:
+1. Visit the URL: [https://app.hackthebox.com/profile/settings](https://app.hackthebox.com/profile/settings)
+2. Click on "Create App Token"
+3. Store the token
+4. Call `htb-operator init -api YOUR_API_TOKEN`
 
 # Commands
 The tool is command based. You can call `-h` or `--help` for displaying the help information in each stage. The "top level" commands are called if you call only the programm without any arguments:
