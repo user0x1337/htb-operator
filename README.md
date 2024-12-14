@@ -38,7 +38,7 @@ pip3 install git+https://github.com/user0x1337/htb-operator
 ```
 
 # Configuration
-You need an API-token from HTB. For thatL:
+You need an API-token from HTB. For that:
 1. Visit the URL: [https://app.hackthebox.com/profile/settings](https://app.hackthebox.com/profile/settings)
 2. Click on "Create App Token"
 3. Store the token
