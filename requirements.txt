@@ -1,0 +1,15 @@
+requests
+colorama
+pyjwt
+tabulate
+psutil
+pexpect
+pyreadline3
+python-dateutil
+rich
+pillow
+python-hosts==1.0.7
+psutil
+beautifulsoup4
+tqdm
+paramiko
