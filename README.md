@@ -45,7 +45,7 @@ You need an API-token from HTB. For that:
 4. Call `htb-operator init -api YOUR_API_TOKEN`
 
 # Commands
-The tool is command based. You can call `-h` or `--help` for displaying the help information in each stage. The "top level" commands are called if you call only the programm without any arguments:
+The tool is command based. You can call `-h` or `--help` for displaying the help information in each stage. The "top level" commands are displayed if you call only the programm without any arguments:
 
 
 ```bash 
