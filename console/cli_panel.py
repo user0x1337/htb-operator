@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from typing import List, Optional, Set
+from typing import List, Optional
 
 from rich.console import Group
 from rich.panel import Panel
@@ -50,90 +50,6 @@ def create_pwnbox_panel(pwnbox: dict):
                  expand=True,
                  border_style="yellow",
                  title_align="left")
-
-def _create_machine_list_table_header() -> Table:
-    table = Table(expand=True, show_lines=False, box=None)
-
-    table.add_column("#", width=1)
-    table.add_column("ID", width=1)
-    table.add_column("Name", width=10)
-    table.add_column("OS", width=6)
-    table.add_column("Difficulty", width=4)
-    table.add_column("\U00002605 Stars", justify="center", width=3)
-    table.add_column("Own User?", justify="center", width=3)
-    table.add_column("Own Root?", justify="center", width=3)
-    table.add_column("Retired?", justify="center", width=3)
-    table.add_column("Release date", max_width=10)
-
-    return table
-
-
-def _create_machine_list_table_rows(machine_info: List[dict], table: Table, filter_type) -> bool:
-    found = False
-    for i, m in enumerate([m for m in machine_info if filter_type(m)]):
-        found = True
-
-        if "Easy" == m["difficultyText"]:
-            color = "bright_green"
-        elif "Medium" == m["difficultyText"]:
-            color = "bright_yellow"
-        elif "Hard" == m["difficultyText"]:
-            color = "bright_red"
-        elif "Insane" == m["difficultyText"]:
-            color = "bright_magenta"
-        else:
-            color = "bright_white"
-
-        if m["os"].lower() == "windows":
-            unicode_logo = "\U0001F5D4  "
-        elif m["os"].lower() in ["linux", "freebsd", "openbsd"]:
-            unicode_logo = "\U0001F427 "
-        elif m["os"].lower() == "android":
-            unicode_logo = "\U0001F4F1 "
-        else:
-            unicode_logo = ""
-
-        retiring: bool = False
-        if "retiring" in m and m["retiring"]:
-            retiring = True
-            retiring_font_begin = "[bold cyan]"
-            retiring_font_end = "[/bold cyan]"
-        else:
-            retiring_font_begin = ""
-            retiring_font_end = ""
-
-        table.add_row(f'{retiring_font_begin}{i + 1}{retiring_font_end}',
-                      f'{retiring_font_begin}{m["id"]}{retiring_font_end}',
-                      f'{retiring_font_begin}[bold {color}]{m["name"]}[/bold {color}]{retiring_font_end}',
-                      f'{retiring_font_begin}{unicode_logo}{m["os"]}{retiring_font_end}',
-                      f'{retiring_font_begin}[bold {color}]{m["difficultyText"]}[/bold {color}]{retiring_font_end}',
-                      f'{retiring_font_begin}{m["stars"]}{retiring_font_end}',
-                      f'{retiring_font_begin}{"[bold green]" if m["authUserInUserOwns"] else ""}{format_bool(m["authUserInUserOwns"])}{"[/bold green]" if m["authUserInUserOwns"] else ""}{retiring_font_end}',
-                      f'{retiring_font_begin}{"[bold green]" if m["authUserInUserOwns"] else ""}{format_bool(m["authUserInRootOwns"])}{"[/bold green]" if m["authUserInRootOwns"] else ""}{retiring_font_end}',
-                      f'{retiring_font_begin}{format_bool(m["retired"])}{f'/{format_bool(True)}' if retiring else ""}{retiring_font_end}',
-                      f'{retiring_font_begin}{m["release_date"].strftime("%Y-%m-%d") if m["release_date"] <= datetime.now(tz=timezone.utc) else m["release_date"].strftime("%Y-%m-%d %H:%M:%S UTC")}{retiring_font_end}'
-                      )
-    return found
-
-
-def create_machine_list_group_by_os_panel(machine_info: List[dict]) -> Panel | Group | Table:
-    """Create the panel for machine list group by OS."""
-    assert machine_info is not None
-
-    os_set: Set[str] = set([x["os"] for x in machine_info])
-
-    panels = []
-    for os in os_set:
-        table = _create_machine_list_table_header()
-        filter_type = lambda x: x["os"] == os
-        if _create_machine_list_table_rows(table=table, machine_info=machine_info, filter_type=filter_type):
-            panels.append(Panel(table,
-                                title=f"[bold yellow]{os}[/bold yellow]",
-                                border_style="yellow",
-                                title_align="left",
-                                expand=True))
-
-    return Group(*panels)
 
 
 def create_sherlock_list_group_by_retired_panel(sherlock_info: List[dict]) -> Panel | Group | Table:
@@ -190,23 +106,6 @@ def create_sherlock_list_group_by_retired_panel(sherlock_info: List[dict]) -> Pa
 
     return Group(*panels)
 
-
-def create_machine_list_group_by_retired_panel(machine_info: List[dict]) -> Panel | Group | Table:
-    """Create the panel for machine list group by retired/active."""
-    assert machine_info is not None
-
-    panels = []
-    for machine_type in ["active", "retired", "unreleased"]:
-        table = _create_machine_list_table_header()
-        filter_type = lambda x: x["retired"] == (machine_type == "retired") and x["release_date"] <= datetime.now(tz=timezone.utc) if machine_type in ["active", "retired"] else x["release_date"] > datetime.now(tz=timezone.utc)
-        if _create_machine_list_table_rows(table=table, machine_info=machine_info, filter_type=filter_type):
-            panels.append(Panel(table,
-                                title=f"[bold yellow]{"Retired" if machine_type == "retired" else "Active" if machine_type == "active" else "Scheduled"}[/bold yellow]",
-                                border_style="yellow",
-                                title_align="left",
-                                expand=True))
-
-    return Group(*panels)
 
 
 def create_prolab_detail_info_panel(prolab_dict: dict) -> Panel | Group | Table:

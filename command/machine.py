@@ -13,8 +13,8 @@ from colorama import Fore, Style
 from python_hosts import Hosts
 
 from command.base import BaseCommand, IS_ROOT_OR_ADMIN, IS_WINDOWS
-from console import create_panel_active_machine_status, create_machine_list_group_by_retired_panel, \
-    create_machine_list_group_by_os_panel
+from console import create_panel_active_machine_status, create_machine_list_group_by_retired, \
+    create_machine_list_group_by_os
 from htbapi import MachineInfo, ActiveMachineInfo, VpnServerInfo
 
 
@@ -393,7 +393,7 @@ class MachineCommand(BaseCommand):
             return None
 
         if self.args.group_by_os:
-            self.console.print(create_machine_list_group_by_os_panel(machine_info=[x.to_dict() for x in machines_result]))
+            self.console.print(create_machine_list_group_by_os(machine_info=[x.to_dict() for x in machines_result]))
         else:
             maschine_dict_list = []
             for machine in machines_result:
@@ -402,7 +402,7 @@ class MachineCommand(BaseCommand):
                     machine_dict["retiring"] = True
                 maschine_dict_list.append(machine_dict)
 
-            self.console.print(create_machine_list_group_by_retired_panel(machine_info=maschine_dict_list))
+            self.console.print(create_machine_list_group_by_retired(machine_info=maschine_dict_list))
 
 
     def reset_machine(self):
