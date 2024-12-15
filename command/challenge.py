@@ -151,17 +151,27 @@ class ChallengeCommand(BaseCommand):
         category_dict = {x.id: x.name for x in categories}
 
         filter_category_id = None
+        cat_filter_list = []
         if self.args.category:
-            if self.args.category not in category_dict.values():
-                self.logger.error(
-                    f'{Fore.RED}Category "{self.args.category}" is not a valid HTB category.{Style.RESET_ALL}')
+            cat_list = self.args.category.split(',')
+            all_cats_invalid = True
+            for cat in cat_list:
+                if cat not in category_dict.values():
+                    self.logger.warning(f'{Fore.LIGHTYELLOW_EX}Category "{self.args.category}" is not a valid HTB category.{Style.RESET_ALL}')
+                else:
+                    all_cats_invalid = False
+
+            if all_cats_invalid:
                 return None
-            filter_category_id = next((key for key, value in category_dict.items() if value == self.args.category), None)
+
+            for cat in cat_list:
+                filter_category_id = next((key for key, value in category_dict.items() if value == cat), None)
+                cat_filter_list.append(filter_category_id)
 
         challenge_list: List[ChallengeList] = self.client.get_challenge_list(retired=self.args.retired,
                                                                              unsolved=unsolved,
                                                                              filter_todo=self.args.todo,
-                                                                             filter_category=filter_category_id,
+                                                                             filter_category_list=cat_filter_list,
                                                                              filter_difficulty=self.args.difficulty)
 
         self.console.print((create_table_challenge_list(challenge_list=[x.to_dict() for x in challenge_list], category_dict=category_dict)))

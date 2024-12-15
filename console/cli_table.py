@@ -130,32 +130,76 @@ def create_table_active_vpn_connections(vpn_connections: List[dict]):
     return table
 
 
-def create_table_challenge_list(challenge_list: List[dict], category_dict: dict) -> Table:
-    table = Table(title="Challenges", show_lines=True)
-    table.add_column(header="ID", style="cyan", justify="left")
-    table.add_column(header="Name", style="cyan", justify="left")
-    table.add_column(header="Retired", style="cyan", justify="left")
-    table.add_column(header="Difficulty", style="cyan", justify="left")
-    table.add_column(header="Avg Difficulty", style="cyan", justify="left")
-    table.add_column(header="Points", style="cyan", justify="left")
-    table.add_column(header="Solved", style="cyan", justify="left")
-    table.add_column(header="Release Date", style="cyan", justify="left")
-    table.add_column(header="Category", style="cyan", justify="left")
-    table.add_column(header="Rating", style="cyan", justify="left")
-    table.add_column(header="TODO", style="cyan", justify="left")
+def create_table_challenge_list(challenge_list: List[dict], category_dict: dict) -> Table | Panel | Group:
+    panels = []
+    for k,v in category_dict.items():
+        table: Table = _create_challenge_list_table_header()
 
-    for c in challenge_list:
-        table.add_row(str(c["id"]),
-                      c["name"],
-                      format_bool(c["retired"]),
-                      c["difficulty"],
-                      f"{c["avg_difficulty"]}",
-                      f"{c["points"]}",
-                      format_bool(c["solved"]),
-                      f"{c["release_date"].strftime('%Y-%m-%d')}",
-                      category_dict[c["category_id"]],
-                      f"{c["rating"]}",
-                      format_bool(c["isTodo"]))
+        filter_type = lambda x: x["category_id"] == k
+        if _create_challenge_list_table_rows(table=table, challenge_info=challenge_list, filter_type=filter_type):
+            panels.append(Panel(table,
+                                title=f"[bold yellow]{v.capitalize()}[/bold yellow]",
+                                border_style="yellow",
+                                title_align="left",
+                                expand=True))
+
+    return Group(*panels)
+
+
+def _create_challenge_list_table_rows(challenge_info: List[dict], table: Table, filter_type) -> bool:
+    found = False
+    for i, c in enumerate([c for c in challenge_info if filter_type(c)]):
+        found = True
+
+        if "Easy" == c["difficulty"]:
+            color = "bright_green"
+        elif "Medium" == c["difficulty"]:
+            color = "bright_yellow"
+        elif "Hard" == c["difficulty"]:
+            color = "bright_red"
+        elif "Insane" == c["difficulty"]:
+            color = "bright_magenta"
+        else:
+            color = "bright_white"
+
+        retiring: bool = False
+        if "retiring" in c and c["retiring"]:
+            retiring = True
+            retiring_font_begin = "[bold cyan]"
+            retiring_font_end = "[/bold cyan]"
+        else:
+            retiring_font_begin = ""
+            retiring_font_end = ""
+
+        table.add_row(f'{retiring_font_begin}{i+1}',
+                      f'{retiring_font_begin}[bold {color}]{(c["id"])}[/bold {color}]{retiring_font_end}',
+                      f'{retiring_font_begin}[bold {color}]{c["name"]}[/bold {color}]{retiring_font_end}',
+                      f'{retiring_font_begin}[bold {color}]{c["difficulty"]}[/bold {color}]{retiring_font_end}',
+                      f'{retiring_font_begin}{c["avg_difficulty"]}{retiring_font_end}',
+                      f'{retiring_font_begin}{c["points"]}{retiring_font_end}',
+                      f'{retiring_font_begin}{format_bool(c["solved"], color_true="green")}{retiring_font_end}',
+                      f'{retiring_font_begin}{format_bool(c["retired"], color_true="blue")}{retiring_font_end}',
+                      f'{retiring_font_begin}{c["rating"]}{retiring_font_end}',
+                      f'{retiring_font_begin}{format_bool(c["isTodo"])}{retiring_font_end}',
+                      f'{retiring_font_begin}{c["release_date"].strftime('%Y-%m-%d')}{retiring_font_end}'
+                      )
+    return found
+
+
+def _create_challenge_list_table_header() -> Table:
+    table = Table(expand=True, show_lines=False, box=None)
+
+    table.add_column(header="#", width=1)
+    table.add_column(header="ID", width=1)
+    table.add_column(header="Name", width=10)
+    table.add_column(header="Difficulty", width=4)
+    table.add_column(header="Avg Difficulty", width=3)
+    table.add_column(header="Points",  justify="center", width=3)
+    table.add_column(header="Solved",  justify="center", width=3)
+    table.add_column(header="Retired", justify="center", width=3)
+    table.add_column(header="Rating",  justify="center", width=3)
+    table.add_column(header="TODO", justify="center", width=3)
+    table.add_column(header="Release Date", max_width=10)
 
     return table
 
