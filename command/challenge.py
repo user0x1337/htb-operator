@@ -174,7 +174,7 @@ class ChallengeCommand(BaseCommand):
                                                                              filter_category_list=cat_filter_list,
                                                                              filter_difficulty=self.args.difficulty)
 
-        self.console.print((create_table_challenge_list(challenge_list=[x.to_dict() for x in challenge_list], category_dict=category_dict)))
+        self.console.print((create_table_challenge_list(challenge_list=sorted([x.to_dict() for x in challenge_list], key=lambda x: x["difficulty_num"]), category_dict=category_dict)))
 
 
     def start_instance(self, challenge: ChallengeInfo):

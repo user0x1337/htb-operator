@@ -14,6 +14,7 @@ class ChallengeBase(client.BaseHtbApiObject):
     name: str
     retired: bool
     difficulty: str
+    difficulty_num: int
     points: int
     solves: int
     likes: int
@@ -39,6 +40,19 @@ class ChallengeBase(client.BaseHtbApiObject):
         self.isTodo = data.get('isTodo', False)
         self.recommended = data.get('recommended', 0)
 
+        if self.difficulty.lower() == "very easy":
+            self.difficulty_num = 0
+        elif self.difficulty.lower() == "easy":
+            self.difficulty_num = 1
+        elif self.difficulty.lower() == "medium":
+            self.difficulty_num = 2
+        elif self.difficulty.lower() == "hard":
+            self.difficulty_num = 3
+        elif self.difficulty.lower() == "insane":
+            self.difficulty_num = 4
+        else:
+            self.difficulty_num = -1
+
 
     def to_dict(self):
         return {
@@ -53,7 +67,8 @@ class ChallengeBase(client.BaseHtbApiObject):
             'release_date': self.release_date,
             'solved': self.solved,
             'isTodo': self.isTodo,
-            'recommended': self.recommended
+            'recommended': self.recommended,
+            'difficulty_num': self.difficulty_num,
             }
 
     def submit(self, flag: str, difficulty: int):
