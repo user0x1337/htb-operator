@@ -237,6 +237,9 @@ def _create_machine_command_parser(subparsers):
     machine_sub_parser.add_parser(name="status", help="Displays the active machine(s)")
     machine_sub_parser.add_parser(name="extend",help="Extends the uptime of the active machine")
 
+    machine_info_parser = machine_sub_parser.add_parser(name="info", help="Displays detailed information for a machine")
+    add_id_name_arguments(machine_info_parser)
+
     maschine_list_parser = machine_sub_parser.add_parser(name="list", help="Lists all machines")
     maschine_list_parser.add_argument("--retired", action="store_true", help="Lists only retired machines")
     maschine_list_parser.add_argument("--active", action="store_true", help="Lists only active machines")

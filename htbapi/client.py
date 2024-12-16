@@ -638,6 +638,22 @@ class HTBClient:
         return res
 
     # noinspection PyUnresolvedReferences
+    def get_machine_top_owns(self, machine_id_or_name: int | str) -> List["MachineTopOwns"]:
+        """Retrieve the top user which owned this machine for the given machine ID."""
+        from .machine import MachineTopOwns, MachineInfo
+
+        if machine_id_or_name is None:
+            return []
+
+        machine: MachineInfo = self.get_machine(machine_id_or_name=machine_id_or_name)
+        if machine is None:
+            return []
+
+        data = self.get_request(endpoint=f'machine/owns/top/{machine.id}')["info"]
+        return [MachineTopOwns(data=x, _client=self, machine_info=machine) for x in data]
+
+
+    # noinspection PyUnresolvedReferences
     def get_machine(self, machine_id_or_name: int | str) -> "MachineInfo":
         """Retrieve a machine object for the given machine ID or name."""
         from .machine import MachineInfo

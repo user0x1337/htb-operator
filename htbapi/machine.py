@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, List
 
 import dateutil.parser
 
@@ -100,6 +100,7 @@ class MachineInfo(MachineBase):
     show_go_vip_server: bool
     ownRank: int
     machine_mode: Optional[str]
+    machine_top_owns: List["MachineTopOwns"]
 
     # noinspection PyUnresolvedReferences
     def __init__(self, data: dict, _client: "HTBClient"):
@@ -135,6 +136,7 @@ class MachineInfo(MachineBase):
         self.show_go_vip_server = data.get('show_go_vip_server', False)
         self.ownRank = data.get('ownRank', 0)
         self.machine_mode = None if data.get('machine_mode', None) else data.get('machine_mode')
+        self.machine_top_owns = []
 
     def __repr__(self):
          return f"<MachineInfo '{self.name} | {self.id}'>"
@@ -283,3 +285,54 @@ class MachineMaker(client.BaseHtbApiObject):
 
     def __repr__(self):
         return f"<MachineMaker '{self.name} | {self.id}'>"
+
+
+class MachineTopOwns(client.BaseHtbApiObject):
+    username: str
+    rank_id: int
+    rank_text: str
+    own_date: datetime
+    user_own_date: datetime
+    user_own_time: str
+    root_own_tine: str
+    is_user_blood: bool
+    is_root_blood: bool
+    position: int
+    machine: MachineInfo
+
+    # noinspection PyUnresolvedReferences
+    def __init__(self, data: dict, _client: "HTBClient", machine_info: MachineInfo):
+        assert machine_info is not None
+
+        self.id = data.get('id')
+        self._client = _client
+        self.machine = machine_info
+        self.name = data.get('name')
+        self.rank_id = data.get('rank_id')
+        self.rank_text = data.get('rank_text')
+        self.own_date = dateutil.parser.parse(data.get('own_date')).replace(tzinfo=timezone.utc)
+        self.user_own_date = dateutil.parser.parse(data.get('user_own_date')).replace(tzinfo=timezone.utc)
+        self.user_own_time = data.get('user_own_time')
+        self.root_own_tine = data.get('root_own_tine')
+        self.is_user_blood = data.get('is_user_blood', False)
+        self.is_root_blood = data.get('is_root_blood', False)
+        self.position = data.get('position')
+        self.machine.machine_top_owns.append(self)
+
+    def __repr__(self):
+        return f"<MachineTopOwns '{self.name} | {self.id} | {self.machine}'>"
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "username": self.username,
+            "rank_id": self.rank_id,
+            "rank_text": self.rank_text,
+            "own_date": self.own_date,
+            "user_own_date": self.user_own_date,
+            "user_own_time": self.user_own_time,
+            "root_own_tine": self.root_own_tine,
+            "is_user_blood": self.is_user_blood,
+            "is_root_blood": self.is_root_blood,
+            "position": self.position,
+        }

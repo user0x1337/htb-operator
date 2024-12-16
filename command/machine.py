@@ -15,7 +15,7 @@ from python_hosts import Hosts
 from command.base import BaseCommand, IS_ROOT_OR_ADMIN, IS_WINDOWS
 from console import create_panel_active_machine_status, create_machine_list_group_by_retired, \
     create_machine_list_group_by_os
-from htbapi import MachineInfo, ActiveMachineInfo, VpnServerInfo
+from htbapi import MachineInfo, ActiveMachineInfo, VpnServerInfo, MachineTopOwns
 
 
 class MachineCommand(BaseCommand):
@@ -498,6 +498,13 @@ class MachineCommand(BaseCommand):
             self.logger.error(f'{Fore.RED}Machine "{machine.name}": {msg}{Style.RESET_ALL}')
 
 
+    def print_info(self):
+        """Print the machine info"""
+        machine_top_owns_list: List[MachineTopOwns] = self.client.get_machine_top_owns(machine_id_or_name=self.args_id if self.args_id else self.args_name)
+        machine_top_owns_list.sort(key=lambda m: m.position)
+        self.logger.info(machine_top_owns_list)
+
+
     def execute(self):
         if not self.check():
             return None
@@ -518,6 +525,8 @@ class MachineCommand(BaseCommand):
             self.grab_flag_via_ssh()
         elif self.machine_command == "list":
             self.list()
+        elif self.machine_command == "info":
+            self.print_info()
         else:
             self.logger.error(f'{Fore.RED}Unknown command "{self.machine_command}{Style.RESET_ALL}')
             return None
