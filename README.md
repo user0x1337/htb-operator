@@ -90,7 +90,9 @@ List all obtained certification of completion.
 ```bash
 htb-operator certificate --list
 ```
-![image](https://github.com/user-attachments/assets/0783bd15-590f-43a9-a4b0-eefa08e6409e)
+![image](https://github.com/user-attachments/assets/d9fabf5d-cb2a-4663-812a-55cd030ff275)
+
+
 
 
 ### download
