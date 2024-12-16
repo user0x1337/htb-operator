@@ -137,6 +137,25 @@ class ChallengeCommand(BaseCommand):
         table = create_challenge_info_panel(channel_info=challenge_info.to_dict())
         self.console.print(table)
 
+    def _get_filter_category_list(self, category_dict:dict):
+        cat_filter_list = []
+        if self.args.category:
+            cat_list = self.args.category.split(',')
+            all_cats_invalid = True
+            for cat in cat_list:
+                if cat not in category_dict.values():
+                    self.logger.warning(
+                        f'{Fore.LIGHTYELLOW_EX}Category "{self.args.category}" is not a valid HTB category.{Style.RESET_ALL}')
+                else:
+                    all_cats_invalid = False
+
+            if all_cats_invalid:
+                return None
+
+            for cat in cat_list:
+                filter_category_id = next((key for key, value in category_dict.items() if value == cat), None)
+                cat_filter_list.append(filter_category_id)
+        return cat_filter_list
 
     def list_challenges(self):
         """List all challenges"""
@@ -151,23 +170,7 @@ class ChallengeCommand(BaseCommand):
         category_dict = {x.id: x.name for x in categories}
 
         filter_category_id = None
-        cat_filter_list = []
-        if self.args.category:
-            cat_list = self.args.category.split(',')
-            all_cats_invalid = True
-            for cat in cat_list:
-                if cat not in category_dict.values():
-                    self.logger.warning(f'{Fore.LIGHTYELLOW_EX}Category "{self.args.category}" is not a valid HTB category.{Style.RESET_ALL}')
-                else:
-                    all_cats_invalid = False
-
-            if all_cats_invalid:
-                return None
-
-            for cat in cat_list:
-                filter_category_id = next((key for key, value in category_dict.items() if value == cat), None)
-                cat_filter_list.append(filter_category_id)
-
+        cat_filter_list = self._get_filter_category_list(category_dict)
         challenge_list: List[ChallengeList] = self.client.get_challenge_list(retired=self.args.retired,
                                                                              unsolved=unsolved,
                                                                              filter_todo=self.args.todo,
@@ -274,7 +277,24 @@ class ChallengeCommand(BaseCommand):
         self.logger.info(f'{Fore.GREEN}Writeup downloaded in {target_path}{Style.RESET_ALL}')
 
     def search(self):
-        challenges_list: List[ChallengeList] = self.client.search_challenges(name=self.challenge_name)
+        if self.args.unsolved:
+            unsolved = self.args.unsolved
+        elif self.args.solved:
+            unsolved = not self.args.solved
+        else:
+            unsolved = None
+
+        # Mapping between category-id and category_name. Challenge returns only the id.
+        categories: List[Category] = self.client.get_challenge_categories_list()
+        category_dict = {x.id: x.name for x in categories}
+
+        cat_filter_list = self._get_filter_category_list(category_dict)
+
+        challenges_list: List[ChallengeList] = self.client.search_challenges(name=self.challenge_name,
+                                                                             unsolved=unsolved,
+                                                                             filter_todo=self.args.todo,
+                                                                             filter_category_list=cat_filter_list,
+                                                                             filter_difficulty=self.args.difficulty)
         if len(challenges_list) == 0:
             self.logger.warning(
                 f'{Fore.LIGHTYELLOW_EX}No challenges found for name "{self.challenge_name}"{Style.RESET_ALL}')

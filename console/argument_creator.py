@@ -292,6 +292,14 @@ def _create_challenge_command_parser(subparsers):
 
     challenge_search: ArgumentParser = challenge_sub_parser.add_parser(name="search", help="Search for challenges")
     challenge_search.add_argument("--name", type=str, metavar="WORD", required=True, help="Search for challenge whose name begins with this word")
+    challenge_search.add_argument("--unsolved", action="store_true", help="only unsolved challenges are listed")
+    challenge_search.add_argument("--solved", action="store_true",
+                                       help="only solved challenges are listed. If both --solved and --unsolved are specified, just unsolved will be returned")
+    challenge_search.add_argument("--todo", action="store_true", help='only challenges which are marked as "TODO"')
+    challenge_search.add_argument("--category", metavar="CATEGORY", type=str, default=None,
+                                       help="Filter challenges by category")
+    challenge_search.add_argument("--difficulty", metavar="Difficulty", type=str, default=None,
+                                       help="Filter challenges by difficulty")
 
     challenge_submit_flag: ArgumentParser = challenge_sub_parser.add_parser(name="submit", help="Submit the flag")
     add_id_name_arguments(challenge_submit_flag)

@@ -80,7 +80,11 @@ class HTBClient:
         return user
 
     # noinspection PyUnresolvedReferences
-    def search_challenges(self, name: str) -> List["ChallengeList"]:
+    def search_challenges(self, name: str,
+                          unsolved: Optional[bool] = None,
+                          filter_todo: Optional[bool] = False,
+                          filter_category_list: Optional[List[int]] = None,
+                          filter_difficulty: Optional[str] = None) -> List["ChallengeList"]:
         """Search for challenges for a given name."""
         from .challenge import ChallengeList
 
@@ -98,7 +102,13 @@ class HTBClient:
                                                   "rating": d["rating"],
                                                   "avg_difficulty": d["user_difficulty"],
                                                   "authUserSolve": d["is_owned"]
-                                                  }) for d in data]
+                                                  }) for d in data
+                if unsolved is None and d["is_owned"] == d["is_owned"] or d["is_owned"] != unsolved
+                if filter_todo is None or not filter_todo or (d["isTodo"] == filter_todo)
+                if filter_category_list is None or len(filter_category_list) == 0 or (
+                            d["category_id"] in filter_category_list)
+                if filter_difficulty is None or (d["difficulty"].lower() == filter_difficulty.lower())
+                ]
 
 
     # noinspection PyUnresolvedReferences
