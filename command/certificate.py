@@ -2,6 +2,7 @@ import argparse
 from typing import Optional
 
 from colorama import Fore, Style
+from rich.panel import Panel
 from rich.table import Table
 
 from command.base import BaseCommand
@@ -34,16 +35,26 @@ class CertificateCommand(BaseCommand):
                 self.logger.warning("No certificates obtained, yet.")
                 return None
 
-            table = Table(title="Obtained Certifications", show_lines=True)
-            table.add_column(header="Certification ID", style="cyan", justify="left")
-            table.add_column(header="Name", style="cyan", justify="left")
-            table.add_column(header="Downloaded", style="cyan", justify="left")
-            table.add_column(header="Completion date/time", style="cyan", justify="left")
+            table = Table(expand=True, show_lines=False, box=None)
+
+            table.add_column(header="Certification ID", justify="left")
+            table.add_column(header="Name", justify="left")
+            table.add_column(header="Downloaded", justify="left")
+            table.add_column(header="Completion date/time",  justify="left")
 
             for cert in certs:
-                table.add_row(str(cert.cert_id), cert.name, format_bool(cert.has_downloaded_cert), f"{cert.created_at.strftime('%Y-%m-%d %H:%M:%S')} UTC")
+                table.add_row(str(cert.cert_id),
+                              cert.name,
+                              format_bool(cert.has_downloaded_cert),
+                              f"{cert.created_at.strftime('%Y-%m-%d %H:%M:%S')} UTC")
 
-            self.console.print(table)
+            p = Panel(table,
+                      title=f"[bold yellow]Certificates[/bold yellow]",
+                      border_style="yellow",
+                      title_align="left",
+                      expand=False)
+
+            self.console.print(p)
 
         elif self.certificate_command and self.id:
             try:
