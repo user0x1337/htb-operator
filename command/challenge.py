@@ -273,6 +273,21 @@ class ChallengeCommand(BaseCommand):
         self.logger.info(f'{Fore.GREEN}Integrity check successful{Style.RESET_ALL}')
         self.logger.info(f'{Fore.GREEN}Writeup downloaded in {target_path}{Style.RESET_ALL}')
 
+    def search(self):
+        challenges_list: List[ChallengeList] = self.client.search_challenges(name=self.challenge_name)
+        if len(challenges_list) == 0:
+            self.logger.warning(
+                f'{Fore.LIGHTYELLOW_EX}No challenges found for name "{self.challenge_name}"{Style.RESET_ALL}')
+            return None
+
+        categories = self.client.get_challenge_categories_list()
+        category_dict = {x.id: x.name for x in categories}
+
+        self.console.print((create_table_challenge_list(challenge_list=sorted([x.to_dict() for x in challenges_list], key=lambda x: x["difficulty_num"]),
+                                                        category_dict=category_dict)))
+        self.logger.info(f'{Fore.GREEN}Found {len(challenges_list)} challenges which begin with "{self.challenge_name}"{Style.RESET_ALL}')
+
+
     def execute(self):
         """Download the challenge."""
         if not self.challenge_command:
@@ -290,3 +305,5 @@ class ChallengeCommand(BaseCommand):
             self.handle_instance()
         elif self.challenge_command == "download_writeup":
             self.download_writeup()
+        elif self.challenge_command == "search":
+            self.search()

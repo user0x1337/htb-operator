@@ -211,7 +211,7 @@ def _create_challenge_list_table_rows(challenge_info: List[dict], table: Table, 
                       f'{retiring_font_begin}{c["points"]}{retiring_font_end}',
                       f'{retiring_font_begin}{format_bool(c["solved"], color_true="green")}{retiring_font_end}',
                       f'{retiring_font_begin}{format_bool(c["retired"], color_true="blue")}{retiring_font_end}',
-                      f'{retiring_font_begin}{c["rating"]}{retiring_font_end}',
+                      f'{retiring_font_begin}{round(c["rating"], 2)}{retiring_font_end}',
                       f'{retiring_font_begin}{format_bool(c["isTodo"])}{retiring_font_end}',
                       f'{retiring_font_begin}{c["release_date"].strftime('%Y-%m-%d')}{retiring_font_end}'
                       )

@@ -290,6 +290,9 @@ def _create_challenge_command_parser(subparsers):
     challenge_info: ArgumentParser = challenge_sub_parser.add_parser(name="info", help="Displays info about a challenge")
     add_id_name_arguments(challenge_info)
 
+    challenge_search: ArgumentParser = challenge_sub_parser.add_parser(name="search", help="Search for challenges")
+    challenge_search.add_argument("--name", type=str, metavar="WORD", required=True, help="Search for challenge whose name begins with this word")
+
     challenge_submit_flag: ArgumentParser = challenge_sub_parser.add_parser(name="submit", help="Submit the flag")
     add_id_name_arguments(challenge_submit_flag)
     challenge_submit_flag.add_argument("-d", "--difficulty", type=int, metavar="<Difficulty Rating>",
@@ -351,6 +354,4 @@ def _create_info_command_parser(subparsers):
                              help="Specify an username to retrieve their information. Default is the own user")
     info_parser.add_argument("-a", "--activity", action="store_true",
                              help="Show only the activity of the user if possible. All entries will be displayed!")
-    info_parser.add_argument("-c", type=str, metavar="<Challenge Name>", default=None,
-                             help="Search for challenges based on the name and displays the basic information.")
     info_parser.set_defaults(func=InfoCommand)
