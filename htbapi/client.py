@@ -517,12 +517,33 @@ class HTBClient:
 
 
     # noinspection PyUnresolvedReferences
-    def get_badges(self) -> List["BadgeCategory"]:
+    def get_badges(self,
+                   user_id: Optional[int]=None,
+                   username: Optional[str]=None,
+                   remove_obtained_badges: Optional[bool]=None) -> List["BadgeCategory"]:
         """Get all badges"""
-        from .badge import BadgeCategory
+        from .badge import BadgeCategory, Badge
+        res = []
+
+        if remove_obtained_badges is None:
+            remove_obtained_badges = False
+
+        user: User = self.get_user(user_id=user_id, username=username)
+        if user is None:
+            return res
 
         data: List[dict] = self.get_request(endpoint=f"badges")["categories"]
-        return [BadgeCategory(_client=self, data=x) for x in data]
+        for x in data:
+            badge_category = BadgeCategory(_client=self, data=x)
+            if remove_obtained_badges:
+                badge_category.badges = [x for x in badge_category.badges if x.id not in user.badges.keys()]
+            else:
+                for badge in badge_category.badges:
+                    badge.set_badge_obtained(badge_obtained=badge.id in user.badges.keys(), when=user.badges.get(badge.id, None))
+
+            res.append(badge_category)
+
+        return res
 
     # noinspection PyUnresolvedReferences
     def get_machine_list(self,

@@ -13,6 +13,7 @@ from .api_key import ApiKey
 from .init import InitCommand
 from .proxy import ProxyCommand
 from .version import VersionCommand
+from .badge import BadgeCommand
 
 
 

@@ -49,6 +49,9 @@ def create_arg_parser(htbcli: "HtbCLI") -> ArgumentParser:
     # Sherlock command
     _create_sherlock_command_parser(subparsers=subparsers)
 
+    # Badges command
+    _create_badge_command_parser(subparsers=subparsers)
+
     # help command
     subparsers.add_parser("help", help="show this help message and exit")
 
@@ -64,6 +67,18 @@ def _create_vhosts_command_parser(subparsers):
     vhost_add_sub_parser.add_argument("--subdomain", type=str, metavar="<HOSTNAME>", required=True, help="Add <HOSTNAME> to the hosts file. Adding more than one host must be seperated by commas [,]")
     vhost_add_sub_parser.add_argument("--no-machine-hostname", action="store_true" ,help="If indicated, the machine hostname will not be added automatically to the vhost.")
     vhost_sub_parser.add_parser(name="add-hostname", help='Add the hostname of the active running machine (e.g. for the machine "Alert" the hostname "alert.htb" will be added)')
+
+
+def _create_badge_command_parser(subparsers):
+    from command import BadgeCommand
+
+    badge_parser: ArgumentParser = subparsers.add_parser("badge", help="Commands for Badges")
+    badge_parser.set_defaults(func=BadgeCommand)
+    badge_sub_parser = badge_parser.add_subparsers(title="commands", description="Available commands", dest="badge")
+    badge_list_parser = badge_sub_parser.add_parser(name="list", help="List all badges")
+    badge_list_parser.add_argument("-s", "--username", type=str, default=None,help="Specify an username. Default is the own user")
+    badge_list_parser.add_argument("--open", action="store_true",help="Filter badges which the user has not obtained, yet.")
+
 
 def _create_sherlock_command_parser(subparsers):
     from command import SherlockCommand

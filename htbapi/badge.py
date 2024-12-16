@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, List
 
 from htbapi import client
@@ -34,6 +35,8 @@ class BadgeCategory(client.BaseHtbApiObject):
 class Badge(client.BaseHtbApiObject):
     name: str
     description: str
+    badge_obtained: bool
+    badge_obtained_datetime : Optional[datetime]
     color: Optional[str]
     users_count: int
     rarity: float
@@ -49,6 +52,14 @@ class Badge(client.BaseHtbApiObject):
         self.color = data.get("color")
         self.users_count = data["users_count"]
         self.rarity = data["rarity"]
+        self.badge_obtained = False
+        self.badge_obtained_datetime = None
+
+    def set_badge_obtained(self, badge_obtained: bool, when: datetime):
+        assert badge_obtained is not None
+
+        self.badge_obtained = badge_obtained
+        self.badge_obtained_datetime = when
 
     def __repr__(self) -> str:
         return f"<Badge '{self.name} | {self.id}'>"
@@ -61,4 +72,6 @@ class Badge(client.BaseHtbApiObject):
             "color": self.color,
             "users_count": self.users_count,
             "rarity": self.rarity,
+            "badge_obtained": self.badge_obtained,
+            "badge_obtained_datetime": self.badge_obtained_datetime,
         }

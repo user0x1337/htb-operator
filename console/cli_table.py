@@ -130,6 +130,38 @@ def create_table_active_vpn_connections(vpn_connections: List[dict]):
     return table
 
 
+def create_table_badge_list(badge_categories: List[dict]) -> Table | Panel | Group:
+    """Create a table with available and obtained badges"""
+    panels = []
+
+    for badge_category in badge_categories:
+        if len(badge_category["badges"]) == 0:
+            continue
+
+        category_name = badge_category["name"]
+        table: Table = _create_badge_list_table_header()
+
+        counter = 0
+        for badge in badge_category["badges"]:
+            counter += 1
+
+            table.add_row(f'{counter + 1}',
+                          f'{(badge["id"])}',
+                          f'{badge["name"]}',
+                          f'{badge["description"]}',
+                          f'{badge["users_count"]}',
+                          f'{badge["rarity"]}',
+                          f'{format_bool(badge["badge_obtained"], color_true="green", color_false="red")}',
+                          f'{"" if badge["badge_obtained_datetime"] is None else badge["badge_obtained_datetime"].strftime('%Y-%m-%d')}',
+                          )
+        panels.append(Panel(table,
+                            title=f"[bold yellow]{category_name}[/bold yellow]",
+                            border_style="yellow",
+                            title_align="left",
+                            expand=True))
+
+    return Group(*panels)
+
 def create_table_challenge_list(challenge_list: List[dict], category_dict: dict) -> Table | Panel | Group:
     panels = []
     for k,v in category_dict.items():
@@ -184,6 +216,21 @@ def _create_challenge_list_table_rows(challenge_info: List[dict], table: Table, 
                       f'{retiring_font_begin}{c["release_date"].strftime('%Y-%m-%d')}{retiring_font_end}'
                       )
     return found
+
+
+def _create_badge_list_table_header() -> Table:
+    table = Table(expand=True, show_lines=False, box=None)
+
+    table.add_column(header="#", width=1)
+    table.add_column(header="ID", width=1)
+    table.add_column(header="Name", width=10)
+    table.add_column(header="Description", width=20)
+    table.add_column(header="# Users", justify="center", width=1)
+    table.add_column(header="Rarity [%]",  justify="center", width=3)
+    table.add_column(header="Obtained?", justify="center", width=3)
+    table.add_column(header="Obtained when?", justify="center", width=10)
+
+    return table
 
 
 def _create_challenge_list_table_header() -> Table:

@@ -1,4 +1,7 @@
-from typing import Optional
+from datetime import datetime
+from typing import Optional, List, Tuple, Dict
+
+import dateutil.parser
 
 from htbapi import client
 
@@ -51,6 +54,7 @@ class User(client.BaseHtbApiObject):
     respects: int
     university: University
     ranking_bracket: Optional["UserRankingHoF"]
+    badges: Dict[int, datetime]
 
     # noinspection PyUnresolvedReferences
     def __init__(self, data: dict, _client: "HTBClient", ranking_bracket: "UserRankingHoF"=None):
@@ -79,6 +83,9 @@ class User(client.BaseHtbApiObject):
         self.isVip = data.get('isVip', False)
         self.university = University({}, _client) if data.get('university', None) is None else University(data['university'], _client)
         self.ranking_bracket = ranking_bracket
+
+        data = self._client.get_request(endpoint=f'user/profile/badges/{self.id}')["badges"]
+        self.badges = {x["id"]: dateutil.parser.parse(x["pivot"]["created_at"] if "pivot" in x else None) for x in data}
 
 
     def __repr__(self):
@@ -112,7 +119,8 @@ class User(client.BaseHtbApiObject):
             "Subscription": "VIP" if self.isVip else
                             "VIP+" if self.isDedicatedVip else
                             "Normal",
-            "Ranking_Bracket": None if self.ranking_bracket is None else self.ranking_bracket.to_dict()
+            "Ranking_Bracket": None if self.ranking_bracket is None else self.ranking_bracket.to_dict(),
+            "Badges": self.badges,
         }
 
         if key_filter and len(key_filter) > 0:
