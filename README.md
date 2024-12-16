@@ -102,4 +102,12 @@ Using the `download` subcommand, you are able to download the certificate. With 
 
 ![image](https://github.com/user-attachments/assets/8725d37a-32ea-4d2c-bc23-d90c184cec62)
 
+# challenge
+The challenge command provides commands for listing all available challenges, displaying info about a specific challenge, downloading files and writeups, starting challenge instances or submitting flags. For example, if you want to download the file, unzip it and start the instance in HTB, you need only one command:
+```bash
+htb-operator challenge download --name "Hunting License" --unzip --s
+```
+The result might look like:
+![image](https://github.com/user-attachments/assets/15cd5b53-8ab8-40d0-af89-c3e07c7aee83)
+
 
