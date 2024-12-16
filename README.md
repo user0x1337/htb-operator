@@ -53,9 +53,9 @@ htb-operator
 ![image](https://github.com/user-attachments/assets/4dd6800d-53c1-464e-acb3-db61ca261082)
 
 
-## init
+# init
 TBD
-## Info 
+# Info 
 The `info` command retireves the information for a user. If no user is indicated, it will display the information for the authenticated user, i.e. for your user. 
 ```bash
 htb-operator info
@@ -82,7 +82,7 @@ htb-operator info -a -s HTBBot
 ![image](https://github.com/user-attachments/assets/addda738-5435-4e66-9058-2efe81ca4a65)
 
 
-## certificate
+# certificate
 You can list or download obtained certification of completion. 
 
 ### `-l` / `--list`
