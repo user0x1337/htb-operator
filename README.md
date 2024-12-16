@@ -50,7 +50,8 @@ The tool is command based. You can call `-h` or `--help` for displaying the help
 ```bash 
 htb-operator
 ```
-![image](https://github.com/user-attachments/assets/16c0f8d3-d23d-48a0-935a-c582bf834e45)
+![image](https://github.com/user-attachments/assets/4dd6800d-53c1-464e-acb3-db61ca261082)
+
 
 ## init
 TBD
@@ -60,14 +61,15 @@ The `info` command retireves the information for a user. If no user is indicated
 htb-operator info
 ```
 
-### -s / --username
+### `-s` / `--username`
 Using `-s USERNAME` or `--username USERNAME` you can search for the user with the username `USERNAME` and display its profile. E.g.
 ```bash
 htb-operator info -s HTBBot
 ```
-![image](https://github.com/user-attachments/assets/7bfa90f2-df6d-401e-b90e-a9c09a553915)
+![image](https://github.com/user-attachments/assets/8a613234-4dce-4f41-8927-cf004c857cdb)
 
-### -a / --activity
+
+### `-a` / `--activity`
 Usually, the activity is limited to the recent 20 entries. Using `-a` or `--activity` shows the entire activity history without any limits.
 ```bash
 htb-operator info -a
@@ -75,21 +77,15 @@ htb-operator info -a
  
  `-s` / `--username` works with this flag, too.
 ```bash
-htp-operator info -a -s HTBBot
+htb-operator info -a -s HTBBot
 ```
-![image](https://github.com/user-attachments/assets/d596460a-1493-4eb7-8c73-2cb0ee44439f)
+![image](https://github.com/user-attachments/assets/addda738-5435-4e66-9058-2efe81ca4a65)
 
-### -c 
-`-c NAME` search for all challenges whose names start with `NAME`.
-```bash
-htb-operator info -c Spook
-```
-![image](https://github.com/user-attachments/assets/94a51690-b123-47c9-aa60-2d0514422dda)
 
 ## certificate
 You can list or download obtained certification of completion. 
 
-### -l / --list
+### `-l` / `--list`
 List all obtained certification of completion.
 ```bash
 htb-operator certificate --list
@@ -107,7 +103,32 @@ The challenge command provides commands for listing all available challenges, di
 ```bash
 htb-operator challenge download --name "Hunting License" --unzip -s
 ```
-The result might look like:
-![image](https://github.com/user-attachments/assets/15cd5b53-8ab8-40d0-af89-c3e07c7aee83)
+
+## search
+Using search, you are able to search for challenge which contain the name of the searching word. The argument `--name` is required.
+```bash
+htb-operator challenge search --name Spook
+```
+![image](https://github.com/user-attachments/assets/420f4564-b3d9-40ba-8ff6-f72ec7c54fe2)
+
+### `--unsolved`
+Displays only challenges which are not solved. If both `--solved` and `--unsolved` are speicifed, just unsolved challenges will be returned.
+
+### `--solved`
+Displays only challenges which are already solved. If both `--solved` and `--unsolved` are speicifed, just unsolved challenges will be returned.
+
+### `--todo`
+Displays only challenges whose `TODO`-Flag has been set.
+
+###  `--category` 
+Displays only challenges which are part of the specified category. You can specify more than one category, but they must be seperated by commas [,]. For example:
+```bash
+htb-operator challenge search --name Spook --category Web,Crypto,Pwn
+```
+![image](https://github.com/user-attachments/assets/1475a94a-7017-4101-b742-de0838c77eab)
+
+### `--difficulty`
+Displays only challenges which matches the specified difficulty.
+
 
 
