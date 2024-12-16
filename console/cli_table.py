@@ -145,7 +145,7 @@ def create_table_badge_list(badge_categories: List[dict]) -> Table | Panel | Gro
         for badge in badge_category["badges"]:
             counter += 1
 
-            table.add_row(f'{counter + 1}',
+            table.add_row(f'{counter}',
                           f'{(badge["id"])}',
                           f'{badge["name"]}',
                           f'{badge["description"]}',
