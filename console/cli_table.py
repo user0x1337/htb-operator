@@ -228,7 +228,7 @@ def _create_badge_list_table_header() -> Table:
     table.add_column(header="# Users", justify="center", width=1)
     table.add_column(header="Rarity [%]",  justify="center", width=3)
     table.add_column(header="Obtained?", justify="center", width=3)
-    table.add_column(header="Obtained when?", justify="center", width=10)
+    table.add_column(header="Earned date", justify="center", width=10)
 
     return table
 
