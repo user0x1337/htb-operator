@@ -18,7 +18,7 @@
   <br><br>
 </div>
 
-HTB-Operator is a project developed and maintained by [user0x1337](https://github.com/user0x1337). It interacts with the API of HackTheBox, a popular cybersecurity training platform. The main objective is to save time while interacting with the platform of HTB. 
+HTB-Operator is a project developed and maintained by [user0x1337](https://github.com/user0x1337). It interacts with the API of [HackTheBox](https://www.hackthebox.com/), a popular cybersecurity training platform. The main objective is to save time while interacting with the platform of HTB. 
 
 <img alt="current version" src="https://img.shields.io/badge/Status-Under_Development-red">
 
