@@ -25,15 +25,9 @@ HTB-Operator is a project developed and maintained by [user0x1337](https://githu
 # Installation
 HTB-Operator is written in Python. In general, it can be executed on every OS if python is installed on this OS. But it was only tested on Linux (Kali, Ubuntu) and has some limitations on Windows (I was not in the mood for migrating some features for Windows...maybe later).
 
-It is strongly recommended to create a venv:
+It is strongly recommended to create a venv. Use [pipx](https://pipx.pypa.io/latest/) to install `htb-operator`:
 ```bash
-1. python3 -m venv .venv
-2. source .venv/bin/activate 
-``` 
-
-You can install htb-operator using pip:
-```bash
-pip3 install git+https://github.com/user0x1337/htb-operator
+pipx install git+https://github.com/user0x1337/htb-operator
 ```
 
 # Configuration
