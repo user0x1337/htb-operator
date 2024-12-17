@@ -29,3 +29,5 @@ dependencies = [
     "tqdm",
     "paramiko"
 ]
+[project.scripts]
+htb-operator = "htb_operator:main"
