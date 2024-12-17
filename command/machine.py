@@ -500,9 +500,8 @@ class MachineCommand(BaseCommand):
 
     def print_info(self):
         """Print the machine info"""
-        machine_top_owns_list: List[MachineTopOwns] = self.client.get_machine_top_owns(machine_id_or_name=self.args_id if self.args_id else self.args_name)
-        machine_top_owns_list.sort(key=lambda m: m.position)
-        self.logger.info(machine_top_owns_list)
+        machine: MachineInfo = self.client.get_machine(machine_id_or_name=self.args_id if self.args_id else self.args_name)
+        self.logger.info(machine.machine_top_owns)
 
 
     def execute(self):

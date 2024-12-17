@@ -136,10 +136,30 @@ class MachineInfo(MachineBase):
         self.show_go_vip_server = data.get('show_go_vip_server', False)
         self.ownRank = data.get('ownRank', 0)
         self.machine_mode = None if data.get('machine_mode', None) else data.get('machine_mode')
-        self.machine_top_owns = []
 
     def __repr__(self):
          return f"<MachineInfo '{self.name} | {self.id}'>"
+
+    def __getattr__(self, item):
+        """Retrieve attributes not given
+
+        Some endpoints only provide a subset of the attributes available for a given object.
+        If these extra attributes are requested, the object will request the full data from the
+        API and fill out the missing items.
+
+        Args:
+            item: The name of the property to retrieve
+        """
+        if item == "machine_top_owns":
+            data: dict = self._client.get_request(endpoint=f"machine/owns/top/{self.id}")["info"]
+            new_obj = [MachineTopOwns(data=x, _client=self, machine_info=self) for x in data]
+            new_obj.sort(key=lambda x: x.position)
+        else:
+            raise AttributeError
+
+        setattr(self, item, new_obj)
+        return new_obj
+
 
     def __eq__(self, other):
         return other is not None and type(other) == type(self) and self.id == other.id
@@ -317,7 +337,6 @@ class MachineTopOwns(client.BaseHtbApiObject):
         self.is_user_blood = data.get('is_user_blood', False)
         self.is_root_blood = data.get('is_root_blood', False)
         self.position = data.get('position')
-        self.machine.machine_top_owns.append(self)
 
     def __repr__(self):
         return f"<MachineTopOwns '{self.name} | {self.id} | {self.machine}'>"
