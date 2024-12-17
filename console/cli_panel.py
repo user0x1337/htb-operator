@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
+from colorama import Fore
 from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table
@@ -249,6 +250,165 @@ def create_prolab_info_panel_text(prolab: dict) -> str:
                       for k,v in panel_dict.items()])
 
     return text
+
+
+def create_machine_info_panel(machine_info: dict) -> Table | Panel | Group:
+    """Create the info panel for a machine"""
+
+    if "Easy" == machine_info["difficultyText"]:
+        color = "bright_green"
+    elif "Medium" == machine_info["difficultyText"]:
+        color = "bright_yellow"
+    elif "Hard" == machine_info["difficultyText"]:
+        color = "bright_red"
+    elif "Insane" == machine_info["difficultyText"]:
+        color = "bright_magenta"
+    else:
+        color = "bright_white"
+
+    if machine_info["os"].lower() == "windows":
+        unicode_logo = "\U0001F5D4  "
+    elif machine_info["os"].lower() in ["linux", "freebsd", "openbsd"]:
+        unicode_logo = "\U0001F427 "
+    elif machine_info["os"].lower() == "android":
+        unicode_logo = "\U0001F4F1 "
+    else:
+        unicode_logo = ""
+        
+    basic = {
+        "ID": f'{machine_info["id"]}',
+        "Name": f'[bold {color}]{machine_info["name"]}[/bold {color}]',
+        "OS": f'{unicode_logo}{machine_info["os"]}',
+        "Difficulty": f'[bold {color}]{machine_info["difficultyText"]}[/bold {color}]',
+        "Points": f"{machine_info["points"]}",
+        "Stars": f"\U00002605 {machine_info["stars"]}",
+        "Maker": f'{"-" if machine_info["maker"] is None else machine_info["maker"]["name"]}',
+        "# Reviews": f'{machine_info["reviews_count"]}',
+        "Retired": f"{format_bool(machine_info["retired"])}",
+        "Release Date": f"{machine_info["release_date"].strftime('%Y-%m-%d')}",
+        "# User Owns": f"{machine_info["user_owns_count"]}",
+        "# Root Owns": f"{machine_info["root_owns_count"]}",
+    }
+    max_key_length = max(len(key) for key in basic.keys())
+    text_basic = "\n".join([f"[bold yellow]{k.ljust(max_key_length)}[/bold yellow] : {v}" for k, v in basic.items()])
+
+    p_basic = Panel(renderable=Text.from_markup(text=text_basic, justify="left"),
+                    title=f"[bold yellow]Basics[/bold yellow]",
+                    expand=True,
+                    border_style="yellow",
+                    title_align="left")
+
+    # Top 10 users
+    top_10_table = Table(expand=True, show_lines=False, box=None)
+
+    top_10_table.add_column("Pos", width=1)
+    top_10_table.add_column("User", max_width=8)
+    top_10_table.add_column("Rank", width=4)
+    top_10_table.add_column("First blood user", width=3)
+    top_10_table.add_column("First blood root", width=3)
+    top_10_table.add_column("Date own user", width=8)
+    top_10_table.add_column("Date own root", width=8)
+
+    for i, user_own in enumerate(machine_info["machine_top_owns"][:10]):
+        position = i + 1
+        username = f'{user_own["username"]}'
+        rank = user_own["rank_text"]
+        if user_own["is_user_blood"] or user_own["is_root_blood"]:
+            username = f'[bold red]{user_own["username"]}[/bold red]'
+            position = f'[bold red]{i + 1}[/bold red]'
+            rank = f'[bold red]{user_own["rank_text"]}[/bold red]'
+
+
+        top_10_table.add_row(f'{position}.',
+                             f'{username}',
+                             f'{rank}',
+                             f'{format_bool(user_own["is_user_blood"], color_true="green")}',
+                             f'{format_bool(user_own["is_root_blood"], color_true="green")}',
+                             f'{user_own["user_own_date"].strftime("%Y-%m-%d %H:%M")} UTC',
+                             f'{user_own["own_date"].strftime("%Y-%m-%d %H:%M")} UTC'
+                             )
+
+    p_top_10 = Panel(top_10_table,
+                     title=f"[bold yellow]Top 10 Users[/bold yellow]",
+                     expand=True,
+                     border_style="yellow",
+                     title_align="left")
+
+    activity_table = Table(expand=True, show_lines=False, box=None)
+    activity_table.add_column("#", width=1)
+    activity_table.add_column("User", width=7)
+    activity_table.add_column("Type", max_width=8)
+    activity_table.add_column("First blood type", width=4)
+    activity_table.add_column("Date", width=7)
+    activity_table.add_column("Diff", width=7)
+    for i, activity in enumerate(machine_info["machine_activity"][:25]):
+        position = f'{i + 1}'
+        username = f'{activity["username"]}'
+        activity_type = f'{activity["type"]}'
+        if activity["type"].lower() == "blood":
+            position = f''
+            username = f'[bold red]{activity["username"]}[/bold red]'
+            activity_type = f'[bold red]{activity["type"]}[/bold red]'
+            if len(machine_info["machine_activity"]) > 1 and machine_info["machine_activity"][i - 1]["type"].lower() != "blood":
+                activity_table.add_row("", "...", style="bold bright_white")
+        elif activity["type"].lower() == "root":
+            username = f'[bold bright_white]{activity["username"]}[/bold bright_white]'
+            activity_type = f'[bold bright_white]{activity["type"]}[/bold bright_white]'
+
+        activity_table.add_row(f'{position}',
+                               f'{username}',
+                               f'{activity_type}',
+                               f'{"-" if activity["blood_type"] is None else activity["blood_type"]}',
+                               f'{activity["created_at"].strftime("%Y-%m-%d %H:%M")} UTC',
+                               f'{activity["date_diff"]}'
+                             )
+    p_activity = Panel(activity_table,
+                       title=f"[bold yellow]Recent Activities[/bold yellow]",
+                       expand=True,
+                       border_style="yellow",
+                       title_align="left")
+
+    p_changelog = None
+    if len(machine_info["changelog"]) > 0:
+        changelog_table = Table(expand=True, show_lines=False, box=None)
+        changelog_table.add_column("Type", width=3)
+        changelog_table.add_column("Released at", width=4)
+        changelog_table.add_column("Updated at", width=4)
+        changelog_table.add_column("By user", width=4)
+        changelog_table.add_column("Title", max_width=7)
+        changelog_table.add_column("Description", width=20)
+
+        for log in machine_info["changelog"]:
+            log_type = log["type"].upper()
+            if log["type"].lower() == "update":
+                log_type = f'[bold bright_green][+]UPDATE[/bold bright_green]'
+            elif log["type"].lower() == "change":
+                log_type = f'[bold bright_blue][~]CHANGE[/bold bright_blue]'
+            elif log["type"].lower() == "bug":
+                log_type = f'[bold bright_red][!]BUGFIX[/bold bright_red]'
+
+            changelog_table.add_row(f'{log_type}',
+                                    f'{log["created_at"].strftime("%Y-%m-%d")}',
+                                    f'{log["updated_at"].strftime("%Y-%m-%d")}',
+                                    f'{log["user"]["Name"]}',
+                                    f'{log["title"]}',
+                                    f'{log["description"]}')
+
+        p_changelog = Panel(changelog_table,
+                            title=f"[bold yellow]Changelog[/bold yellow]",
+                            expand=True,
+                            border_style="yellow",
+                            title_align="left")
+
+
+    table = Table.grid(expand=True)
+    table.add_column()
+    table.add_column()
+    table.add_row(p_basic, p_top_10)
+
+
+    return Group(table, p_changelog, p_activity) if p_changelog is not None else Group(table, p_activity)
+
 
 
 def create_challenge_info_panel(channel_info: dict) -> Table:

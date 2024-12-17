@@ -14,7 +14,7 @@ from python_hosts import Hosts
 
 from command.base import BaseCommand, IS_ROOT_OR_ADMIN, IS_WINDOWS
 from console import create_panel_active_machine_status, create_machine_list_group_by_retired, \
-    create_machine_list_group_by_os
+    create_machine_list_group_by_os, create_machine_info_panel
 from htbapi import MachineInfo, ActiveMachineInfo, VpnServerInfo, MachineTopOwns
 
 
@@ -63,6 +63,12 @@ class MachineCommand(BaseCommand):
         if not self.machine_command:
             self.logger.error(f"{Fore.RED}No options. Use --help for more information.{Style.RESET_ALL}")
             return False
+
+        if self.args.machine == "info":
+            if self.args_id is None and self.args_name is None:
+                self.htb_cli.logger.error(
+                    f"{Fore.RED}ID or Name must be specified. Use --help for more information.{Style.RESET_ALL}")
+                return False
 
         if self.args.machine == "start":
             if self.args_id is None and self.args_name is None:
@@ -501,7 +507,8 @@ class MachineCommand(BaseCommand):
     def print_info(self):
         """Print the machine info"""
         machine: MachineInfo = self.client.get_machine(machine_id_or_name=self.args_id if self.args_id else self.args_name)
-        self.logger.info(machine.machine_top_owns)
+        self.console.print(create_machine_info_panel(machine_info=machine.to_dict()))
+
 
 
     def execute(self):
