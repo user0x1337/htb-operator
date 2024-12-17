@@ -29,8 +29,8 @@ setup(
     description="Command line interface for managing hack the box profile, machines and challenges",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    url="https://github.com/",
+    url="https://github.com/user0x1337/htb-operator",
     author="user0x1337",
     author_email="user0x1337@protonmail.com",
-    license="MIT",
+    license="GPLv3.0",
 )
