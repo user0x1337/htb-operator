@@ -104,12 +104,52 @@ htb-operator certificate --list
 ![image](https://github.com/user-attachments/assets/d9fabf5d-cb2a-4663-812a-55cd030ff275)
 
 
-
-
 ### download
 Using the `download` subcommand, you are able to download the certificate. With `--id` you have to indicate the certification id (e.g. obtained by listing all certificates) and with `-f` or `--filename`, you can set the target directory and the target filename.
 
 ![image](https://github.com/user-attachments/assets/8725d37a-32ea-4d2c-bc23-d90c184cec62)
+
+# machine
+The machine command provides commands for listing all available machines, displaying info about a specific machine, stop, reset and start a machine, and so on. 
+
+## list
+Lists all active and retired machines. Furthermore, you can add some filter flags for optimizing your view. Check out the provided flags with `htb-operator machine list -h`. 
+```bash
+htb-operator machine list
+```
+![image](https://github.com/user-attachments/assets/d4ab1f19-d695-448c-816c-62268dc806eb)
+
+Active machines which will be retired soon, are flagged as `✘/✔`.
+
+### `--limit` 
+As default only the 20 recent machines are displayed. If you want to increase or decrease the number of displyed machine, just use the `--limit <NUMBER>` flag. For example:
+```bash
+htb-operator machine list --limit 10
+```
+![image](https://github.com/user-attachments/assets/a2ad559b-944a-470e-932a-429d8d93e6b3)
+
+### `--retired`
+If the `--retired` flag is set, only retired machines are displayed. 
+```bash
+htb-operator machine list --retired
+```
+![image](https://github.com/user-attachments/assets/da96ca5a-ff12-4bff-9edc-57319304f2ed)
+
+
+### `--active`
+If the `--active` flag is set, only active machines are displayed. 
+```bash
+htb-operator machine list --active
+```
+
+### `--group-by-os` 
+You can change grouping of the result set. Instead of grouping the result by `Retired` and `Active`, you can group the result by OS.
+```bash
+htb-operator machine list --group-by-os
+```
+![image](https://github.com/user-attachments/assets/1dcfbcde-c640-4281-849c-8e98bc48aa52)
+
+
 
 # challenge
 The challenge command provides commands for listing all available challenges, displaying info about a specific challenge, downloading files and writeups, starting challenge instances or submitting flags. For example, if you want to download the file, unzip it and start the instance in HTB, you need only one command:
