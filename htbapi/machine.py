@@ -198,7 +198,7 @@ class MachineInfo(MachineBase):
             "user_owns_count": self.user_owns_count,
             "root_owns_count": self.root_owns_count,
             "reviews_count": self.reviews_count,
-            "machine_play_info": None if self.machine_play_info is None else self.machine_play_info,
+            "machine_play_info": None if self.machine_play_info is None else self.machine_play_info.to_dict(),
             "maker": None if self.maker is None else self.maker.to_dict(),
             "recommended": self.recommended,
             "sp_flag": self.sp_flag,
@@ -227,7 +227,6 @@ class MachineInfo(MachineBase):
 
 class ActiveMachineInfo(MachineBase):
     name: str
-
     expires_at: datetime
     isSpawning: bool
     lab_server: str
@@ -306,7 +305,7 @@ class MachinePlayInfo(client.BaseHtbApiObject):
         self.is_spawned = data.get('isSpawned', False)
         self.is_active = data.get('isActive', False)
         self.active_player_count = data.get('active_player_count', 0)
-        self.expires_at = None if data.get('expires_at', None) is None else dateutil.parser.parse(data.get('expires_at').replace(tzinfo=timezone.utc))
+        self.expires_at = None if data.get('expires_at', None) is None else dateutil.parser.parse(data.get('expires_at')).replace(tzinfo=timezone.utc)
 
     def __repr__(self):
         return f"<MachinePlayInfo '{self.machineInfo.name} | {self.machineInfo.id}'>"
@@ -358,6 +357,7 @@ class MachineTopOwns(client.BaseHtbApiObject):
     is_root_blood: bool
     position: int
     machine: MachineInfo
+    user: User
 
     # noinspection PyUnresolvedReferences
     def __init__(self, data: dict, _client: "HTBClient", machine_info: MachineInfo):
@@ -380,6 +380,15 @@ class MachineTopOwns(client.BaseHtbApiObject):
     def __repr__(self):
         return f"<MachineTopOwns '{self.username} | {self.id} | {self.machine}'>"
 
+    def __getattr__(self, item):
+        if item == 'user':
+            new_obj = self._client.get_user(user_id=self.id)
+        else:
+            raise AttributeError
+
+        setattr(self, item, new_obj)
+        return new_obj
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -392,7 +401,7 @@ class MachineTopOwns(client.BaseHtbApiObject):
             "root_own_tine": self.root_own_tine,
             "is_user_blood": self.is_user_blood,
             "is_root_blood": self.is_root_blood,
-            "position": self.position,
+            "position": self.position
         }
 
 

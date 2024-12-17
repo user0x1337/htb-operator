@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
-from colorama import Fore
 from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table
@@ -37,9 +36,9 @@ def create_pwnbox_panel(pwnbox: dict):
         "Location": f'{pwnbox["location"]}',
         "Proxy URL": f'{pwnbox["proxy_url"]}',
         "Instance Lifetime": f'{dummy_date.strftime(f"%H:%M")} [Hours:Minutes]',
-        "Expires at": 'Never' if pwnbox["expires_at"] == pwnbox["updated_at"] else f'{pwnbox["expires_at"].isoformat().replace("T", " ").replace("+00:00", "")} UTC',
-        "Created at": f'{pwnbox["created_at"].isoformat().replace("T", " ").replace("+00:00", "")} UTC',
-        "Updated at": f'{pwnbox["updated_at"].isoformat().replace("T", " ").replace("+00:00", "")} UTC'
+        "Expires at": f'{get_expire_str(expires_at=pwnbox["expires_at"])}',
+        "Created at": f'{pwnbox["created_at"].strftime("%Y-%m-%d %H:%M:%S")} UTC',
+        "Updated at": f'{pwnbox["updated_at"].strftime("%Y-%m-%d %H:%M:%S")} UTC'
     }
 
     max_key_length = max(len(key) for key in pwnbox_status.keys())
@@ -283,8 +282,6 @@ def create_machine_info_panel(machine_info: dict) -> Table | Panel | Group:
         "Points": f"{machine_info["points"]}",
         "Stars": f"\U00002605 {machine_info["stars"]}",
         "Maker": f'{"-" if machine_info["maker"] is None else machine_info["maker"]["name"]}',
-        "# Reviews": f'{machine_info["reviews_count"]}',
-        "Retired": f"{format_bool(machine_info["retired"])}",
         "Release Date": f"{machine_info["release_date"].strftime('%Y-%m-%d')}",
         "# User Owns": f"{machine_info["user_owns_count"]}",
         "# Root Owns": f"{machine_info["root_owns_count"]}",
@@ -292,22 +289,43 @@ def create_machine_info_panel(machine_info: dict) -> Table | Panel | Group:
     max_key_length = max(len(key) for key in basic.keys())
     text_basic = "\n".join([f"[bold yellow]{k.ljust(max_key_length)}[/bold yellow] : {v}" for k, v in basic.items()])
 
-    p_basic = Panel(renderable=Text.from_markup(text=text_basic, justify="left"),
+    basic_2 = {
+        "Retired": f"{format_bool(machine_info["retired"])}",
+        "Recommended": f'{format_bool(machine_info["recommended"])}',
+        "Is TODO": f'{format_bool(machine_info["is_todo"])}',
+        "# Reviews": f'{machine_info["reviews_count"]}',
+        "IP": f'{"-" if machine_info["ip"] is None else machine_info["ip"]}',
+        "Is Free": f'{format_bool(machine_info["free"])}',
+        "Solved User": f"{format_bool(machine_info["authUserInUserOwns"], color_true="green")}",
+        "Solved Root": f"{format_bool(machine_info["authUserInRootOwns"], color_true="green")}",
+        "Is Active": f"{format_bool(machine_info["machine_play_info"]["is_active"])}",
+        "# Active Player": f"{machine_info["machine_play_info"]["active_player_count"]}"
+    }
+    max_key_length = max(len(key) for key in basic_2.keys())
+    basic_2 = "\n".join([f"[bold yellow]{k.ljust(max_key_length)}[/bold yellow] : {v}" for k, v in basic_2.items()])
+
+    basic_table = Table(expand=True, show_lines=False, box=None)
+    basic_table.add_column()
+    basic_table.add_column()
+    basic_table.add_row(Text.from_markup(text=text_basic, justify="left"),
+                        Text.from_markup(text=basic_2, justify="left"))
+    basic_table.add_row()
+    p_basic = Panel(renderable=Group(basic_table,
+                                     Text.from_markup(text=f"[bold yellow]Expires at[/bold yellow]: {get_expire_str(expires_at=machine_info["machine_play_info"]["expires_at"])}", justify="left")),
                     title=f"[bold yellow]Basics[/bold yellow]",
                     expand=True,
                     border_style="yellow",
                     title_align="left")
 
     # Top 10 users
-    top_10_table = Table(expand=True, show_lines=False, box=None)
-
+    top_10_table = Table(expand=True, show_lines=False, box=None, width=110)
     top_10_table.add_column("Pos", width=1)
     top_10_table.add_column("User", max_width=8)
-    top_10_table.add_column("Rank", width=4)
-    top_10_table.add_column("First blood user", width=3)
-    top_10_table.add_column("First blood root", width=3)
-    top_10_table.add_column("Date own user", width=8)
-    top_10_table.add_column("Date own root", width=8)
+    top_10_table.add_column("Rank", width=5)
+    top_10_table.add_column("First blood user", width=4)
+    top_10_table.add_column("First blood root", width=4)
+    top_10_table.add_column("Date own user", width=10)
+    top_10_table.add_column("Date own root", width=10)
 
     for i, user_own in enumerate(machine_info["machine_top_owns"][:10]):
         position = i + 1
@@ -327,6 +345,8 @@ def create_machine_info_panel(machine_info: dict) -> Table | Panel | Group:
                              f'{user_own["user_own_date"].strftime("%Y-%m-%d %H:%M")} UTC',
                              f'{user_own["own_date"].strftime("%Y-%m-%d %H:%M")} UTC'
                              )
+    for i in range(len(top_10_table.rows), 11):
+        top_10_table.add_row()
 
     p_top_10 = Panel(top_10_table,
                      title=f"[bold yellow]Top 10 Users[/bold yellow]",
@@ -621,13 +641,11 @@ def create_panel_active_machine_status(active_machine: dict) -> Table | Panel:
     else:
         color = "bright_white"
 
-    expires_at: datetime = active_machine["expires_at"].replace(tzinfo=timezone.utc)
-    time_left: datetime = datetime(1, 1, 1, tzinfo=timezone.utc) + (expires_at - datetime.now(tz=timezone.utc))
     panel_dict_text = {
         "Machine ID": f'{active_machine["id"]}',
         "Name": f'{active_machine["name"]}',
         "IP": f'{active_machine["ip"]}',
-        "Expires at": f'{expires_at.strftime("%Y-%m-%d %H:%M:%S")} UTC ({time_left.strftime(f"%H:%M:%S")} left)',
+        "Expires at": f'{get_expire_str(expires_at=active_machine["expires_at"])}',
         "Retired?": f'{format_bool(active_machine["retired"])}',
         "OS": f'{unicode_logo}{active_machine["os"]}',
         "Info": f'{'-' if active_machine["info_status"] is None else active_machine["info_status"]}',
@@ -643,3 +661,13 @@ def create_panel_active_machine_status(active_machine: dict) -> Table | Panel:
 
     return _create_custom_panel(custom_dict=panel_dict_text, panel_title="Active Machine", value_color_format="white")
 
+def get_expire_str(expires_at: datetime) -> str:
+    if expires_at is None:
+        return "-"
+
+    expires_at = expires_at.replace(tzinfo=timezone.utc)
+    try:
+        time_left: datetime = datetime(1, 1, 1, tzinfo=timezone.utc) + (expires_at - datetime.now(tz=timezone.utc))
+    except OverflowError:
+        return "-"
+    return f'{expires_at.strftime("%Y-%m-%d %H:%M:%S")} UTC ({time_left.strftime(f"%H:%M:%S")} left)'

@@ -72,9 +72,9 @@ class PwnboxStatus(client.BaseHtbApiObject):
         self.proxy_url = data.get("proxy_url", "")
         self.spectate_url = data.get("spectate_url", "")
         self.life_remaining = data.get("life_remaining", 0)
-        self.expires_at = dateutil.parser.parse(data.get("expires_at"))
-        self.created_at = dateutil.parser.parse(data.get("created_at"))
-        self.updated_at = dateutil.parser.parse(data.get("updated_at"))
+        self.expires_at = dateutil.parser.parse(data.get("expires_at")).replace(tzinfo=datetime.timezone.utc)
+        self.created_at = dateutil.parser.parse(data.get("created_at")).replace(tzinfo=datetime.timezone.utc)
+        self.updated_at = dateutil.parser.parse(data.get("updated_at")).replace(tzinfo=datetime.timezone.utc)
 
     def terminate(self) -> [bool, str]:
         """Terminate an active Pwnbox session. Returns an exception if termination fails."""
