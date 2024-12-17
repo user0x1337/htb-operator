@@ -39,9 +39,20 @@ pip3 install git+https://github.com/user0x1337/htb-operator
 # Configuration
 You need an API-token from HTB. For that:
 1. Visit the URL: [https://app.hackthebox.com/profile/settings](https://app.hackthebox.com/profile/settings)
+
 2. Click on "Create App Token"
-3. Store the token
-4. Call `htb-operator init -api YOUR_API_TOKEN`
+   
+![image](https://github.com/user-attachments/assets/48024f28-df90-4f39-b285-5a09a2ac8bb5)
+
+3. Create a token
+   
+![image](https://github.com/user-attachments/assets/045e6828-fa0b-4cc7-b644-33384fc1e901)
+
+4. Store the token
+   
+![image](https://github.com/user-attachments/assets/5eb05a1f-4716-4d23-869f-29255fb7404f)
+
+5. Call `htb-operator init -api YOUR_API_TOKEN`
 
 # Commands
 The tool is command based. You can call `-h` or `--help` for displaying the help information in each stage. The "top level" commands are displayed if you call the programm without any arguments:
