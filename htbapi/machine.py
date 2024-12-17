@@ -184,8 +184,8 @@ class MachineInfo(MachineBase):
     def __eq__(self, other):
         return other is not None and type(other) == type(self) and self.id == other.id
 
-    def to_dict(self):
-        return {
+    def to_dict(self, details:bool = False):
+        res = {
             "id": self.id,
             "name": self.name,
             "info_status": self.info_status,
@@ -220,10 +220,13 @@ class MachineInfo(MachineBase):
             "show_go_vip_server": self.show_go_vip_server,
             "ownRank": self.ownRank,
             "machine_mode": self.machine_mode,
-            "machine_top_owns": [x.to_dict() for x in self.machine_top_owns],
-            "machine_activity": [x.to_dict() for x in self.machine_activity],
-            "changelog": [x.to_dict() for x in self.changelog]
         }
+        if details:
+            res["machine_top_owns"] = [x.to_dict() for x in self.machine_top_owns]
+            res["machine_activity"] = [x.to_dict() for x in self.machine_activity]
+            res["changelog"] = [x.to_dict() for x in self.changelog]
+
+        return res
 
 class ActiveMachineInfo(MachineBase):
     name: str

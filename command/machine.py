@@ -507,9 +507,7 @@ class MachineCommand(BaseCommand):
     def print_info(self):
         """Print the machine info"""
         machine: MachineInfo = self.client.get_machine(machine_id_or_name=self.args_id if self.args_id else self.args_name)
-        self.console.print(create_machine_info_panel(machine_info=machine.to_dict()))
-
-
+        self.console.print(create_machine_info_panel(machine_info=machine.to_dict(details=True)))
 
     def execute(self):
         if not self.check():
