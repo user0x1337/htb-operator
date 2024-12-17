@@ -27,7 +27,7 @@ HTB-Operator is written in Python. In general, it can be executed on every OS if
 
 It is strongly recommended to create a venv. Use [pipx](https://pipx.pypa.io/latest/) to install `htb-operator`:
 ```bash
-pipx install git+https://github.com/user0x1337/htb-operator
+pipx install htb-operator
 ```
 
 # Configuration
