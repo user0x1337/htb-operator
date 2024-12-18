@@ -55,7 +55,8 @@ The tool is command based. You can call `-h` or `--help` for displaying the help
 ```bash 
 htb-operator
 ```
-![image](https://github.com/user-attachments/assets/9a0e6945-c8a6-4297-b4f1-c4dfb1eeb6d4)
+![image](https://github.com/user-attachments/assets/fbb1a80a-8005-40bd-86c6-ac3ff32dabf0)
+
 
 
 
