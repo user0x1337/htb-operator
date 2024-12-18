@@ -25,6 +25,10 @@ HTB-Operator is a project developed and maintained by [user0x1337](https://githu
 
 <img alt="current version" src="https://img.shields.io/badge/Status-Under_Development-red">
 
+# Restrictions on Windows
+Windows imposes certain restrictions or obstacles, which result in not supporting all features. Features/commands which will not work:
+* VPN: Starting and stopping
+
 # Installation
 HTB-Operator is written in Python. In general, it can be executed on every OS if python is installed on this OS. But it was only tested on Linux (Kali, Ubuntu) and has some limitations on Windows (I was not in the mood for migrating some features for Windows...maybe later).
 
