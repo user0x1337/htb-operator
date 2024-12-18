@@ -152,12 +152,21 @@ class MachineCommand(BaseCommand):
         self.logger.info(f'{Fore.GREEN}Executing script: {script}{Style.RESET_ALL}')
 
         try:
-            subprocess.run([shutil.which("bash")] + [script],
-                           stdout=sys.stdout,
-                           stderr=sys.stderr,
-                           stdin=sys.stdin,
-                           env=os.environ.copy(),
-                           text=True)
+            if IS_WINDOWS:
+                pwsh = shutil.which("pwsh") if shutil.which("pwsh") else shutil.which("powershell")
+                subprocess.run([pwsh, "-ep", "bypass"] + [script],
+                               stdout=sys.stdout,
+                               stderr=sys.stderr,
+                               stdin=sys.stdin,
+                               env=os.environ.copy(),
+                               text=True)
+            else:
+                subprocess.run([shutil.which("bash")] + [script],
+                               stdout=sys.stdout,
+                               stderr=sys.stderr,
+                               stdin=sys.stdin,
+                               env=os.environ.copy(),
+                               text=True)
         except Exception as e:
             self.logger.error(f'Error executing script: {e}{Style.RESET_ALL}')
             return None
