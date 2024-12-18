@@ -69,7 +69,7 @@ class BaseCommand(object):
             raise NotImplementedError("[switch_to_root] not implemented for Windows")
         else:
             env = os.environ.copy()
-            env["HTB_TERMINAL_STORE_DIR"] = os.path.join(os.path.expanduser("~"), ".config", "htb-cli")
+            env["HTB_TERMINAL_STORE_DIR"] = os.path.join(os.path.expanduser("~"), ".config", self.htb_cli.package_name)
             subprocess.run(args=['sudo', '-E', sys.executable] + sys.argv,
                            env=env,
                            text=True,
