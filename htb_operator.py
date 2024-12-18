@@ -79,7 +79,7 @@ class HtbCLI:
         if IS_ROOT_OR_ADMIN:
             self.logger.warning(f'{Fore.LIGHTYELLOW_EX}App is running as {"Administrator" if IS_WINDOWS else "root"}{Style.RESET_ALL}')
 
-        parser: ArgumentParser = create_arg_parser()
+fix        parser: ArgumentParser = create_arg_parser(self)
         args: argparse.Namespace = parser.parse_args()
         init = self.api_key is not None
 

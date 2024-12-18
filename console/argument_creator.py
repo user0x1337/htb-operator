@@ -4,8 +4,9 @@ from argparse import ArgumentParser
 from colorama import Fore, Style
 
 
-def create_arg_parser() -> ArgumentParser:
-    parser: ArgumentParser = argparse.ArgumentParser(prog="htb-cli", description=f"{Fore.MAGENTA}CLI tool for HTB operations.{Style.RESET_ALL}")
+# noinspection PyUnresolvedReferences
+def create_arg_parser(htb_cli: "HtbCLI") -> ArgumentParser:
+    parser: ArgumentParser = argparse.ArgumentParser(prog=f"{htb_cli.package_name}", description=f"{Fore.MAGENTA}CLI tool for HTB operations.{Style.RESET_ALL}")
     subparsers = parser.add_subparsers(title="commands", description="Available commands", dest="command")
 
     # info command
