@@ -190,7 +190,7 @@ def create_prolab_detail_info_panel(prolab_dict: dict) -> Panel | Group | Table:
 
     return table
 
-def _create_custom_panel(custom_dict: dict, panel_title: str, value_color_format: str | None = "bold cyan", target_height: int = -1) -> Panel:
+def _create_custom_panel(custom_dict: dict, panel_title: str, value_color_format: str | None = "bold cyan", target_height: int = -1, extend_panel: bool=True) -> Panel:
     """Internal function for creating a panel"""
     assert custom_dict is not None
     assert len(custom_dict.keys()) > 0
@@ -216,7 +216,7 @@ def _create_custom_panel(custom_dict: dict, panel_title: str, value_color_format
 
     return Panel(renderable=Text.from_markup(text=profile_text, justify="left"),
                  title=f"[bold yellow]{panel_title}[/bold yellow]",
-                 expand=True,
+                 expand=extend_panel,
                  border_style="yellow",
                  title_align="left")
 
@@ -659,7 +659,7 @@ def create_panel_active_machine_status(active_machine: dict) -> Table | Panel:
         "Entries in hosts-file": f'{", ".join(active_machine["hosts_file_name"].split("\n"))}'
     }
 
-    return _create_custom_panel(custom_dict=panel_dict_text, panel_title="Active Machine", value_color_format="white")
+    return _create_custom_panel(custom_dict=panel_dict_text, panel_title="Active Machine", value_color_format="white", extend_panel=False)
 
 def get_expire_str(expires_at: datetime) -> str:
     if expires_at is None:
