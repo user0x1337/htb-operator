@@ -43,7 +43,7 @@ class VersionCommand(BaseCommand):
         except requests.RequestException as e:
             self.logger.error(f"{Fore.RED}Error while fetching version information: {e}{Style.RESET_ALL}")
             return
-        if self.htb_cli.version > latest_version:
+        if self.htb_cli.version >= latest_version:
             self.logger.info(f"{Fore.GREEN}You are using the latest version ({self.htb_cli.version}){Style.RESET_ALL}")
         else:
             self.logger.warning(f"{Fore.LIGHTYELLOW_EX}A new version of '{self.htb_cli.package_name}' is available: {latest_version}{Style.RESET_ALL}")
