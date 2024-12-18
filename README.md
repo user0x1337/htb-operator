@@ -25,7 +25,7 @@ HTB-Operator is a project developed and maintained by [user0x1337](https://githu
 # Installation
 HTB-Operator is written in Python. In general, it can be executed on every OS if python is installed on this OS. But it was only tested on Linux (Kali, Ubuntu) and has some limitations on Windows (I was not in the mood for migrating some features for Windows...maybe later).
 
-It is strongly recommended to create a venv. Use [pipx](https://pipx.pypa.io/latest/) to install `htb-operator`:
+It is strongly recommended to create a venv. Use [pipx](https://pipx.pypa.io/latest/) (which will automatically create a virtual python environment) to install `htb-operator`:
 ```bash
 pipx install htb-operator
 ```
@@ -55,11 +55,19 @@ The tool is command based. You can call `-h` or `--help` for displaying the help
 ```bash 
 htb-operator
 ```
-![image](https://github.com/user-attachments/assets/4dd6800d-53c1-464e-acb3-db61ca261082)
+![image](https://github.com/user-attachments/assets/9a0e6945-c8a6-4297-b4f1-c4dfb1eeb6d4)
+
 
 
 # init
-TBD
+The init command should be the first command you use. As already mentioned above, you need to register your generated API-Key using the init command:
+```bash
+htb-operator init -api YOUR_API_TOKEN
+```
+![image](https://github.com/user-attachments/assets/e5f3792b-46a8-4211-82dd-5aea5f516044)
+
+The init command also supports to indicate an alternative URL for accessing HTB API. This should only be used with caution and in an unlikely case when HTB itself changes the API-URL.
+
 # Info 
 The `info` command retireves the information for a user. If no user is indicated, it will display the information for the authenticated user, i.e. for your user. 
 ```bash
