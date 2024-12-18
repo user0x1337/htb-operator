@@ -33,4 +33,4 @@ class InitCommand(BaseCommand):
 
         self.htb_cli.config["HTB"] = htb_dict
         self.htb_cli.save_config_file()
-        self.logger.info("HTB-CLI successfully initialized.")
+        self.logger.info("HTB-Operator successfully initialized.")
