@@ -1,10 +1,11 @@
 import argparse
 from argparse import ArgumentParser
 
+from colorama import Fore, Style
 
-# noinspection PyUnresolvedReferences
-def create_arg_parser(htbcli: "HtbCLI") -> ArgumentParser:
-    parser: ArgumentParser = argparse.ArgumentParser(prog="htb-cli", description="CLI tool for HTB operations.")
+
+def create_arg_parser() -> ArgumentParser:
+    parser: ArgumentParser = argparse.ArgumentParser(prog="htb-cli", description=f"{Fore.MAGENTA}CLI tool for HTB operations.{Style.RESET_ALL}")
     subparsers = parser.add_subparsers(title="commands", description="Available commands", dest="command")
 
     # info command
@@ -185,8 +186,9 @@ def _create_vpn_command_parser(subparsers):
 
 def _create_version_command_parser(subparsers):
     from command import VersionCommand
-    version_parser: ArgumentParser = subparsers.add_parser("version", help="Display the version of htb-cli.")
+    version_parser: ArgumentParser = subparsers.add_parser("version", help="Displays the current version and can check for a new version.")
     version_parser.set_defaults(func=VersionCommand)
+    version_parser.add_argument("--check", action="store_true", help="Checks for a new version")
 
 
 def _create_proxy_command_parser(subparsers):

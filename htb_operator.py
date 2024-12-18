@@ -33,7 +33,6 @@ class HtbCLI:
         self.api_key, self._api_base, self._user_agent = self.load_cli_config()
         self.console = Console()
         self.version = version(self.package_name)
-
         self.proxy = self.config["Proxy"] if "Proxy" in self.config else None
 
         if self.api_key is not None:
@@ -83,7 +82,7 @@ class HtbCLI:
         if IS_ROOT_OR_ADMIN:
             self.logger.warning(f'{Fore.LIGHTYELLOW_EX}App is running as {"Administrator" if IS_WINDOWS else "root"}{Style.RESET_ALL}')
 
-        parser: ArgumentParser = create_arg_parser(self)
+        parser: ArgumentParser = create_arg_parser()
         args: argparse.Namespace = parser.parse_args()
         init = self.api_key is not None
 
