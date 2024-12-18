@@ -42,7 +42,7 @@ class BaseCommand(object):
         self.args = args
         self.stop_animation = threading.Event()
         self.logger = self.htb_cli.logger
-        self.client = self.htb_cli.client
+        self.client = self.htb_cli.client if hasattr(self.htb_cli, "client") else None
         self.console = self.htb_cli.console
 
 

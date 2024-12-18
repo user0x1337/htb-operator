@@ -28,7 +28,7 @@ class InitCommand(BaseCommand):
         else:
             htb_dict['api_base_url'] = DEFAULT_BASE_API_URL
 
-        htb_dict["USER_AGENT"] = f"htb-cli/{self.htb_cli.version}"
+        htb_dict["USER_AGENT"] = f"{self.htb_cli.package_name}/{self.htb_cli.version}"
         htb_dict["DOWNLOAD_COOLDOWN"] = 30
 
         self.htb_cli.config["HTB"] = htb_dict

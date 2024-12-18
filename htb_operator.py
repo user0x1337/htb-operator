@@ -12,7 +12,6 @@ from inspect import isfunction, ismethod
 from logging import Logger
 from typing import Optional
 
-import requests
 from colorama import Fore, Style
 from rich.console import Console
 
@@ -43,18 +42,17 @@ class HtbCLI:
                                                      proxy=self.proxy)
             self.client = HTBClient(htb_http_request=htb_http_request)
 
-    @staticmethod
-    def get_base_store_dir() -> str:
+    def get_base_store_dir(self) -> str:
         if sys.platform.startswith("win"):
             raise NotImplementedError
 
         # Only for Linux
         env_store_dir = os.environ.get("HTB_TERMINAL_STORE_DIR")
-        return env_store_dir if env_store_dir else os.path.join(os.path.expanduser("~"), ".config", "htb-cli")
+        return env_store_dir if env_store_dir else os.path.join(os.path.expanduser("~"), ".config", self.package_name)
 
     def load_cli_config(self) -> [str, str, str]:
         """Loads the API key from the config file if it exists."""
-        config_path = HtbCLI.get_config_path()
+        config_path = self.get_config_path()
         if os.path.exists(config_path):
             self.config.read(config_path)
             return (self.config["HTB"].get("api_key"),
@@ -64,14 +62,13 @@ class HtbCLI:
         return None, None, None
 
 
-    @staticmethod
-    def get_config_path() -> str:
+    def get_config_path(self) -> str:
         """Returns the path to the config file."""
-        return os.path.join(HtbCLI.get_base_store_dir(), "config.ini")
+        return os.path.join(self.get_base_store_dir(), "config.ini")
 
     def save_config_file(self):
         """Save the config file"""
-        config_path = HtbCLI.get_config_path()
+        config_path = self.get_config_path()
         os.makedirs(os.path.dirname(config_path), exist_ok=True)
 
         with open(config_path, "w") as configfile:
@@ -89,7 +86,7 @@ class HtbCLI:
         if args.command is None or args.command == "help":
             parser.print_help()
         elif not init and args.command not in ["version", "init"]:
-            print(f"{Fore.RED}HTB-CLI needs to be initialized. Use the \"init\" command.{Style.RESET_ALL}", file=sys.stderr)
+            print(f"{Fore.RED}HTB-Operator needs to be initialized. Use the \"init\" command.{Style.RESET_ALL}", file=sys.stderr)
         else:
             try:
                 if not (ismethod(args.func) or isfunction(args.func)) and issubclass(args.func, BaseCommand):
