@@ -308,4 +308,23 @@ htb-operator challenge search --name Spook --category Web,Crypto,Pwn
 Displays only challenges which matches the specified difficulty.
 
 
+# Prolabs
+The prolabs command provides commands for listing all ProLabs as well as getting detailed information about a specific ProLab. 
+
+## list
+List all prolabs.
+```bash
+htb-operator prolabs list
+```
+![image](https://github.com/user-attachments/assets/9f5a1514-5260-4845-bcc7-5eada511a8b1)
+
+## info 
+Get more detailed information about a ProLab which is definied by the `--id` or `--name` flag.
+```bash
+htb-operator prolabs info --name APTLabs
+```
+![image](https://github.com/user-attachments/assets/6b751c2e-6572-4020-aaf6-4ca64943462b)
+
+
+
 
