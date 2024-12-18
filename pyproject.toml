@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "htb-operator"
-version = "1.0.12.3"
+version = "1.0.12.4"
 description = "HTB-Operator - A CLI for accessing Hackthebox"
 readme = "README.md"
 authors = [
