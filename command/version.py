@@ -26,7 +26,7 @@ class VersionCommand(BaseCommand):
         try:
             pipx_path = shutil.which("pipx")
             if pipx_path is not None:
-                subprocess.run([pipx_path, "upgrade", self.htb_cli.package_name], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.run([pipx_path, "reinstall", self.htb_cli.package_name], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             else:
                 subprocess.run([shutil.which("pip"), "install", "--upgrade", self.htb_cli.package_name], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             self.logger.info(f'{Fore.GREEN}{self.htb_cli.package_name} successfully updated.{Style.RESET_ALL}')
