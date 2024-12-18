@@ -20,13 +20,13 @@ class VersionCommand(BaseCommand):
         self.url = f"https://pypi.org/pypi/{self.htb_cli.package_name}/json"
         self.check = self.args.check if hasattr(args, "check") else False
 
-    def update(self):
+    def update(self, latest_version):
         """Update the programme"""
         # pipx is preferred. If it is not found, use pip as the standard tool
         try:
             pipx_path = shutil.which("pipx")
             if pipx_path is not None:
-                subprocess.call([pipx_path, "install", f'{self.htb_cli.package_name}=={self.htb_cli.version}', "--force"], stdout=sys.stdout, stderr=sys.stderr)
+                subprocess.call([pipx_path, "install", f'{self.htb_cli.package_name}=={latest_version}', "--force"], stdout=sys.stdout, stderr=sys.stderr)
             else:
                 subprocess.call([shutil.which("pip"), "install", "--upgrade", self.htb_cli.package_name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             self.logger.info(f'{Fore.GREEN}{self.htb_cli.package_name} successfully updated.{Style.RESET_ALL}')
@@ -57,7 +57,7 @@ class VersionCommand(BaseCommand):
             if resp is None or len(resp) == 0 or resp.lower() != "y":
                 return None
 
-            self.update()
+            self.update(latest_version)
 
     def execute(self):
         """Execute command"""
