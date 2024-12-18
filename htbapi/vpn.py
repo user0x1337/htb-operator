@@ -18,7 +18,7 @@ class BaseVpnServer(client.BaseHtbApiObject):
     def switch(self) -> "BaseVpnServer":
         """Switches the client to use this VPN server"""
         try:
-            data: dict = self._client.post_request(endpoint=f'connections/servers/switch/{self.id}')
+            data: dict = self._client.htb_http_request.post_request(endpoint=f'connections/servers/switch/{self.id}')
         except RequestException as e:
             raise VpnException(e.args[0]["message"])
 
@@ -51,7 +51,7 @@ class BaseVpnServer(client.BaseHtbApiObject):
             self.switch()
 
         try:
-            data = self._client.get_request(endpoint=url, download=True)
+            data = self._client.htb_http_request.get_request(endpoint=url, download=True)
         except RequestException as e:
             if len(e.args) > 0 and "message" in e.args[0]:
                 data = e.args[0]["message"].encode()
@@ -62,7 +62,7 @@ class BaseVpnServer(client.BaseHtbApiObject):
         if b"You are not assigned" in data:
             self.switch()
             # Try again
-            data = self._client.get_request(endpoint=url, download=True)
+            data = self._client.htb_http_request.get_request(endpoint=url, download=True)
 
         data:bytes = cast(bytes, data)
         with open(path, 'wb') as f:
@@ -128,7 +128,7 @@ class VpnConnection(client.BaseHtbApiObject):
     name: str
     server_id: int
     server_hostname: str
-    server_port: int
+    server_port: Optional[int]
     server_name: str
     connection_username: str
     connection_through_pwnbox: bool
@@ -144,7 +144,7 @@ class VpnConnection(client.BaseHtbApiObject):
         self.name = data.get('location_type_friendly')
         self.server_id = data["server"]['id']
         self.server_hostname = data["server"]['hostname']
-        self.server_port = data["server"]['port']
+        self.server_port = data["server"].get('port', None)
         self.server_name = data["server"]['friendly_name']
         self.connection_username = data["connection"]['name']
         self.connection_through_pwnbox = data["connection"]['through_pwnbox']

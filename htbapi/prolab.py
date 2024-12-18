@@ -241,7 +241,7 @@ class ProLabInfo(client.BaseHtbApiObject):
         self.level = data.get('level', 0)
         self.lab_servers_count = data.get('lab_servers_count', 0)
 
-        detail_data:dict = self._client.get_request(endpoint=f"prolab/{self.id}/info")["data"]
+        detail_data:dict = self._client.htb_http_request.get_request(endpoint=f"prolab/{self.id}/info")["data"]
         if detail_data is not None:
             self.version = detail_data.get('version')
             self.description = detail_data.get('description')
@@ -251,7 +251,7 @@ class ProLabInfo(client.BaseHtbApiObject):
             self.writeup_filename = None if detail_data.get('writeup') is None else detail_data["writeup"]["file_name"]
             self.writeup_link = None if detail_data.get('writeup') is None else detail_data["writeup"]["link"]
 
-        overview_data: dict = self._client.get_request(endpoint=f"prolab/{self.id}/overview")["data"]
+        overview_data: dict = self._client.htb_http_request.get_request(endpoint=f"prolab/{self.id}/overview")["data"]
         if overview_data is not None:
             self.discord_url = overview_data["social_links"].get('discord', None) if "social_links" in overview_data else None
             self.forum = overview_data["social_links"].get('forum', None) if "social_links" in overview_data else None
@@ -259,7 +259,7 @@ class ProLabInfo(client.BaseHtbApiObject):
 
     def get_flags(self) -> [ProLabFlag]:
         """Get the corresponding flags"""
-        res: dict = self._client.get_request(endpoint=f"prolab/{self.id}/flags")
+        res: dict = self._client.htb_http_request.get_request(endpoint=f"prolab/{self.id}/flags")
         if "status" in res and res["status"]:
             return sorted([ProLabFlag(_client=self._client, data=x, _pro_lab=self) for x in res["data"]], key=lambda flag: flag.id)
         else:
@@ -267,7 +267,7 @@ class ProLabInfo(client.BaseHtbApiObject):
 
     def get_machines(self) -> List[ProLabMachine]:
         """Get the corresponding machines"""
-        res: dict = self._client.get_request(endpoint=f"prolab/{self.id}/machines")
+        res: dict = self._client.htb_http_request.get_request(endpoint=f"prolab/{self.id}/machines")
         if "status" in res and res["status"]:
             return sorted([ProLabMachine(_client=self._client, data=x, _pro_lab=self) for x in res["data"]], key=lambda flag: flag.id)
         else:
@@ -275,7 +275,7 @@ class ProLabInfo(client.BaseHtbApiObject):
 
     def get_progress(self) -> Optional[ProLabProgres]:
         """Get the progress"""
-        res: dict = self._client.get_request(endpoint=f"prolab/{self.id}/progress")
+        res: dict = self._client.htb_http_request.get_request(endpoint=f"prolab/{self.id}/progress")
         if "status" in res and res["status"]:
             return ProLabProgres(_client=self._client, data=res["data"], _pro_lab=self)
         else:
@@ -283,7 +283,7 @@ class ProLabInfo(client.BaseHtbApiObject):
 
     def get_changelogs(self) -> List[ProLabChangeLog]:
         """Get changelogs"""
-        res: dict = self._client.get_request(endpoint=f"prolab/{self.id}/changelogs")
+        res: dict = self._client.htb_http_request.get_request(endpoint=f"prolab/{self.id}/changelogs")
         if "status" in res and res["status"]:
             return [ProLabChangeLog(_client=self._client, data=x, _pro_lab=self) for x in res["data"]]
         else:
@@ -292,7 +292,7 @@ class ProLabInfo(client.BaseHtbApiObject):
     def submit_flag(self, flag: str) -> [bool, str]:
         """Submit a flag"""
         try:
-            data: dict = self._client.post_request(endpoint=f"prolab/{self.id}/flag", json={'flag': flag})
+            data: dict = self._client.htb_http_request.post_request(endpoint=f"prolab/{self.id}/flag", json={'flag': flag})
             return True, data["message"]
         except RequestException as e:
             return False, e.args[0]["message"]
@@ -300,7 +300,7 @@ class ProLabInfo(client.BaseHtbApiObject):
     def get_reset_status(self) -> [Optional[str], Optional[datetime]]:
         """Get the progress. Returns a datetime if successful (and string is None), otherwise a string and datetime is None."""
         try:
-            res: dict = self._client.get_request(endpoint=f"prolab/{self.id}/reset")
+            res: dict = self._client.htb_http_request.get_request(endpoint=f"prolab/{self.id}/reset")
             if "status" in res and res["status"] == "online":
                 return None, dateutil.parser.parse(res["data"]["last_reverted"])
             else:

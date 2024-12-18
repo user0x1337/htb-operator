@@ -20,7 +20,7 @@ class MachineBase(client.BaseHtbApiObject):
 
     def _execute_post_machine_call(self, endpoint: str) -> [bool, str]:
         try:
-            data: dict = self._client.post_request(endpoint=endpoint, json={'machine_id': self.id})
+            data: dict = self._client.htb_http_request.post_request(endpoint=endpoint, json={'machine_id': self.id})
             if "success" in data and type(data["success"]) == str and data["success"] == '0':
                 return False, data["message"]
             elif "success" not in data:
@@ -43,9 +43,9 @@ class MachineBase(client.BaseHtbApiObject):
 
     def submit(self, flag: str) -> [bool, str]:
         try:
-            data: dict = self._client.post_request(endpoint=f"machine/own",
-                                                   json={'machine_id': self.id, 'flag': flag},
-                                                   api_version="v5")
+            data: dict = self._client.htb_http_request.post_request(endpoint=f"machine/own",
+                                                                    json={'machine_id': self.id, 'flag': flag},
+                                                                    api_version="v5")
             return True, data["message"]
         except RequestException as e:
             return False, e.args[0]["message"]
@@ -56,10 +56,10 @@ class MachineBase(client.BaseHtbApiObject):
             raise IncorrectArgumentException("Difficulty must be between 1 and 10")
 
         try:
-            data: dict = self._client.post_request(endpoint=f"machine/{self.id}/flag/rate",
-                                                   json={'machine_id': self.id,
-                                                         'difficulty': difficulty,
-                                                         'type': flag_type})
+            data: dict = self._client.htb_http_request.post_request(endpoint=f"machine/{self.id}/flag/rate",
+                                                                    json={'machine_id': self.id,
+                                                                          'difficulty': difficulty,
+                                                                          'type': flag_type})
             return True, data["message"]
         except RequestException as e:
             return False, e.args[0]["message"]
@@ -153,11 +153,11 @@ class MachineInfo(MachineBase):
             item: The name of the property to retrieve
         """
         if item == "machine_top_owns":
-            data: dict = self._client.get_request(endpoint=f"machine/owns/top/{self.id}")["info"]
+            data: dict = self._client.htb_http_request.get_request(endpoint=f"machine/owns/top/{self.id}")["info"]
             new_obj = [MachineTopOwns(data=x, _client=self._client, machine_info=self) for x in data]
             new_obj.sort(key=lambda x: x.position)
         elif item == "machine_activity":
-            data: dict = self._client.get_request(endpoint=f"machine/activity/{self.id}")
+            data: dict = self._client.htb_http_request.get_request(endpoint=f"machine/activity/{self.id}")
             if "info" not in data:
                 new_obj = []
             elif "activity" not in data["info"]:
@@ -167,7 +167,7 @@ class MachineInfo(MachineBase):
                 new_obj = [MachineActivity(data=x, _client=self._client, machine_info=self) for x in data]
                 new_obj.sort(key=lambda x: x.created_at, reverse=True)
         elif item == "changelog":
-            data: dict = self._client.get_request(endpoint=f"machine/changelog/{self.id}")
+            data: dict = self._client.htb_http_request.get_request(endpoint=f"machine/changelog/{self.id}")
             if "info" not in data:
                 return []
 

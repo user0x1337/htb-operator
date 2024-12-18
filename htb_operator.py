@@ -7,16 +7,17 @@ import logging
 import os
 import sys
 from argparse import ArgumentParser
+from importlib.metadata import version
 from inspect import isfunction, ismethod
 from logging import Logger
+from typing import Optional
 
 from colorama import Fore, Style
 from rich.console import Console
 
 from command.base import BaseCommand, InsufficientPermissions
 from console import *
-from htbapi import HTBClient, RequestException
-
+from htbapi import HTBClient, RequestException, HtbHtbHttpRequest, BaseHtbHttpRequest
 
 IS_WINDOWS: bool = sys.platform.startswith("win")
 IS_ROOT_OR_ADMIN: bool =  ((not IS_WINDOWS and os.getuid() == 0) or
@@ -25,18 +26,20 @@ IS_ROOT_OR_ADMIN: bool =  ((not IS_WINDOWS and os.getuid() == 0) or
 
 class HtbCLI:
     """Main class for the HTB-Command line interface"""
-    def __init__(self):
+    def __init__(self, htb_http_request: Optional[BaseHtbHttpRequest] = None):
         self.config = configparser.ConfigParser()
         self.logger = setup_logger()
         self.api_key, self._api_base, self._user_agent = self.load_cli_config()
         self.console = Console()
-        self.version = "0.1"
+        self.version = version('htb-operator')
 
         if self.api_key is not None:
-            self.client = HTBClient(app_token=self.api_key,
-                                    api_base=self._api_base,
-                                    user_agent=self._user_agent,
-                                    proxy=self.config["Proxy"] if "Proxy" in self.config else None)
+            if htb_http_request is None:
+                htb_http_request = HtbHtbHttpRequest(app_token=self.api_key,
+                                                     api_base=self._api_base,
+                                                     user_agent=self._user_agent,
+                                                     proxy=self.config["Proxy"] if "Proxy" in self.config else None)
+            self.client = HTBClient(htb_http_request=htb_http_request)
 
     @staticmethod
     def get_base_store_dir() -> str:

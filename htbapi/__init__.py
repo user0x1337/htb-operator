@@ -13,3 +13,4 @@ from .vpn import VpnServerInfo, VpnConnection, AccessibleVpnServer, BaseVpnServe
 from .season import SeasonList, SeasonLeaderboardUserPosition, SeasonUserDetails
 from .pwnbox import PwnboxStatus, PwnboxUsage
 from .badge import Badge, BadgeCategory
+from .htb_http_request import HtbHtbHttpRequest, BaseHtbHttpRequest

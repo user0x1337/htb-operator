@@ -79,7 +79,7 @@ class PwnboxStatus(client.BaseHtbApiObject):
     def terminate(self) -> [bool, str]:
         """Terminate an active Pwnbox session. Returns an exception if termination fails."""
         try:
-            data: dict = self._client.post_request(endpoint="pwnbox/terminate")
+            data: dict = self._client.htb_http_request.post_request(endpoint="pwnbox/terminate")
             if data is None or len(data) == 0 or len(data.keys()) == 0:
                 return True, ""
 

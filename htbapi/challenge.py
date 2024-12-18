@@ -75,7 +75,7 @@ class ChallengeBase(client.BaseHtbApiObject):
         if difficulty < 1 or difficulty > 10:
             raise IncorrectArgumentException("Difficulty must be between 1 and 10")
 
-        res = self._client.post_request(endpoint=f"challenge/own", json={
+        res = self._client.htb_http_request.post_request(endpoint=f"challenge/own", json={
             "flag": flag,
             "challenge_id": self.id,
             "difficulty": difficulty*10
@@ -89,7 +89,7 @@ class ChallengeBase(client.BaseHtbApiObject):
 
         :returns: The message from the backend.
         """
-        data: dict = self._client.post_request(endpoint=f"challenge/start", json={'challenge_id': self.id})
+        data: dict = self._client.htb_http_request.post_request(endpoint=f"challenge/start", json={'challenge_id': self.id})
         return data["message"]
 
     def stop_instance(self) -> str:
@@ -97,7 +97,7 @@ class ChallengeBase(client.BaseHtbApiObject):
 
         :returns: The message from the backend.
         """
-        data: dict = self._client.post_request(endpoint=f"challenge/stop", json={'challenge_id': self.id})
+        data: dict = self._client.htb_http_request.post_request(endpoint=f"challenge/stop", json={'challenge_id': self.id})
         return data["message"]
 
 
@@ -112,7 +112,7 @@ class ChallengeBase(client.BaseHtbApiObject):
             path = os.path.join(path, f'{self.name.strip().replace(" ", "_")}.zip')
 
         try:
-            data = cast(bytes, self._client.get_request(endpoint=f"challenge/download/{self.id}", download=True))
+            data = cast(bytes, self._client.htb_http_request.get_request(endpoint=f"challenge/download/{self.id}", download=True))
         except RequestException as e:
             if not e.args or len(e.args) == 0 or "message" not in e.args[0].keys():
                 raise RequestException(f"Could not download file for challenge {self.name}")
@@ -131,7 +131,7 @@ class ChallengeBase(client.BaseHtbApiObject):
 
     def download_writeup(self, path: Optional[str] = None) -> str:
         """Download writeup"""
-        data:dict = self._client.get_request(endpoint=f"challenge/{self.id}/writeup")["data"]
+        data:dict = self._client.htb_http_request.get_request(endpoint=f"challenge/{self.id}/writeup")["data"]
         if "official" not in data:
             raise RequestException(f"Could not download writeup for challenge {self.name}")
 
@@ -150,7 +150,7 @@ class ChallengeBase(client.BaseHtbApiObject):
             path = os.path.join(path, f'{filename}')
 
         try:
-            file_data = cast(bytes, self._client.get_request(custom_url=f"{url}", download=True))
+            file_data = cast(bytes, self._client.htb_http_request.get_request(custom_url=f"{url}", download=True))
         except RequestException as e:
             msg = e.args[0]["message"]
             if "unauthorized" in msg:

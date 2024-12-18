@@ -1,10 +1,6 @@
 import os
 import time
-from typing import Optional, List, Union, cast, Tuple
-
-import requests
-from requests import JSONDecodeError
-from urllib3.exceptions import InsecureRequestWarning
+from typing import Optional, List, cast, Tuple
 
 from .exception.errors import RequestException, NoPwnBoxActiveException
 
@@ -14,41 +10,13 @@ _vpn_server_cache = dict()
 _user_cache: dict[int, "User"] = dict()
 
 class HTBClient:
-    _refresh_token: Optional[str]
-    _access_token: Optional[str]
-    _api_version: str
+    # noinspection PyUnresolvedReferences
+    htb_http_request: "BaseHtbHttpRequest"
 
-    def __init__(self,
-                 app_token: str,
-                 api_base: str,
-                 user_agent: str,
-                 download_cooldown: int = 30,
-                 api_version: str = "v4",
-                 proxy: Optional[dict]=None) -> None:
-        assert app_token is not None
-        assert api_base is not None
-        assert user_agent is not None
-
-        self._app_token = app_token
-        self._api_base = api_base
-        self._api_version = api_version
-        self._user_agent = user_agent
-        self._proxies = None
-        self._verify_ssl = True
-        self._download_cooldown = download_cooldown
-        # noinspection PyUnresolvedReferences
-        requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-        if proxy is not None:
-            self.set_proxies({"http": proxy["http"] if "http" in proxy and len(proxy["http"]) > 0 else None,
-                              "https": proxy["https"] if "https" in proxy and len(proxy["https"]) > 0 else None})
-            self.set_verify_ssl(proxy["verify_ssl"].strip().lower() == "true" if "verify_ssl" in proxy else True)
-
-
-    def set_proxies(self, proxies: dict | None) -> None:
-        self._proxies = proxies
-
-    def set_verify_ssl(self, verify_ssl: bool) -> None:
-        self._verify_ssl = verify_ssl
+    # noinspection PyUnresolvedReferences
+    def __init__(self,htb_http_request: "BaseHtbHttpRequest") -> None:
+        assert htb_http_request is not None
+        self.htb_http_request = htb_http_request
 
     # noinspection PyUnresolvedReferences
     def get_user(self, username: Optional[str]=None, user_id: Optional[int]=None) -> "User":
@@ -60,16 +28,16 @@ class HTBClient:
 
         if user_id is None:
             if username is None:
-                data:dict = self.get_request(endpoint="user/info")["info"]
+                data:dict = self.htb_http_request.get_request(endpoint="user/info")["info"]
                 user_id: int = int(data["id"])
 
             else:
-                data = self.get_request(endpoint=f'search/fetch?query="{username}"')
+                data = self.htb_http_request.get_request(endpoint=f'search/fetch?query="{username}"')
                 if len(data) == 0 or "users" not in data.keys():
                     return None
                 user_id = data["users"][0]["id"]
 
-        data = self.get_request(endpoint=f"user/profile/basic/{user_id}")["profile"]
+        data = self.htb_http_request.get_request(endpoint=f"user/profile/basic/{user_id}")["profile"]
 
         # Ranking brackets are only provided for own (authenticated) user. If username is None, we will definitely retrieve
         # the information for the own user.
@@ -88,7 +56,7 @@ class HTBClient:
         """Search for challenges for a given name."""
         from .challenge import ChallengeList
 
-        data: List = self.get_request(endpoint=f'challenges?keyword={name}&sort_type=asc')["data"]
+        data: List = self.htb_http_request.get_request(endpoint=f'challenges?keyword={name}&sort_type=asc')["data"]
         if len(data) == 0:
             return []
 
@@ -116,7 +84,7 @@ class HTBClient:
         """Get the ranking of the own (authenticated) user."""
         from .user import UserRankingHoF
 
-        data = self.get_request(endpoint=f"rankings/user/ranking_bracket")["data"]
+        data = self.htb_http_request.get_request(endpoint=f"rankings/user/ranking_bracket")["data"]
         return UserRankingHoF(data=data, _client=self)
 
 
@@ -124,7 +92,7 @@ class HTBClient:
     def get_prolab_certificate_list(self) -> List["Certificate"]:
         from .certificate import Certificate
 
-        data: dict = self.get_request(endpoint=f"user/profile/certificates")
+        data: dict = self.htb_http_request.get_request(endpoint=f"user/profile/certificates")
         if data is None or len(data.keys()) == 0 or "ownedProLab" not in data.keys():
             return []
 
@@ -135,7 +103,7 @@ class HTBClient:
         assert certificate_id is not None and certificate_id > 0
 
         try:
-            data = self.get_request(endpoint=f"certificate/{certificate_id}/download", download=True)
+            data = self.htb_http_request.get_request(endpoint=f"certificate/{certificate_id}/download", download=True)
         except RequestException as e:
 
             if not e.args or len(e.args) == 0 or "message" not in e.args[0].keys():
@@ -164,7 +132,7 @@ class HTBClient:
         """Get the usage of the Pwnbox instance for the auth user"""
         from .pwnbox import PwnboxUsage
 
-        data:dict = self.get_request(endpoint=f"pwnbox/usage")["data"]
+        data:dict = self.htb_http_request.get_request(endpoint=f"pwnbox/usage")["data"]
         return PwnboxUsage(_client=self, data=data)
 
     # noinspection PyUnresolvedReferences
@@ -172,7 +140,7 @@ class HTBClient:
         """Get the current pwnbox status."""
         from .pwnbox import PwnboxStatus
 
-        data: dict = self.get_request(endpoint=f"pwnbox/status")
+        data: dict = self.htb_http_request.get_request(endpoint=f"pwnbox/status")
         if data is not None and "message" in data.keys():
             raise NoPwnBoxActiveException(data["message"])
 
@@ -186,7 +154,7 @@ class HTBClient:
         """Get the season rank details for a given user."""
         from .season import SeasonUserDetails
 
-        data = self.get_request(endpoint=f"season/end/{season_id}/{user_id}")["data"]
+        data = self.htb_http_request.get_request(endpoint=f"season/end/{season_id}/{user_id}")["data"]
         if data is None or len(data) == 0:
             return None
 
@@ -194,7 +162,6 @@ class HTBClient:
         return SeasonUserDetails(_client=self, data=data)
 
     def get_season_leaderboard_top_x(self, season_id: int, top_number:int) -> List["SeasonLeaderboardUserPosition"]:
-        from .season import SeasonLeaderboardUserPosition
         pass # top_number must be between 3 <= x <= 100
         # API: season/players/leaderboard/top/6?number=100
 
@@ -203,7 +170,7 @@ class HTBClient:
         """Get the list of seasons"""
         from .season import SeasonList
 
-        data: list = self.get_request(endpoint=f"season/list")["data"]
+        data: list = self.htb_http_request.get_request(endpoint=f"season/list")["data"]
 
         return [SeasonList(data=x, _client=self) for x in data]
 
@@ -226,9 +193,9 @@ class HTBClient:
         from .challenge import ChallengeList
 
         if retired:
-            data: list = self.get_request(endpoint=f"challenge/list/retired")["challenges"]
+            data: list = self.htb_http_request.get_request(endpoint=f"challenge/list/retired")["challenges"]
         else:
-            data: list = self.get_request(endpoint=f"challenge/list")["challenges"]
+            data: list = self.htb_http_request.get_request(endpoint=f"challenge/list")["challenges"]
 
         return [ChallengeList(_client=self, data=d) for d in data
                 if unsolved is None and d["authUserSolve"] == d["authUserSolve"] or d["authUserSolve"] != unsolved
@@ -239,7 +206,7 @@ class HTBClient:
     # noinspection PyUnresolvedReferences
     def get_challenge_categories_list(self) -> List["Category"]:
         from .challenge import Category
-        data: list = self.get_request(endpoint=f"challenge/categories/list")["info"]
+        data: list = self.htb_http_request.get_request(endpoint=f"challenge/categories/list")["info"]
 
         return [Category(_client=self, data=x) for x in data]
 
@@ -248,7 +215,7 @@ class HTBClient:
         assert user_id is not None
         from .prolab import ProLabUserProfile
 
-        data: dict = self.get_request(endpoint=f"user/profile/progress/prolab/{user_id}")["profile"]
+        data: dict = self.htb_http_request.get_request(endpoint=f"user/profile/progress/prolab/{user_id}")["profile"]
         return [ProLabUserProfile(_client=self, data=x) for x in data["prolabs"]]
 
     # noinspection PyUnresolvedReferences
@@ -258,7 +225,7 @@ class HTBClient:
 
         from .endgame import EndgameUserProfile
 
-        data: dict = self.get_request(endpoint=f"user/profile/progress/endgame/{user_id}")["profile"]
+        data: dict = self.htb_http_request.get_request(endpoint=f"user/profile/progress/endgame/{user_id}")["profile"]
         return [EndgameUserProfile(_client=self, data=x) for x in data["endgames"]]
 
     # noinspection PyUnresolvedReferences
@@ -268,7 +235,7 @@ class HTBClient:
 
         from .fortress import FortressUserProfile
 
-        data: dict = self.get_request(endpoint=f"user/profile/progress/fortress/{user_id}")["profile"]
+        data: dict = self.htb_http_request.get_request(endpoint=f"user/profile/progress/fortress/{user_id}")["profile"]
         return [FortressUserProfile(_client=self, data=x) for x in data["fortresses"]]
 
     # noinspection PyUnresolvedReferences
@@ -276,14 +243,14 @@ class HTBClient:
         assert user_id is not None
         from .sherlock import SherlockUserProfile
 
-        data: dict = self.get_request(endpoint=f"user/profile/progress/sherlocks/{user_id}")["profile"]
+        data: dict = self.htb_http_request.get_request(endpoint=f"user/profile/progress/sherlocks/{user_id}")["profile"]
         return [SherlockUserProfile(_client=self, data=x) for x in data["challenge_categories"]]
 
     # noinspection PyUnresolvedReferences
     def get_sherlock_categories(self) -> List["SherlockCategory"]:
         """Get a list of sherlock categories"""
         from .sherlock import SherlockCategory
-        data: list = self.get_request(endpoint=f"sherlocks/categories/list")["info"]
+        data: list = self.htb_http_request.get_request(endpoint=f"sherlocks/categories/list")["info"]
 
         return [SherlockCategory(_client=self, data=x) for x in data]
 
@@ -310,7 +277,7 @@ class HTBClient:
         page_no: int = 1
         sherlock_result: List["SherlockInfo"] = []
         while True:
-            res: dict = self.get_request(endpoint=f"sherlocks?page={page_no}{state}{categories}")
+            res: dict = self.htb_http_request.get_request(endpoint=f"sherlocks?page={page_no}{state}{categories}")
 
             if res is None or len(res.keys()) == 0:
                 break
@@ -336,7 +303,7 @@ class HTBClient:
         assert user_id is not None
         from .machine import MachineOsUserProfile
 
-        data: dict = self.get_request(endpoint=f"user/profile/progress/machines/os/{user_id}")["profile"]
+        data: dict = self.htb_http_request.get_request(endpoint=f"user/profile/progress/machines/os/{user_id}")["profile"]
         return [MachineOsUserProfile(_client=self, data=x) for x in data["operating_systems"]]
 
     # noinspection PyUnresolvedReferences
@@ -344,7 +311,7 @@ class HTBClient:
         assert user_id is not None
         from .challenge import ChallengeUserProfile
 
-        data: dict = self.get_request(endpoint=f"user/profile/progress/challenges/{user_id}")["profile"]
+        data: dict = self.htb_http_request.get_request(endpoint=f"user/profile/progress/challenges/{user_id}")["profile"]
         return [ChallengeUserProfile(_client=self, data=x) for x in data["challenge_categories"]]
 
     # noinspection PyUnresolvedReferences
@@ -355,7 +322,7 @@ class HTBClient:
         if challenge_id_or_name is None:
             return None
 
-        data = self.get_request(endpoint=f'challenge/info/{challenge_id_or_name}')["challenge"]
+        data = self.htb_http_request.get_request(endpoint=f'challenge/info/{challenge_id_or_name}')["challenge"]
         return ChallengeInfo(_client=self, data=data)
 
 
@@ -365,9 +332,9 @@ class HTBClient:
         from .challenge import ChallengeList
 
         if retired:
-            data = self.get_request(f"challenge/list/retired")
+            data = self.htb_http_request.get_request(f"challenge/list/retired")
         else:
-            data = self.get_request(f"challenge/list")
+            data = self.htb_http_request.get_request(f"challenge/list")
 
         return [ChallengeList(data=x, _client=self) for x in data["challenges"]]
 
@@ -376,7 +343,7 @@ class HTBClient:
         """Requests a list of `ProLab` from the API"""
         from .prolab import ProLabInfo
 
-        data: dict = self.get_request(endpoint=f"prolabs")["data"]
+        data: dict = self.htb_http_request.get_request(endpoint=f"prolabs")["data"]
 
         if data is None or len(data) == 0:
             return []
@@ -388,7 +355,7 @@ class HTBClient:
         """Requests a `ProLab` from the API"""
         from .prolab import ProLabInfo
 
-        data: dict = self.get_request(endpoint=f"prolabs")["data"]
+        data: dict = self.htb_http_request.get_request(endpoint=f"prolabs")["data"]
 
         if data is None or len(data) == 0:
             return None
@@ -459,7 +426,7 @@ class HTBClient:
             if _vpn_server_cache is None:
                 _vpn_server_cache = dict()
 
-            data: dict = self.get_request(endpoint=f"connections/servers?product={product}")["data"]
+            data: dict = self.htb_http_request.get_request(endpoint=f"connections/servers?product={product}")["data"]
             servers = parse_data(data, my_location=vpn_location)
             _vpn_server_cache[caching_key] = servers
             if vpn_servers is not None and len(vpn_servers.keys()) > 0:
@@ -484,7 +451,7 @@ class HTBClient:
                     vpn_servers = vpn_servers | _vpn_server_cache.get(caching_key)
                     continue
 
-                data: dict = self.get_request(endpoint=f"connections/servers/prolab/{prolab.id}")["data"]
+                data: dict = self.htb_http_request.get_request(endpoint=f"connections/servers/prolab/{prolab.id}")["data"]
                 servers = parse_data(data, my_location=vpn_location)
                 _vpn_server_cache[caching_key] = servers
                 vpn_servers = vpn_servers | servers
@@ -496,7 +463,7 @@ class HTBClient:
         """Get all VPN Server which are directly accessible without switching the VPN-Server"""
         from .vpn import AccessibleVpnServer
 
-        data: dict = self.get_request(endpoint=f"connections")["data"]
+        data: dict = self.htb_http_request.get_request(endpoint=f"connections")["data"]
         if data is None or len(data.keys()) == 0:
             return dict()
 
@@ -522,7 +489,7 @@ class HTBClient:
     def get_active_connections(self) -> List["VpnConnection"]:
         from .vpn import VpnConnection
 
-        data: List = self.get_request(endpoint=f"connection/status")
+        data: List = self.htb_http_request.get_request(endpoint=f"connection/status")
         return [VpnConnection(data=x, _client=self) for x in data]
 
 
@@ -542,7 +509,7 @@ class HTBClient:
         if user is None:
             return res
 
-        data: List[dict] = self.get_request(endpoint=f"badges")["categories"]
+        data: List[dict] = self.htb_http_request.get_request(endpoint=f"badges")["categories"]
         for x in data:
             badge_category = BadgeCategory(_client=self, data=x)
             if remove_obtained_badges:
@@ -592,9 +559,9 @@ class HTBClient:
         page_number = 1
         while True:
             if retired:
-                res = self.get_request(endpoint=f"machine/list/retired/paginated?per_page=100&page={page_number}{keyword_option}{sort_option}{os_filter_option}{os_difficulty_option}")
+                res = self.htb_http_request.get_request(endpoint=f"machine/list/retired/paginated?per_page=100&page={page_number}{keyword_option}{sort_option}{os_filter_option}{os_difficulty_option}")
             else:
-                res = self.get_request(endpoint=f"machine/paginated?per_page=100&page={page_number}{keyword_option}{sort_option}{os_filter_option}{os_difficulty_option}")
+                res = self.htb_http_request.get_request(endpoint=f"machine/paginated?per_page=100&page={page_number}{keyword_option}{sort_option}{os_filter_option}{os_difficulty_option}")
 
             data: list = res["data"]
             if data is None or len(data) == 0:
@@ -624,7 +591,7 @@ class HTBClient:
     def get_unreleased_machines(self) -> List[Tuple["MachineInfo", Optional["MachineInfo"]]]:
         """Get a list of all unreleased machines and the corresponding scheduled retired machine (if available)"""
         from .machine import MachineInfo
-        data: List[dict] = self.get_request(endpoint=f"machine/unreleased")["data"]
+        data: List[dict] = self.htb_http_request.get_request(endpoint=f"machine/unreleased")["data"]
 
         res = []
         for row in data:
@@ -646,7 +613,7 @@ class HTBClient:
         if machine_id_or_name is None:
             return None
 
-        data = self.get_request(endpoint=f'machine/profile/{machine_id_or_name}')["info"]
+        data = self.htb_http_request.get_request(endpoint=f'machine/profile/{machine_id_or_name}')["info"]
         return MachineInfo(_client=self, data=data)
 
     # noinspection PyUnresolvedReferences
@@ -654,7 +621,7 @@ class HTBClient:
         """Retrieve the active machine info."""
         from .machine import ActiveMachineInfo
 
-        data:dict = self.get_request(endpoint=f'machine/active')["info"]
+        data:dict = self.htb_http_request.get_request(endpoint=f'machine/active')["info"]
         if data is None or len(data.keys()) == 0:
             return None
 
@@ -666,7 +633,7 @@ class HTBClient:
         """Retrieves a list of `Activity` from the API"""
         from .activity import Activity
 
-        data:dict = self.get_request(endpoint=f'user/profile/activity/{user_id}')["profile"]
+        data:dict = self.htb_http_request.get_request(endpoint=f'user/profile/activity/{user_id}')["profile"]
         if len(data["activity"]) == 0:
             return []
 
@@ -677,83 +644,9 @@ class HTBClient:
         """Retrieves a list of `Fortress` from the API"""
         from .fortress import Fortress
 
-        data: dict = self.get_request(endpoint=f'fortresses')["data"]
-        return [Fortress(_client=self, data=self.get_request(endpoint=f'fortress/{x["id"]}')["data"]) for x in data.values()]
+        data: dict = self.htb_http_request.get_request(endpoint=f'fortresses')["data"]
+        return [Fortress(_client=self, data=self.htb_http_request.get_request(endpoint=f'fortress/{x["id"]}')["data"]) for x in data.values()]
 
-    def post_request(self,
-                     endpoint: str,
-                     json=None,
-                     api_version: str = "v4") -> dict:
-
-        if api_version is None:
-            api_version = self._api_version
-
-        headers = {"Authorization": f"Bearer {self._app_token}",
-                   "User-Agent": self._user_agent,
-                   "Accept": "application/json"}
-
-        while True:
-            r = requests.post(url=f"{self._api_base}{api_version}/{endpoint}",
-                              headers=headers,
-                              json=json,
-                              proxies=self._proxies,
-                              verify=self._verify_ssl)
-            # Due to rate limit
-            if r.status_code == 429:
-                time.sleep(1)
-                continue
-            else:
-                break
-
-        if r.status_code != requests.codes.ok:
-            if r.status_code == requests.codes.no_content:
-                return dict()
-
-            if r.content and len(r.content) > 0:
-                try:
-                    raise RequestException(r.json())
-                except JSONDecodeError:
-                    raise RequestException(r.content)
-            else:
-                raise RequestException(r.status_code)
-
-        return r.json()
-
-    def get_request(self, endpoint:Optional[str]=None, download=False, base:str=None, custom_url:Optional[str]=None) -> Union[list, dict, bytes]:
-        """Send a GET request to the API"""
-        assert endpoint is not None or custom_url is not None
-
-        headers = {"Authorization": f"Bearer {self._app_token}",
-                   "User-Agent": self._user_agent,
-                   "Accept": "application/json"}
-
-        if base is None:
-            base = self._api_base
-
-        while True:
-            r = requests.get(url=custom_url if custom_url is not None else f"{base}{self._api_version}/{endpoint}",
-                             headers=headers,
-                             proxies=self._proxies,
-                             verify=self._verify_ssl,
-                             stream=download)
-            if r.status_code == 429:
-                time.sleep(1)
-                continue
-            else:
-                break
-
-        if r.status_code != requests.codes.ok:
-            if r.content and len(r.content) > 0:
-                try:
-                    raise RequestException(r.json())
-                except JSONDecodeError:
-                    raise RequestException(r.content)
-            else:
-                raise RequestException(r.status_code)
-        if download:
-            return r.content
-        else:
-            return r.json()
 
     def __repr__(self):
         return f"<Client '{self._api_base}{self._api_version}'>"

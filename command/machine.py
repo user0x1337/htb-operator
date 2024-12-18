@@ -323,6 +323,7 @@ class MachineCommand(BaseCommand):
                 if not start_new_maschine:
                     return None
                 else:
+                    self.args.stop_vpn = active_machine.vpn_server_id not in [x.server_id for x in self.client.get_active_connections()]
                     self.stop_machine()
 
             if not self._check_or_wait_for_release_date(machine=machine):
@@ -334,8 +335,8 @@ class MachineCommand(BaseCommand):
             from command import VpnCommand
 
             vpn_command = VpnCommand(htb_cli=self.htb_cli, args=self.args)
-            accessible_vpn_server = self.client.get_accessible_vpn_server()
             if self.start_vpn and active_machine is not None:
+                vpn_command.vpn_id = active_machine.vpn_server_id
                 vpn_command.start_vpn()
 
 

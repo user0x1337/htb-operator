@@ -68,7 +68,7 @@ class SherlockInfo(client.BaseHtbApiObject):
         self.pinned = data['pinned']
 
         if get_details:
-            details_data = self._client.get_request(endpoint=f"sherlocks/{self.id}")
+            details_data = self._client.htb_http_request.get_request(endpoint=f"sherlocks/{self.id}")
             if details_data and "data" in details_data:
                 details_data: dict = details_data["data"]
                 self.writeup_visible = details_data['writeup_visible']
@@ -85,7 +85,7 @@ class SherlockInfo(client.BaseHtbApiObject):
 
     def get_writeup(self) -> Optional["SherlockWriteup"]:
         try:
-            data: dict = self._client.get_request(endpoint=f"sherlocks/{self.id}/writeup")
+            data: dict = self._client.htb_http_request.get_request(endpoint=f"sherlocks/{self.id}/writeup")
         except RequestException as e:
             return None
 

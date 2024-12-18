@@ -84,7 +84,7 @@ class User(client.BaseHtbApiObject):
         self.university = University({}, _client) if data.get('university', None) is None else University(data['university'], _client)
         self.ranking_bracket = ranking_bracket
 
-        data = self._client.get_request(endpoint=f'user/profile/badges/{self.id}')["badges"]
+        data = self._client.htb_http_request.get_request(endpoint=f'user/profile/badges/{self.id}')["badges"]
         self.badges = {x["id"]: dateutil.parser.parse(x["pivot"]["created_at"] if "pivot" in x else None) for x in data}
 
 
