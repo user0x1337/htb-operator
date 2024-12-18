@@ -1,5 +1,4 @@
-#!/home/user/PycharmProjects/htb-operator/.venv/bin/python3
-# --#!/usr/bin/env python3
+#!/usr/bin/env python3
 
 import argparse
 import configparser
