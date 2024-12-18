@@ -27,7 +27,8 @@ dependencies = [
     "psutil",
     "beautifulsoup4",
     "tqdm",
-    "paramiko"
+    "paramiko",
+    "packaging"
 ]
 [project.scripts]
 htb-operator = "htb_operator:main"

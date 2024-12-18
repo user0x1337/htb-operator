@@ -13,3 +13,4 @@ psutil
 beautifulsoup4
 tqdm
 paramiko
+packaging

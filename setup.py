@@ -20,7 +20,8 @@ setup(
         "psutil",
         "beautifulsoup4",
         "tqdm",
-        "paramiko"],
+        "paramiko",
+        "packaging"],
     entry_points={
         "console_scripts": [
             "htb-operator=htb_operator:main",
