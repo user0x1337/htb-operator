@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="htb-operator",
-    version="1.0.7",
+    version="1.0.8",
     packages=find_packages(),
     py_modules=["htb_operator"],
     install_requires=[
