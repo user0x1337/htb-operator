@@ -151,7 +151,129 @@ htb-operator machine list --group-by-os
 ```
 ![image](https://github.com/user-attachments/assets/1dcfbcde-c640-4281-849c-8e98bc48aa52)
 
+## start
+Start the instance of a given machine. If another machine already runs, you will asked for terminating the running machine before starting the new one. You must indicate the ID of the machine using `--id` flag or the name using `--name` 
+```bash
+htb-operator machine start --id 620
+```
+![image](https://github.com/user-attachments/assets/6e13bdb3-e755-4a6a-9cee-b08b6884c56a)
 
+
+### `--start-vpn` 
+If you use this flag, a VPN connection will automatically be established based on the configured VPN-Server. This operation needs **root/sudo/admin** permission. In Linux, you will be asked for entering your sudo password. 
+```bash
+htb-operator machine start --id 620 --start-vpn
+```
+![image](https://github.com/user-attachments/assets/2820fa16-0aa7-49fa-940e-09c0d9a67b38)
+
+
+### `--update-hosts-file`
+If you use this flag, the hosts file in `/etc/hosts` (Linux) or `/drivers/etc/hosts` (Windows, not tested) will be updated. The hostname of the machine plus the suffix `htb` (i.e. `HOSTNAME.htb`) and the assigned IP address will be inserted. This operation needs **root/sudo/admin** permission. In Linux, you will be asked for entering your sudo password.  
+
+```bash
+htb-operator machine start --id 620 --update-hosts-file
+```
+![image](https://github.com/user-attachments/assets/5399d44a-aaa5-4383-97fa-f4e90e00422b)
+
+
+### `--wait-for-release`
+Only works for scheduled machine. Starting the machine is paused until the release date/time will be reached and will be available for the entire community. It can be useful if you want to get a first blood. 
+```bash
+htb-operator machine start --id 620 --wait-for-release
+```
+
+### `--script <SCRIPT_FILE>`
+Executes a custom bash script when all previous steps are done (i.e. an IP was assigned, possible VPN-Connection has been established, and so on). htb-operator will set the following environment variables:
+* $HTB_MACHINE_IP -> Assigned IP
+* $HTB_MACHINE_NAME -> Machine name (e.g. "Sea") 
+* $HTB_MACHINE_OS -> Machine OS ("Linux", "Windows", "FreeBSD", ...)
+* $HTB_MACHINE_DIFFICULTY -> Machine's difficulty (e.g. "Easy")
+* $HTB_MACHINE_INFO -> Info provided by HTB
+* $HTB_MACHINE_HOSTNAME -> Hostname (e.g. "sea.htb") 
+
+#### Example
+I would like to run following script:
+```bash
+#!/usr/bin/bash
+
+echo "Starting script, assigned IP $HTB_MACHINE_IP and Hostname $HTB_MACHINE_HOSTNAME"
+nmap "$HTB_MACHINE_HOSTNAME" -p 80 --open
+```
+My call looks like (as you can see, I can combine the flags for automation):
+```bash
+htb-operator machine start --id 620 --script /tmp/example.sh --start-vpn --update-hosts-file
+```
+
+![image](https://github.com/user-attachments/assets/de741502-87af-407d-aa33-a3e856e1d3bd)
+
+In my case, I got a warning because I already had a running VPN conneciton. In general, this warning is for your information and you can ignore it.
+
+## stop
+This command stops an active running machine. This operation needs **root/sudo/admin** permission. In Linux, you will be asked for entering your sudo password.   
+```bash
+htb-operator machine stop
+```
+![image](https://github.com/user-attachments/assets/29a0a12b-3247-4594-ade6-7f8a4aff9067)
+
+### `--stop-vpn` 
+Kills all running HTB-VPN-connection after stopping the machine.
+```bash
+htb-operator machine stop --stop-vpn
+```
+
+### `--clean-hosts-file`
+Removes the hostname which matches the machine name from your hosts file. This operation needs **root/sudo/admin** permission. In Linux, you will be asked for entering your sudo password.  
+```bash
+htb-operator machine stop --clean-hosts-file
+```
+
+### Example
+You can combine the "stop" flags mentioned above:
+```bash
+htb-operator machine stop --stop-vpn --clean-hosts-file
+```
+![image](https://github.com/user-attachments/assets/57216405-e246-4c9c-8552-0bf8b289330e)
+
+## reset
+Just reset the active running machine.
+```bash
+htb-operator machine reset
+```
+### `--update-hosts-file`
+Updates the hosts file, functioning exactly the same way as in `machine start`.
+```bash
+htb-operator machine reset --update-hosts-file
+```
+
+## extend
+Extends the expiry time of the machine.
+```bash
+htb-operator machine extend
+```
+
+## status
+Returns information about the active running machine.
+
+![image](https://github.com/user-attachments/assets/242ad7e9-95e9-42f1-a0f4-dea5afa8b085)
+
+## info
+Displays detailed information about a machine given by the flag `--id` or `--name`.
+```bash
+htb-operator machine info --id 620
+```
+![image](https://github.com/user-attachments/assets/d426e72d-b26a-46f8-b30e-2dd9a3d6dbd9)
+
+## submit
+Sumbit the flag for the active machine. Use the flag `--user-flag` for submitting the user flag, `--root-flag` for the root flag. You also need to use the flag `-d` for specifying the difficulty rating (from 1="Piece of Cake" to 10="Brainfuck"). 
+```bash
+htb-operator machine submit --user-flag <FLAG> -d <DIFFICULTY_RATING>
+```
+
+## ssh-grab
+A ssh connection will be established to the victim host. After that, it tries to grab the flag from `/home/USERNAME/user.txt` (for non-root) or `/root/root.txt` (for root user) and submit it to HTB for the active running machine. You also need to use the flag `-d` for specifying the difficulty rating (from 1="Piece of Cake" to 10="Brainfuck").
+```bash
+htb-operator machine ssh-grab -u <SSH-USERNAME> -p <SSH-PASSWORD> -i <TARGET_HOST> -d <DIFFICULT_RATING>
+```
 
 # challenge
 The challenge command provides commands for listing all available challenges, displaying info about a specific challenge, downloading files and writeups, starting challenge instances or submitting flags. For example, if you want to download the file, unzip it and start the instance in HTB, you need only one command:
