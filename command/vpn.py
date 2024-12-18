@@ -4,6 +4,7 @@ import re
 import signal
 import socket
 import subprocess
+import sys
 from typing import Optional, List
 
 import psutil
@@ -41,6 +42,10 @@ class VpnCommand(BaseCommand):
 
     def check(self) -> bool:
         """Checks"""
+        if IS_WINDOWS:
+            self.logger.error(f'{Fore.RED}VPN feature is not supported on Windows. Please start it manually.{Style.RESET_ALL}')
+            return False
+
         if self.vpn_command == "start" and self.vpn_id is not None and self.vpn_id not in self.accessible_vpn_servers.keys():
             self.logger.error(f'{Fore.RED}VPN-Server for vpn_id {self.vpn_id} not found{Style.RESET_ALL}')
             return False
@@ -262,7 +267,6 @@ class VpnCommand(BaseCommand):
 
     def start_vpn(self):
         """Start the VPN connection."""
-
         if self.vpn_id is not None:
             vpn_server = self.accessible_vpn_servers[self.vpn_id]
         else:
@@ -274,17 +278,15 @@ class VpnCommand(BaseCommand):
             else:
                 self.logger.error(f'{Fore.RED}No VPN-ID stated and no active running machine found{Style.RESET_ALL}')
                 return None
-
-        for conn in self.client.get_active_connections():
-            intf: Optional[str] = self.get_interface_for_ip(conn.connection_ipv4)
-            if intf is not None:
-                self.logger.warning(
-                    f'{Fore.LIGHTYELLOW_EX}VPN Connection already established on interface "{intf}" with IPv4 "{conn.connection_ipv4}" / IPv6 "{conn.connection_ipv6}"{Style.RESET_ALL}')
-                return None
-
         try:
-            available_tun = self.get_next_free_tun_interface()
+            for conn in self.client.get_active_connections():
+                intf: Optional[str] = self.get_interface_for_ip(conn.connection_ipv4)
+                if intf is not None:
+                    self.logger.warning(
+                        f'{Fore.LIGHTYELLOW_EX}VPN Connection already established on interface "{intf}" with IPv4 "{conn.connection_ipv4}" / IPv6 "{conn.connection_ipv6}"{Style.RESET_ALL}')
+                    return None
 
+            available_tun = self.get_next_free_tun_interface()
             process = subprocess.Popen(["openvpn",
                                         "--config", vpn_server.download(path=self.target_path, tcp=self.tcp),
                                         "--dev", available_tun],
@@ -295,6 +297,7 @@ class VpnCommand(BaseCommand):
                                        text=True)
 
             for line in process.stdout:
+                print(line)
                 if "Peer Connection Initiated" in line:
                     self.logger.info(f'{Fore.GREEN}Establishing VPN connection...{Style.RESET_ALL}')
                 elif "net_addr_v4_add" in line or "net_addr_v6_add" in line:

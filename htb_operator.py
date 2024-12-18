@@ -7,7 +7,7 @@ import logging
 import os
 import sys
 from argparse import ArgumentParser
-from importlib.metadata import version
+from importlib.metadata import version, PackageNotFoundError
 from inspect import isfunction, ismethod
 from logging import Logger
 from typing import Optional
@@ -31,7 +31,12 @@ class HtbCLI:
         self.logger = setup_logger()
         self.api_key, self._api_base, self._user_agent = self.load_cli_config()
         self.console = Console()
-        self.version = version(self.package_name)
+
+        try:
+            self.version = version(self.package_name)
+        except PackageNotFoundError:
+            self.version = "0.0.0.1"
+
         self.proxy = self.config["Proxy"] if "Proxy" in self.config else None
 
         if self.api_key is not None:
@@ -44,11 +49,13 @@ class HtbCLI:
 
     def get_base_store_dir(self) -> str:
         if sys.platform.startswith("win"):
-            raise NotImplementedError
+            config_path = os.path.join(os.getenv("APPDATA"), self.package_name)
+        else:
+            # Only for Linux
+            config_path = os.path.join(os.path.expanduser("~"), ".config", self.package_name)
 
-        # Only for Linux
         env_store_dir = os.environ.get("HTB_TERMINAL_STORE_DIR")
-        return env_store_dir if env_store_dir else os.path.join(os.path.expanduser("~"), ".config", self.package_name)
+        return env_store_dir if env_store_dir else config_path
 
     def load_cli_config(self) -> [str, str, str]:
         """Loads the API key from the config file if it exists."""

@@ -13,7 +13,6 @@ from rich.console import Console
 
 from htbapi import HTBClient
 
-
 IS_WINDOWS: bool = sys.platform.startswith("win")
 IS_ROOT_OR_ADMIN: bool =  ((not IS_WINDOWS and os.getuid() == 0) or
                            (IS_WINDOWS and ctypes.windll.shell32.IsUserAnAdmin()))
@@ -65,11 +64,27 @@ class BaseCommand(object):
 
         self.logger.warning(f'{Fore.LIGHTYELLOW_EX}Some operations need root/admin permissions. Switch to root/administrator.{Style.RESET_ALL}')
 
+        env = os.environ.copy()
         if IS_WINDOWS:
-            raise NotImplementedError("[switch_to_root] not implemented for Windows")
+            env["HTB_TERMINAL_STORE_DIR"] = os.path.join(os.getenv("APPDATA"), self.htb_cli.package_name)
         else:
-            env = os.environ.copy()
             env["HTB_TERMINAL_STORE_DIR"] = os.path.join(os.path.expanduser("~"), ".config", self.htb_cli.package_name)
+
+        if IS_WINDOWS:
+            try:
+                current_directory = os.getcwd()
+                ctypes.windll.shell32.ShellExecuteW(
+                    ctypes.windll.kernel32.GetConsoleWindow(),
+                    "runas",
+                   "cmd.exe",
+                    f'/K "{sys.executable} {os.path.join(current_directory, sys.argv[0])} {" ".join(sys.argv[1:])}"',
+                    None,
+                    1
+                 )
+            except Exception as e:
+                self.logger.error(f"{Fore.RED}Error while requesting UAC: {e}{Style.RESET_ALL}")
+                sys.exit(0)
+        else:
             subprocess.run(args=['sudo', '-E', sys.executable] + sys.argv,
                            env=env,
                            text=True,
@@ -77,6 +92,6 @@ class BaseCommand(object):
                            stdout=sys.stdout,
                            stdin=sys.stdin)
 
-            if callback_execute_after_root_finished:
-                callback_execute_after_root_finished()
-            sys.exit(0)
+        if callback_execute_after_root_finished:
+            callback_execute_after_root_finished()
+        sys.exit(0)

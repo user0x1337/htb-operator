@@ -5,15 +5,18 @@
 ![GitHub Repo stars](https://img.shields.io/github/stars/user0x1337/htb-operator)
 
 <div>
-  <img alt="current version" src="https://img.shields.io/badge/Linux-supported-success">
-  <img alt="current version" src="https://img.shields.io/badge/Windows-unsupported-blue">
+  <b>OS</b><br>
+  <img alt="current version" src="https://img.shields.io/badge/Linux-supported-success"><br>
+  <img alt="current version" src="https://img.shields.io/badge/Windows-supported_|_but_not_all_features-lightgreen"><br>
   <img alt="current version" src="https://img.shields.io/badge/MacOS-supported_|_untested-yellow">
-  <br>
-  <img alt="amd64" src="https://img.shields.io/badge/amd64%20(x86__64)-supported-success">
+  <br><br>
+  <b>Architecture</b><br>
+  <img alt="amd64" src="https://img.shields.io/badge/amd64%20(x86__64)-supported-success"><br>
   <img alt="arm64" src="https://img.shields.io/badge/arm64%20(aarch64)-supported-success">
-  <br>
+  <br><br>
+<b>Misc</b><br>
   <img alt="current version" src="https://img.shields.io/badge/Python_>=3.12-supported-success">
-  <br>
+  <br> 
   <img alt="current version" src="https://img.shields.io/badge/HTB--API_v4-supported-success">
   <br><br>
 </div>

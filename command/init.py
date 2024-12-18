@@ -16,6 +16,7 @@ class InitCommand(BaseCommand):
     def execute(self):
         """Execute the init command"""
         htb_dict = dict()
+        windows_dict = dict()
         if self.args.apikey:
             # Check API-Key
             if self.api_command.check_api_key(self.args.apikey):
@@ -31,6 +32,9 @@ class InitCommand(BaseCommand):
         htb_dict["USER_AGENT"] = f"{self.htb_cli.package_name}/{self.htb_cli.version}"
         htb_dict["DOWNLOAD_COOLDOWN"] = 30
 
+        windows_dict["OpenVPN-Path"] = ""
+
         self.htb_cli.config["HTB"] = htb_dict
+        self.htb_cli.config["WINDOWS"] = windows_dict
         self.htb_cli.save_config_file()
         self.logger.info("HTB-Operator successfully initialized.")
