@@ -27,7 +27,8 @@ class VersionCommand(BaseCommand):
         try:
             pipx_path = shutil.which("pipx")
             if pipx_path is not None:
-                subprocess.call([pipx_path, "upgrade", f'{self.htb_cli.package_name}'], stdout=sys.stdout, stderr=sys.stderr, start_new_session=True)
+                subprocess.call([pipx_path, "uninstall", f'{self.htb_cli.package_name}'], stdout=sys.stdout,stderr=sys.stderr, start_new_session=True)
+                subprocess.call([pipx_path, "install", f'{self.htb_cli.package_name}'], stdout=sys.stdout, stderr=sys.stderr, start_new_session=True)
             else:
                 subprocess.call([shutil.which("pip"), "install", "--upgrade", self.htb_cli.package_name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             self.logger.info(f'{Fore.GREEN}{self.htb_cli.package_name} successfully updated.{Style.RESET_ALL}')
