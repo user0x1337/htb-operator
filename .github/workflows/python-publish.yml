@@ -47,12 +47,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
 
-      - name: Find files to upload
-        id: find_files
-        run: echo "files=$(ls ./dist | tr '\n' ',')" >> $GITHUB_ENV
-
       - name: Upload Release Assets
         run: |
+          files="$(ls ./dist)"
           for file in $files; do
             echo "Uploading $file"
             curl \
