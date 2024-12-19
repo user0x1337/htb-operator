@@ -66,19 +66,19 @@ def create_benchmark_table(vpn_benchmark_results: list) -> Table:
                       f'{format_bool(res["is_assigned"])}')
     return table
 
-def create_vpn_list_table(vpn_servers: list[dict]) -> Table:
+def create_vpn_list_table(vpn_servers: list[dict]) -> Table | Panel:
     assert vpn_servers is not None
     vpn_servers = sorted(vpn_servers, key=lambda x: (x['product'], x['location'], x['name']))
 
-    table = Table(title="VPN-Server", show_lines=True)
-    table.add_column(header="#", style="cyan", justify="left")
-    table.add_column(header="Product", style="cyan", justify="left")
-    table.add_column(header="Location", style="cyan", justify="left")
-    table.add_column(header="Server-ID", style="cyan", justify="left")
-    table.add_column(header="Name", style="cyan", justify="left")
-    table.add_column(header="Assigned?", style="cyan", justify="left")
-    table.add_column(header="# Clients", style="cyan", justify="left")
-    table.add_column(header="Full?", style="cyan", justify="left")
+    table = Table(expand=True, show_lines=False, box=None)
+    table.add_column(header="#", justify="left")
+    table.add_column(header="Product", justify="left")
+    table.add_column(header="Location", justify="left")
+    table.add_column(header="Server-ID", justify="left")
+    table.add_column(header="Name", justify="left")
+    table.add_column(header="Assigned?", justify="left")
+    table.add_column(header="# Clients", justify="left")
+    table.add_column(header="Full?", justify="left")
 
     for i, vpn_server in enumerate(vpn_servers):
         format_bool_ok_begin = "[bold green]"
@@ -97,7 +97,11 @@ def create_vpn_list_table(vpn_servers: list[dict]) -> Table:
                       f'{format_bool(vpn_server["full"])}'
                       f'{format_bool_ok_end if vpn_server["full"] else ""}'
                       )
-    return table
+    return Panel(table,
+                 title=f"[bold yellow]VPN-Server[/bold yellow]",
+                 border_style="yellow",
+                 title_align="left",
+                 expand=False)
 
 def create_table_active_vpn_connections(vpn_connections: List[dict]):
     table = Table(title="Active VPN-Connections", show_lines=True)

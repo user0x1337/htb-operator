@@ -46,10 +46,6 @@ class VpnCommand(BaseCommand):
             self.logger.error(f'{Fore.RED}VPN feature is not supported on Windows. Please start it manually.{Style.RESET_ALL}')
             return False
 
-        if self.vpn_command == "start" and self.vpn_id is not None and self.vpn_id not in self.accessible_vpn_servers.keys():
-            self.logger.error(f'{Fore.RED}VPN-Server for vpn_id {self.vpn_id} not found{Style.RESET_ALL}')
-            return False
-
         return True
 
     def read_vpn_file(self, vpn: VpnServerInfo):
@@ -210,18 +206,22 @@ class VpnCommand(BaseCommand):
         except RequestException as e:
             self.logger.error(f'{Fore.RED}Error: {e.args[0]["message"]}{Style.RESET_ALL}')
 
-    def do_switch(self):
+    def do_switch(self) -> bool:
         """Switching VPN-Server"""
         try:
             vpn_server: BaseVpnServer = VpnServerInfo.switch_vpn_server(vpn_id=self.vpn_id, _client=self.client)
             if vpn_server:
                 self.logger.info(f'{Fore.GREEN}VPN-Server to "{vpn_server.name}" successfully switched (# Clients: {vpn_server.current_clients}){Style.RESET_ALL}')
+                return True
+            self.logger.error(f'{Fore.RED}Could not switch VPN Server.{Style.RESET_ALL}')
         except CannotSwitchWithActive as e:
             self.logger.error(f'{Fore.RED}Cannot switch VPN Server: {e}{Style.RESET_ALL}')
         except VpnException as e:
             self.logger.error(f'{Fore.RED}VPN Error: {e}{Style.RESET_ALL}')
         except RequestException as e:
             self.logger.error(f'{Fore.RED}Error: {e.args[0]["message"]}{Style.RESET_ALL}')
+
+        return False
 
 
     def stop_vpn(self):
@@ -267,6 +267,19 @@ class VpnCommand(BaseCommand):
 
     def start_vpn(self):
         """Start the VPN connection."""
+        if self.vpn_id is not None and self.vpn_id not in self.accessible_vpn_servers.keys():
+            self.logger.warning(f'{Fore.LIGHTYELLOW_EX}VPN-Server with VPN-ID {self.vpn_id} is not found or accessible.{Style.RESET_ALL}\n')
+            try:
+                resp: Optional[str] = input(f'{Fore.LIGHTYELLOW_EX}Try to switch the VPN-Server it to VPN-ID "{self.vpn_id}"? (y/N): {Style.RESET_ALL}')
+            except KeyboardInterrupt:
+                return None
+            if resp is None or len(resp.strip()) == 0 or resp.strip().lower() != "y":
+                return None
+            elif not self.do_switch():
+                return None
+
+            self.accessible_vpn_servers = self.client.get_accessible_vpn_server()
+
         if self.vpn_id is not None:
             vpn_server = self.accessible_vpn_servers[self.vpn_id]
         else:
@@ -297,7 +310,6 @@ class VpnCommand(BaseCommand):
                                        text=True)
 
             for line in process.stdout:
-                print(line)
                 if "Peer Connection Initiated" in line:
                     self.logger.info(f'{Fore.GREEN}Establishing VPN connection...{Style.RESET_ALL}')
                 elif "net_addr_v4_add" in line or "net_addr_v6_add" in line:
