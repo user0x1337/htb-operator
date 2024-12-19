@@ -1,7 +1,8 @@
 # HTB-Operator - A CLI for accessing Hackthebox 
 <img src="https://github.com/user-attachments/assets/7ea918e1-f9d3-4de5-bca7-5bf396bb4f6e" alt="Bild" width="300"/>
 
-![GitHub release](https://img.shields.io/github/v/release/user0x1337/htb-operator)
+![GitHub Tags](https://img.shields.io/github/v/tag/user0x1337/htb-operator)
+![GitHub Releases](https://img.shields.io/github/v/release/user0x1337/htb-operator)
 ![GitHub Repo stars](https://img.shields.io/github/stars/user0x1337/htb-operator)
 
 <div>
