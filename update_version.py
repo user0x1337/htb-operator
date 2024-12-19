@@ -6,7 +6,7 @@ def update_pyproject_version(version):
     with open("pyproject.toml", "r") as f:
         config = toml.load(f)
 
-    config["tool"]["poetry"]["version"] = version
+    config["project"]["version"] = version
 
     with open("pyproject.toml", "w") as f:
         toml.dump(config, f)
