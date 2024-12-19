@@ -49,6 +49,8 @@ jobs:
 
       - name: Upload Release Assets
         run: |
+          echo "$(pwd)"
+          echo "$(ls)"
           files="$(ls ./dist)"
           for file in $files; do
             echo "Uploading $file"
