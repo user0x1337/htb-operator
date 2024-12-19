@@ -47,10 +47,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
 
+      - name: Build and Upload package
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          pip install build twine
+          python -m build
+   #       twine upload dist/*
+
       - name: Upload Release Assets
         run: |
-          echo "$(pwd)"
-          echo "$(ls)"
           files="$(ls ./dist)"
           for file in $files; do
             echo "Uploading $file"
@@ -63,12 +70,3 @@ jobs:
           done
         env:
           files: ${{ env.files }}
-
-   #   - name: Build and Upload package
-   #     env:
-   #       TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-   #       TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-   #     run: |
-   #       pip install build twine
-   #       python -m build
-   #       twine upload dist/*
