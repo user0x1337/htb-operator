@@ -1,62 +1,44 @@
-# This workflow will upload a Python Package to PyPI when a release is created
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python#publishing-to-package-registries
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-name: Upload Python Package
+name: Update Version and Upload Python Package
 
 on:
-  release:
-    types: [published]
-
-permissions:
-  contents: read
+  push:
+    tags:
+      - 'v*'
 
 jobs:
-  release-build:
+  update-version:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      # Check out das Repository
+      - name: Check out code
+        uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v5
+      # Python einrichten
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.12"
+          python-version: '3.x'
 
-      - name: Build release distributions
+      # Abhängigkeiten installieren
+      - name: Install dependencies
         run: |
-          # NOTE: put your own distribution build steps here.
-          python -m pip install build
+          pip install toml
+
+      # Versionsnummer in pyproject.toml und setup.py aktualisieren
+      - name: Update version in pyproject.toml and setup.py
+        run: |
+          TAG_NAME=${GITHUB_REF##*/}
+          VERSION=${TAG_NAME#v}
+          echo "Updating version to $VERSION"
+          python update_version.py $VERSION
+
+      # Erstelle das Paket und lade es hoch
+      - name: Build and Upload package
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          pip install build twine
           python -m build
-
-      - name: Upload distributions
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-dists
-          path: dist/
-
-  pypi-publish:
-    runs-on: ubuntu-latest
-    needs:
-      - release-build
-    permissions:
-      id-token: write
-
-    environment:
-      name: pypi      
-      url: https://pypi.org/project/YOURPROJECT/${{ github.event.release.name }}      
-
-    steps:
-      - name: Retrieve release distributions
-        uses: actions/download-artifact@v4
-        with:
-          name: release-dists
-          path: dist/
-
-      - name: Publish release distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: dist/
+          twine upload dist/*
