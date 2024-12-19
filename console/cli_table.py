@@ -41,30 +41,50 @@ def create_season_list_table(seasons: list) -> Table:
                       f'{format_bool(res["active"])}')
     return table
 
-def create_benchmark_table(vpn_benchmark_results: list) -> Table:
+def create_benchmark_table(vpn_benchmark_results: list) -> Table | Panel:
     """Create benchmark table"""
-    table = Table(title="Result", show_lines=True)
-    table.add_column(header="#", style="cyan", justify="left")
-    table.add_column(header="Latency [ms]", style="cyan", justify="left")
-    table.add_column(header="VPN-ID", style="cyan", justify="left")
-    table.add_column(header="Hostname", style="cyan", justify="left")
-    table.add_column(header="Product", style="cyan", justify="left")
-    table.add_column(header="Servername", style="cyan", justify="left")
-    table.add_column(header="Location", style="cyan", justify="left")
-    table.add_column(header="# Clients", style="cyan", justify="left")
-    table.add_column(header="Assigned?", style="cyan", justify="left")
+    table = Table(expand=True, show_lines=False, box=None)
+    table.add_column(header="#",justify="left")
+    table.add_column(header="Latency [ms]", justify="left")
+    table.add_column(header="VPN-ID", justify="center")
+    table.add_column(header="Hostname", justify="left")
+    table.add_column(header="Product", justify="left")
+    table.add_column(header="Servername", justify="left")
+    table.add_column(header="Location", justify="left")
+    table.add_column(header="# Clients", justify="center")
+    table.add_column(header="Assigned?", justify="center")
 
     for i, res in enumerate(vpn_benchmark_results):
+        latency = res['latency']
+        if res["latency"] < 50:
+            latency = f'[bold bright_green]{latency}ms[/bold bright_green]'
+        elif res["latency"] < 120:
+            latency = f'[bold bright_yellow]{latency}ms[/bold bright_yellow]'
+        else:
+            latency = f'[bold bright_red]{latency}ms[/bold bright_red]'
+
+        current_clients = res['current_clients']
+        if res["current_clients"] < 20:
+            current_clients = f'[bold bright_green]{current_clients}[/bold bright_green]'
+        elif res["current_clients"] < 50:
+            current_clients = f'[bold bright_yellow]{current_clients}[/bold bright_yellow]'
+        else:
+            current_clients = f'[bold bright_red]{current_clients}[/bold bright_red]'
+
         table.add_row(f'{i + 1}',
-                      f'{res["latency"]}',
+                      f'{latency}',
                       f'{res["id"]}',
                       f'{res["hostname"]}',
                       f'{res["product"]}',
                       f'{res["name"]}',
                       f'{res["location"]}',
-                      f'{res["current_clients"]}',
+                      f'{current_clients}',
                       f'{format_bool(res["is_assigned"])}')
-    return table
+    return Panel(table,
+                 title=f"[bold yellow]Benchmark Results[/bold yellow]",
+                 border_style="yellow",
+                 title_align="left",
+                 expand=False)
 
 def create_vpn_list_table(vpn_servers: list[dict]) -> Table | Panel:
     assert vpn_servers is not None

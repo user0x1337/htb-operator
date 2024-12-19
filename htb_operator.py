@@ -137,7 +137,12 @@ def setup_logger() -> Logger:
 
 def main():
     cli = HtbCLI()
-    cli.start()
+    try:
+        cli.start()
+    except KeyboardInterrupt:
+        pass
+    except Exception as e:
+        print(f'{Fore.RED}Error: {e}{Style.RESET_ALL}', file=sys.stderr)
 
 if __name__ == '__main__':
     main()

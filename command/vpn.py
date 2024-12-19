@@ -130,7 +130,7 @@ class VpnCommand(BaseCommand):
                 remote_line = next(x for x in data.split("\n") if x.startswith("remote"))
                 hostname = remote_line.split()[1]
                 vpn_server: dict = vpn_servers[vpn.id].to_dict()
-                vpn_server["latency"] = self.ping_hostname(hostname)
+                vpn_server["latency"] = self.ping_hostname(hostname, count=2)
                 vpn_server["hostname"] = hostname
                 vpn_server["is_assigned"] = bool(vpn.id in accessible_vpn_servers.keys())
                 result[vpn.id] = vpn_server
@@ -141,7 +141,10 @@ class VpnCommand(BaseCommand):
         for accessible_vpn_server_id in accessible_vpn_servers.keys():
             if accessible_vpn_server_id in vpn_servers.keys():
                 vpn = vpn_servers[accessible_vpn_server_id]
-                vpn.switch()
+                try:
+                    vpn.switch()
+                except KeyboardInterrupt:
+                    break
 
         self.logger.info(f'{Fore.GREEN}Benchmark done{Style.RESET_ALL}')
         self.console.print(create_benchmark_table(vpn_benchmark_results=[x for x in result.values()]))
