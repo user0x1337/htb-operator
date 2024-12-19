@@ -409,3 +409,38 @@ htb-operator badge list --username HTBBot --category Rank,Challenge
 ![image](https://github.com/user-attachments/assets/bd69b590-d161-49a0-8e12-40f445a66a77)
 
 
+# Pwnbox
+If you have a running pwnbox instance, you can get the status of the running pwnbox, establish a ssh connection without knowing the credentials, open the pwnbox desktop in your default browser or terminates a running pwnbox instance. Due to implementation restrictions in HTB, it is not possible to start a new pwnbox instance using htb-operator. 
+
+## status
+Read the status of the running pwnbox instance.
+```bash
+htb-operator pwnbox status
+```
+![image](https://github.com/user-attachments/assets/d4bceea5-ae14-4083-b5a1-c6bfe76ee2ac)
+
+## ssh
+**Does not work on Windows**.
+
+Establishs a SSH connection with the running pwnbox instance. sshpass must be installed on you system.
+```bash
+htb-operator pwnbox ssh
+```
+![image](https://github.com/user-attachments/assets/fc197020-c117-4d48-bf7d-4e502c5630a4)
+
+## open
+This command opens the Pwnbox Desktop in your default browser.
+```bash
+htb-operator pwnbox open
+```
+
+## terminate
+It terminates a running Pwnbox instance.
+```bash
+htb-operator pwnbox terminate
+```
+![image](https://github.com/user-attachments/assets/53f6f518-7152-409e-9ae1-096dc2494104)
+
+
+
+
