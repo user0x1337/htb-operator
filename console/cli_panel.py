@@ -47,7 +47,7 @@ def create_pwnbox_panel(pwnbox: dict):
 
     return Panel(renderable=Text.from_markup(text=status_text, justify="left"),
                  title=f"[bold yellow]Pwnbox Status[/bold yellow]",
-                 expand=True,
+                 expand=False,
                  border_style="yellow",
                  title_align="left")
 
