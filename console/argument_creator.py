@@ -205,7 +205,7 @@ def _create_proxy_command_parser(subparsers):
 def _create_init_command_parser(subparsers):
     from command import InitCommand
 
-    init_parser: ArgumentParser = subparsers.add_parser("init", help="Initialize the htb-cli")
+    init_parser: ArgumentParser = subparsers.add_parser("init", help="Initialize the htb-operator")
     init_parser.add_argument("-api", "--apikey", type=str, required=True, help="Specify the API-key.")
     init_parser.add_argument("--apiurl", type=str, default=None, help="(Optional) URL for accessing the HTB API")
     init_parser.set_defaults(func=InitCommand)
