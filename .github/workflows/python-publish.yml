@@ -39,9 +39,7 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }} 
           release_name: Release ${{ github.ref_name }}  
-          body: |
-            This release was automatically created by GitHub Actions.
-            - Version: ${{ github.ref_name }}
+          body_path: CHANGELOG.md
           draft: true
           prerelease: false
         env:
@@ -66,7 +64,7 @@ jobs:
               -H "Authorization: Bearer ${{ secrets.MY_GITHUB_TOKEN }}" \
               -H "Content-Type: $(file -b --mime-type ./dist/$file)" \
               --data-binary @"./dist/$file" \
-              "${{ steps.create_release.outputs.upload_url }}?name=$file"
+              "${{ steps.create_release.outputs.upload_url }}=$file"
           done
         env:
           files: ${{ env.files }}
