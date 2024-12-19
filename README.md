@@ -334,6 +334,51 @@ htb-operator prolabs info --name APTLabs
 ```
 ![image](https://github.com/user-attachments/assets/6b751c2e-6572-4020-aaf6-4ca64943462b)
 
+# VPN
+**Does not work on Windows**.
+
+You can start and stop a HTB-VPN connection. You can also view the status of the HTB-VPN connection. Furthermore, you can download OpenVPN files or execute a benchmark against all or a subset of VPN-Servers.
+
+## list
+List all VPN-Servers. You can filter e.g. for locations or for special VPN servers (e.g. labs, prolabs, and so on). You can combine the flags. Use the help command for more information.
+```bash
+htb-operator vpn list --location US
+```
+![image](https://github.com/user-attachments/assets/6344f4cb-c1d1-446d-990f-62979e8cf49d)
+
+## download
+You can download a OpenVPN file for the given VPN-Server ID. You can obtain the VPN-Server ID with the `list` subcommand mentioned above. Use the help command for more information.
+```bash
+htb-operator vpn download --id <ID> --path /tmp/test.ovpn
+```
+## start
+Start a VPN connection with the given VPN server. If the area or "VPN Access" (as per HTB) is not assigned, htb-operator will attempt to switch to the appropriate "VPN Access" after requesting the user's permission. This action needs root/admin permissions.
+```bash
+htb-operator vpn start --id 35
+```
+![image](https://github.com/user-attachments/assets/a27beae8-e75a-4fb4-8361-1373cae2ebe2)
+
+## stop
+Stops all running HTB-VPN connections. This action needs root/admin permissions.
+```bash
+htb-operator vpn stop
+```
+![image](https://github.com/user-attachments/assets/5be9242e-eab3-46b1-8f0e-80f0c73c5583)
+
+## switch
+Switch the accessible VPN-Server(s). The target VPN-Server has to be specified using the `--id` flag . 
+```bash
+htb-operator vpn switch --id 28
+```
+![image](https://github.com/user-attachments/assets/d34fbafd-9624-48f1-9ac2-df7353275146)
+
+## benchmark
+Run a benchmark against all VPN-Servers or a subset of the VPN-Servers. Use the help command for more information to refine your test set. This can take a lot time (depending on your internet connection and the size of your test set).
+```bash
+htb-operator vpn benchmark --only-accessible
+```
+![image](https://github.com/user-attachments/assets/70f6fb70-24c7-40fc-a0a4-20d9073fddec)
+
 
 # Seasons
 You can display the results of the current or past seasons using the subcommand `list`. For more details, you can use the subcommand `info`.
