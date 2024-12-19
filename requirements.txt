@@ -14,3 +14,4 @@ beautifulsoup4
 tqdm
 paramiko
 packaging
+toml

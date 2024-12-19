@@ -21,7 +21,8 @@ setup(
         "beautifulsoup4",
         "tqdm",
         "paramiko",
-        "packaging"],
+        "packaging",
+        "toml"],
     entry_points={
         "console_scripts": [
             "htb-operator=htb_operator:main",
