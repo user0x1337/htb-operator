@@ -40,7 +40,7 @@ jobs:
           tag_name: ${{ github.ref_name }} 
           release_name: Release ${{ github.ref_name }}  
           body_path: CHANGELOG.md
-          draft: true
+          draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
@@ -52,7 +52,7 @@ jobs:
         run: |
           pip install build twine
           python -m build
-   #       twine upload dist/*
+          twine upload dist/*
 
       - name: Upload Release Assets
         run: |
