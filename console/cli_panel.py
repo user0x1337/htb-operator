@@ -507,9 +507,9 @@ def create_season_panel(season_dict: dict):
     custom_dict = {
         "ID": season_dict["season_id"],
         "Name": season_dict["name"],
-        "Start date": season_dict["start_date"],
-        "Ende date": season_dict["end_date"],
-        "Rank Tier": season_dict["tier"],
+        "Start date": f'{season_dict["start_date"]} UTC',
+        "Ende date": f'{season_dict["end_date"]} UTC',
+        "Rank Tier": f'{season_dict["tier"]}',
         "Username": season_dict["user_name"],
         "Rank": season_dict["current_rank"],
         "Total Players": season_dict["total_ranks"],

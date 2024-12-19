@@ -63,7 +63,7 @@ class SeasonCommand(BaseCommand):
             season_details[season.id] = self.client.get_season_details(user_id=user.id, season_id=season.id)
         season_details_ids = sorted(season_details.keys(), key=lambda s: s, reverse=False)
 
-        table = Table.grid(expand=True)
+        table = Table.grid(expand=len(season_details_ids) >= 4)
         table.add_column()
         table.add_column()
 
@@ -87,8 +87,8 @@ class SeasonCommand(BaseCommand):
             else:
                 season_dict = season_details[season_id].to_dict()
 
-            season_dict["start_date"] = season_meta.start_date.strftime("%Y-%m-%d")
-            season_dict["end_date"] = season_meta.end_date.strftime("%Y-%m-%d") if season_meta.end_date else "-"
+            season_dict["start_date"] = season_meta.start_date.strftime("%Y-%m-%d %H:%M")
+            season_dict["end_date"] = season_meta.end_date.strftime("%Y-%m-%d %H:%M") if season_meta.end_date else "-"
             panels.append(create_season_panel(season_dict=season_dict))
             if len(panels) == 4:
                 table.add_row(*panels)
