@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "htb-operator"
+version = "0.0.1"  # Will be automatically set by GitHub workflow
+description = "HTB-Operator - A CLI for accessing Hackthebox"
+readme = "README.md"
+authors = [
+  { name="user0x1337", email="user0x1337@protonmail.com" }
+]
+license = { text="GPLv3.0" }
+requires-python = ">=3.12"
+dependencies = [
+    "requests",
+    "colorama",
+    "pyjwt",
+    "tabulate",
+    "psutil",
+    "pexpect",
+    "pyreadline3",
+    "python-dateutil",
+    "rich",
+    "pillow",
+    "python-hosts",
+    "psutil",
+    "beautifulsoup4",
+    "tqdm",
+    "paramiko",
+    "packaging",
+    "toml"
+]
+[project.scripts]
+htb-operator = "htb_operator:main"

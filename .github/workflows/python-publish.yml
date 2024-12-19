@@ -1,0 +1,70 @@
+name: Update Version, Upload Python Package and Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out repository
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      
+      - name: Install dependencies
+        run: |
+          pip install toml
+
+      
+      - name: Update version in pyproject.toml and setup.py
+        run: |
+          TAG_NAME=${GITHUB_REF##*/}
+          VERSION=${TAG_NAME#v}
+          echo "Updating version to $VERSION"
+          python update_version.py $VERSION
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref_name }} 
+          release_name: Release ${{ github.ref_name }}  
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+
+      - name: Build and Upload package
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          pip install build twine
+          python -m build
+          twine upload dist/*
+
+      - name: Upload Release Assets
+        run: |
+          files="$(ls ./dist)"
+          for file in $files; do
+            echo "Uploading $file"
+            curl \
+              -X POST \
+              -H "Authorization: Bearer ${{ secrets.MY_GITHUB_TOKEN }}" \
+              -H "Content-Type: $(file -b --mime-type ./dist/$file)" \
+              --data-binary @"./dist/$file" \
+              "${{ steps.create_release.outputs.upload_url }}=$file"
+          done
+        env:
+          files: ${{ env.files }}
