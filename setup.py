@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="htb-operator",
-    version="1.0.12.4",
+    version="0.0.1",  # Will be automatically set by GitHub workflow
     packages=find_packages(),
     py_modules=["htb_operator"],
     install_requires=[
