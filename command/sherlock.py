@@ -22,6 +22,12 @@ class SherlockCommand(BaseCommand):
         self.sherlock_only_retired = args.retired if hasattr(args, "retired") else None
         self.filter_category = args.filter_category if hasattr(args, "filter_category") else None
 
+    def check(self) -> bool:
+        if not self.sherlock_command:
+            self.logger.error(f"{Fore.RED}No options. Use --help for more information.{Style.RESET_ALL}")
+            return False
+        return True
+
     def list(self):
         cats: List[SherlockCategory] = []
         if self.filter_category is not None and len(self.filter_category) > 0:
@@ -43,7 +49,8 @@ class SherlockCommand(BaseCommand):
                                  reverse=False)))
 
     def execute(self):
-
+        if not self.check():
+            return None
         if self.sherlock_command == "list":
             self.list()
         else:
