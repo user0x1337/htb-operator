@@ -273,7 +273,7 @@ class VpnCommand(BaseCommand):
         if self.vpn_id is not None and self.vpn_id not in self.accessible_vpn_servers.keys():
             self.logger.warning(f'{Fore.LIGHTYELLOW_EX}VPN-Server with VPN-ID {self.vpn_id} is not found or accessible.{Style.RESET_ALL}\n')
             try:
-                resp: Optional[str] = input(f'{Fore.LIGHTYELLOW_EX}Try to switch the VPN-Server it to VPN-ID "{self.vpn_id}"? (y/N): {Style.RESET_ALL}')
+                resp: Optional[str] = input(f'{Fore.LIGHTYELLOW_EX}Try to switch the accessible VPN-Server? (y/N): {Style.RESET_ALL}')
             except KeyboardInterrupt:
                 return None
             if resp is None or len(resp.strip()) == 0 or resp.strip().lower() != "y":
