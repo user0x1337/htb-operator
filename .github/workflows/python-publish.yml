@@ -1,4 +1,4 @@
-name: Update Version and Upload Python Package
+name: Update Version, Upload Python Package and Create Release
 
 on:
   push:
@@ -10,22 +10,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Check out das Repository
+      # Check out repository
       - name: Check out code
         uses: actions/checkout@v3
 
-      # Python einrichten
+      
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
-      # Abhängigkeiten installieren
+      
       - name: Install dependencies
         run: |
           pip install toml
 
-      # Versionsnummer in pyproject.toml und setup.py aktualisieren
+      
       - name: Update version in pyproject.toml and setup.py
         run: |
           TAG_NAME=${GITHUB_REF##*/}
@@ -33,7 +33,20 @@ jobs:
           echo "Updating version to $VERSION"
           python update_version.py $VERSION
 
-      # Erstelle das Paket und lade es hoch
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref_name }} 
+          release_name: Release ${{ github.ref_name }}  
+          body: |
+            This release was automatically created by GitHub Actions.
+            - Version: ${{ github.ref_name }}
+          draft: true
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
       - name: Build and Upload package
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
