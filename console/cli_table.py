@@ -21,25 +21,38 @@ connection_down: float  # in bytes
 connection_up: float  # in bytes
 
 
-def create_season_list_table(seasons: list) -> Table:
-    table = Table(title="Seasons", show_lines=True)
-    table.add_column(header="#", style="cyan", justify="left")
-    table.add_column(header="ID", style="cyan", justify="left")
-    table.add_column(header="Name", style="cyan", justify="left")
-    table.add_column(header="Start date", style="cyan", justify="left")
-    table.add_column(header="End date", style="cyan", justify="left")
-    table.add_column(header="State", style="cyan", justify="left")
-    table.add_column(header="Active?", style="cyan", justify="left")
+def create_season_list_table(seasons: list) -> Table | Panel:
+    table = Table(expand=True, show_lines=False, box=None)
+    table.add_column(header="#", justify="left")
+    table.add_column(header="ID", justify="left")
+    table.add_column(header="Name", justify="left")
+    table.add_column(header="Start date/time", justify="left")
+    table.add_column(header="End date/time", justify="left")
+    table.add_column(header="State", justify="left")
+    table.add_column(header="Active?", justify="left")
 
     for i, res in enumerate(seasons):
-        table.add_row(f'{i + 1}',
-                      f'{res["id"]}',
-                      f'{res["name"]}',
-                      f'{res["start_date"].strftime("%Y-%m-%d")}',
-                      f'{"-" if res["end_date"] is None else res["end_date"].strftime("%Y-%m-%d")}',
-                      f'{res["state"]}',
-                      f'{format_bool(res["active"])}')
-    return table
+        color_begin = ""
+        color_end = ""
+        if res["state"] == "upcoming":
+            color_begin = "[bold bright_magenta]"
+            color_end = "[/bold bright_magenta]"
+        elif res["state"] != "ended":
+            color_begin = "[bold bright_green]"
+            color_end = "[/bold bright_green]]"
+
+        table.add_row(f'{color_begin}{i + 1}{color_end}',
+                      f'{color_begin}{res["id"]}{color_end}',
+                      f'{color_begin}{res["name"]}{color_end}',
+                      f'{color_begin}{res["start_date"].strftime("%Y-%m-%d %H:%M")} UTC{color_end}',
+                      f'{color_begin}{"-" if res["end_date"] is None else res["end_date"].strftime("%Y-%m-%d %H:%M")} UTC{color_end}',
+                      f'{color_begin}{res["state"]}{color_end}',
+                      f'{color_begin}{format_bool(res["active"])}{color_end}')
+    return Panel(table,
+                 title=f"[bold yellow]Seasons Overview[/bold yellow]",
+                 border_style="yellow",
+                 title_align="left",
+                 expand=False)
 
 def create_benchmark_table(vpn_benchmark_results: list) -> Table | Panel:
     """Create benchmark table"""

@@ -1,4 +1,5 @@
 import datetime
+from datetime import timezone
 from typing import Optional
 import dateutil.parser
 
@@ -20,8 +21,8 @@ class SeasonList(client.BaseHtbApiObject):
         self.id = data['id']
         self.name = data['name']
         self.subtitle = data.get('subtitle')
-        self.start_date = dateutil.parser.parse(data['start_date'])
-        self.end_date = None if "end_date" not in data else dateutil.parser.parse(data['end_date'])
+        self.start_date = dateutil.parser.parse(data['start_date']).replace(tzinfo=timezone.utc)
+        self.end_date = None if "end_date" not in data else dateutil.parser.parse(data['end_date']).replace(tzinfo=timezone.utc)
         self.state = data['state']
         self.is_visible = data['is_visible']
         self.active = data['active']
