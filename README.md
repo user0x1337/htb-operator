@@ -335,5 +335,32 @@ htb-operator prolabs info --name APTLabs
 ![image](https://github.com/user-attachments/assets/6b751c2e-6572-4020-aaf6-4ca64943462b)
 
 
+# Seasons
+You can display the results of the current or past seasons using the subcommand `list`. For more details, you can use the subcommand `info`.
+```bash
+htb-operator seasons list
+```
+![image](https://github.com/user-attachments/assets/4e1914de-edb6-4566-996e-0e2ec32a7b0f)
+
+## info
+The `info` subcommand provides a flag to display only a subset of the seasons using the flag `--ids`. Additionally, it allows viewing results from another user using the flag `--username`. You can combine the flags `--ids` and `--username`.
+```bash
+htb-operator seasons info --username HTBBot
+```
+![image](https://github.com/user-attachments/assets/462f93de-122a-450d-85a0-e8d7d16d7aba)
+
+
+# badge
+You can display all badges in HTB using the command `badge` with the subcommand `list`. 
+```bash
+htb-operator badge list
+```
+![image](https://github.com/user-attachments/assets/8394d6f5-9613-4c2f-8395-8f1d23052cc0)
+
+You can also filter for "open" badges (i.e. which have not been earned yet) using the flag `--open`. You can also use the flag `--category` for filtering for specific categories. Additionally, you can specify another user if you want to display his earning status using the flag `--username`. You can combine the flags.
+```bash
+htb-operator badge list --username HTBBot --category Rank,Challenge
+```
+![image](https://github.com/user-attachments/assets/bd69b590-d161-49a0-8e12-40f445a66a77)
 
 
