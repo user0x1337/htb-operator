@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from academy_api import academy_client
 
@@ -38,7 +38,7 @@ class Badge(academy_client.BaseAcademyApiObject):
     logo: str
     sharing_url: str
     awarded: bool
-    awarded_at: str
+    awarded_at: Optional[str]
     is_recently_awarded: bool
     requisites: dict[str, list]
     badge_category: BadgeCategory
@@ -53,8 +53,8 @@ class Badge(academy_client.BaseAcademyApiObject):
         self.logo = data['logo']
         self.sharing_url = data['sharing_url']
         self.awarded = data['awarded']
-        self.awarded_at = data['awarded_at']
-        self.is_recently_awarded = data['is_recently_awarded']
+        self.awarded_at = data.get('awarded_at')
+        self.is_recently_awarded = data.get('is_recently_awarded', False)
         self.requisites = data['requisites']
 
     def __repr__(self):
