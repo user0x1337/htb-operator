@@ -22,7 +22,8 @@ setup(
         "tqdm",
         "paramiko",
         "packaging",
-        "toml"],
+        "toml",
+        "urllib3"],
     entry_points={
         "console_scripts": [
             "htb-operator=htb_operator:main",

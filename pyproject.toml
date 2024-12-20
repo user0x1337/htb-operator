@@ -29,7 +29,8 @@ dependencies = [
     "tqdm",
     "paramiko",
     "packaging",
-    "toml"
+    "toml",
+    "urllib3"
 ]
 [project.scripts]
 htb-operator = "htb_operator:main"
