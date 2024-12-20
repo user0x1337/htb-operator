@@ -11,6 +11,7 @@ from logging import Logger
 from colorama import Fore, Style
 from rich.console import Console
 
+from academy_api import AcademyClient
 from htbapi import HTBClient
 
 IS_WINDOWS: bool = sys.platform.startswith("win")
@@ -27,6 +28,7 @@ class BaseCommand(object):
     stop_animation: threading.Event
     logger: Logger
     client: HTBClient
+    academy_client: AcademyClient
     console: Console
 
     # noinspection PyUnresolvedReferences
@@ -42,6 +44,7 @@ class BaseCommand(object):
         self.stop_animation = threading.Event()
         self.logger = self.htb_cli.logger
         self.client = self.htb_cli.client if hasattr(self.htb_cli, "client") else None
+        self.academy_client = self.htb_cli.academy_client if hasattr(self.htb_cli, "academy_client") else None
         self.console = self.htb_cli.console
 
 

@@ -8,6 +8,8 @@ from colorama import Fore, Style
 def create_arg_parser(htb_cli: "HtbCLI") -> ArgumentParser:
     parser: ArgumentParser = argparse.ArgumentParser(prog=f"{htb_cli.package_name}", description=f"{Fore.MAGENTA}CLI tool for HTB operations.{Style.RESET_ALL}")
     subparsers = parser.add_subparsers(title="commands", description="Available commands", dest="command")
+    # academy command
+    _create_academy_command_parser(subparsers)
 
     # info command
     _create_info_command_parser(subparsers=subparsers)
@@ -357,6 +359,15 @@ def _create_certificate_command_parser(subparsers):
                                              help="Download certificate with the given ID")
     certificate_download_parser.add_argument("-f", "--filename", metavar="FILENAME", default=None, type=str,
                                              help="Filename (without extension) with or without a path specification. Default: Current working directory and certification ID as filename")
+
+def _create_academy_command_parser(subparsers):
+    from command.academy import InitCommand as AcademyInitCommand
+
+    academy_parser: ArgumentParser = subparsers.add_parser("academy", help="Commands for accessing HTB Academy")
+    academy_sub_parser = academy_parser.add_subparsers(title="commands", description="Available commands", dest="academy")
+
+    academy_init_parser: ArgumentParser = academy_sub_parser.add_parser("init", help="Initialize the access for HTB Academy")
+    academy_init_parser.set_defaults(func=AcademyInitCommand)
 
 
 def _create_info_command_parser(subparsers):

@@ -15,6 +15,7 @@ from typing import Optional
 from colorama import Fore, Style
 from rich.console import Console
 
+from academy_api import AcademyClient, AcademyHttpRequest
 from command.base import BaseCommand, InsufficientPermissions
 from console import *
 from htbapi import HTBClient, RequestException, HtbHtbHttpRequest, BaseHtbHttpRequest
@@ -24,6 +25,9 @@ IS_ROOT_OR_ADMIN: bool =  ((not IS_WINDOWS and os.getuid() == 0) or
                            (IS_WINDOWS and ctypes.windll.shell32.IsUserAnAdmin()))
 
 class HtbCLI:
+    client: HTBClient
+    academy_client: AcademyClient
+
     """Main class for the HTB-Command line interface"""
     def __init__(self, htb_http_request: Optional[BaseHtbHttpRequest] = None):
         self.package_name = 'htb-operator'
@@ -46,6 +50,14 @@ class HtbCLI:
                                                      user_agent=self._user_agent,
                                                      proxy=self.proxy)
             self.client = HTBClient(htb_http_request=htb_http_request)
+
+        academy_http_request = AcademyHttpRequest(user_agent=self._user_agent,
+                                                  api_base="https://academy.hackthebox.com/api/",
+                                                  api_version="v2",
+                                                  download_cooldown=30,
+                                                  proxy=self.proxy,
+                                                  app_session_cookie=self.config["ACADEMY"]["session_token"] if "ACADEMY" in self.config else None)
+        self.academy_client = AcademyClient(academy_http_request=academy_http_request)
 
     def get_base_store_dir(self) -> str:
         if sys.platform.startswith("win"):
