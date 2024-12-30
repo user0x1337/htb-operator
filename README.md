@@ -334,6 +334,12 @@ htb-operator prolabs info --name APTLabs
 ```
 ![image](https://github.com/user-attachments/assets/6b751c2e-6572-4020-aaf6-4ca64943462b)
 
+## submit
+You can use the `submit` subcommand for submitting flags. For example:
+```
+htb-operator prolabs submit --name "PROLAB" --flag 'HTB{FAKE_FLAG}'
+```
+
 # VPN
 **Does not work on Windows**.
 
