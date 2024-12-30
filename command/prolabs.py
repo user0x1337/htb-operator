@@ -13,22 +13,38 @@ from htbapi import ProLabInfo
 
 class ProlabsCommand(BaseCommand):
     prolabs_command: Optional[str]
+    flag: Optional[str]
 
     # noinspection PyUnresolvedReferences
     def __init__(self, htb_cli: "HtbCLI", args: argparse.Namespace):
         super().__init__(htb_cli, args)
         self.prolabs_command: Optional[str] = args.prolabs if hasattr(args, "prolabs") else None
+        self.flag = args.flag if hasattr(args, "flag") else None
 
     def checks(self):
         """Do some basic checks"""
-        if self.prolabs_command == "info":
+        if self.prolabs_command in ["info", "submit"]:
             if self.args.id is None and self.args.name is None:
                 self.logger.error(
                     f"{Fore.RED}ID or Name must be specified. Use --help for more information.{Style.RESET_ALL}")
                 return False
 
+        if self.prolabs_command == "submit" and self.flag is None:
+            self.logger.error(f"{Fore.RED}A flag must be specified.{Style.RESET_ALL}")
+            return False
+
         return True
 
+    def check_id_name(self, prolab_info: Optional[ProLabInfo]):
+        """Check the  id and name field"""
+        if prolab_info is None:
+            if self.args.id is not None:
+                self.logger.error(f'{Fore.RED}No prolab found with ID "{self.args.id}"{Style.RESET_ALL}')
+            else:
+                self.logger.error(f'{Fore.RED}No prolab found with name "{self.args.name}"{Style.RESET_ALL}')
+            return False
+
+        return True
 
     def list(self):
         """Display the prolabs"""
@@ -86,15 +102,25 @@ class ProlabsCommand(BaseCommand):
 
         # Need to get the prolab id first
         prolab_info: Optional[ProLabInfo] = self.client.get_prolab(prolab_id=self.args.id, prolab_name=self.args.name)
-        if prolab_info is None:
-            if self.args.id is not None:
-                self.logger.error(f'{Fore.RED}No prolab found with ID "{self.args.id}"{Style.RESET_ALL}')
-            else:
-                self.logger.error(f'{Fore.RED}No prolab found with name "{self.args.name}"{Style.RESET_ALL}')
+        if not self.check_id_name(prolab_info):
             return None
 
         self.console.print(create_prolab_detail_info_panel(prolab_dict=prolab_info.to_dict()))
 
+    def submit(self):
+        """Submit the prolab flag"""
+        if not self.checks():
+            return None
+
+        prolab_info: Optional[ProLabInfo] = self.client.get_prolab(prolab_id=self.args.id, prolab_name=self.args.name)
+        if not self.check_id_name(prolab_info):
+            return None
+
+        res, msg = prolab_info.submit_flag(self.flag)
+        if res:
+            self.logger.info(f"{Fore.GREEN}{msg}{Style.RESET_ALL}")
+        else:
+            self.logger.error(f"{Fore.RED}{msg}{Style.RESET_ALL}")
 
 
     def execute(self):
@@ -103,5 +129,7 @@ class ProlabsCommand(BaseCommand):
             self.list()
         elif self.prolabs_command == "info":
             self.print_info()
+        elif self.prolabs_command == "submit":
+            self.submit()
         else:
             self.logger.error(f'{Fore.RED}Unknown command: {self.prolabs_command}{Style.RESET_ALL}')
