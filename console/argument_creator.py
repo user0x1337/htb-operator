@@ -132,6 +132,13 @@ def _create_prolabs_command_parser(subparsers):
     prolab_info_parser.add_argument("--id", type=int, metavar="Prolab ID", help="ID of the Prolab. Either --id or --name must be specified")
     prolab_info_parser.add_argument("--name", type=str, metavar="Prolab Name", help="Name of the Prolab. Either --id or --name must be specified")
 
+    prolabs_submit_flag: ArgumentParser = prolabs_sub_parser.add_parser(name="submit", help="Submit the flag")
+    prolabs_submit_flag.add_argument("--id", type=int, metavar="Prolab ID",
+                                     help="ID of the Prolab. Either --id or --name must be specified")
+    prolabs_submit_flag.add_argument("--name", type=str, metavar="Prolab Name",
+                                     help="Name of the Prolab. Either --id or --name must be specified")
+    prolabs_submit_flag.add_argument("-fl", "--flag", type=str, metavar="Flag", help="The flag")
+
 def _create_api_key_command_parser(subparsers):
     from command import ApiKey
 
