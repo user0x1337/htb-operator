@@ -1,9 +1,11 @@
 # Changelog
 
-This is the first stable version of the **htb-operator**. It supports HTB API version 4.
+Added a new feature. Submitting of prolab flags is now possible.For that, a new subcommand was added called
+"submit". For example:
+`htb-operator prolabs submit --name "PROLAB" -fl 'HTB{FAKE_FLAG}'`
 
 ### Added
-- Stable Version
+- Submitting prolab flags. 
 
 ### Changed
 - `-`
