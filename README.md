@@ -428,7 +428,7 @@ htb-operator pwnbox status
 ## ssh
 **Does not work on Windows**.
 
-Establishs a SSH connection with the running pwnbox instance. sshpass must be installed on you system.
+Establishs a SSH connection with the running pwnbox instance. **sshpass** must be installed on your system.
 ```bash
 htb-operator pwnbox ssh
 ```
