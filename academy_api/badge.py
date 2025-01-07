@@ -52,6 +52,7 @@ class Badge(academy_client.BaseAcademyApiObject):
         self.order = data['order']
         self.logo = data['logo']
         self.sharing_url = data['sharing_url']
+        self.description = data['description']
         self.awarded = data['awarded']
         self.awarded_at = data.get('awarded_at')
         self.is_recently_awarded = data.get('is_recently_awarded', False)

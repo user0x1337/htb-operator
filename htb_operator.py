@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import ast
 import configparser
 import ctypes
 import logging
@@ -56,7 +57,7 @@ class HtbCLI:
                                                   api_version="v2",
                                                   download_cooldown=30,
                                                   proxy=self.proxy,
-                                                  app_session_cookie=self.config["ACADEMY"]["session_token"] if "ACADEMY" in self.config else None)
+                                                  app_session_cookie=ast.literal_eval(self.config["HTB_ACADEMY"]["cookies"]) if "HTB_ACADEMY" in self.config and "cookies" in self.config["HTB_ACADEMY"] else None)
         self.academy_client = AcademyClient(academy_http_request=academy_http_request)
 
     def get_base_store_dir(self) -> str:

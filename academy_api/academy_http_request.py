@@ -3,6 +3,7 @@ from json import JSONDecodeError
 from typing import Optional, Union
 
 import requests
+from requests import Session
 from urllib3.exceptions import InsecureRequestWarning
 
 from htbapi import RequestException
@@ -10,25 +11,24 @@ from htbapi import RequestException
 class BaseAcademyHttpRequest:
     """Base class for HTTP requests."""
     _api_version: str
-    _app_session_cookie: str
+    _app_session_cookie: dict
     _api_base: str
-    _user_agent: str
+    user_agent: str
     _download_cooldown: int
 
     def __init__(self,
-                 app_session_cookie: str,
+                 app_session_cookie: dict,
                  api_base: str,
                  user_agent: str,
                  download_cooldown: int,
                  api_version: str):
-        assert app_session_cookie is not None
         assert api_base is not None
         assert user_agent is not None
 
         self._app_session_cookie = app_session_cookie
         self._api_base = api_base
         self._api_version = api_version
-        self._user_agent = user_agent
+        self.user_agent = user_agent
         self._download_cooldown = download_cooldown
 
     def set_proxies(self, proxies: Optional[dict]) -> None:
@@ -52,7 +52,7 @@ class AcademyHttpRequest(BaseAcademyHttpRequest):
     _http_cookies: dict
 
     def __init__(self,
-                 app_session_cookie: str,
+                 app_session_cookie: dict,
                  api_base: str,
                  user_agent: str,
                  download_cooldown: int = 30,
@@ -73,12 +73,18 @@ class AcademyHttpRequest(BaseAcademyHttpRequest):
                               "https": proxy["https"] if "https" in proxy and len(proxy["https"]) > 0 else None})
             self.set_verify_ssl(proxy["verify_ssl"].strip().lower() == "true" if "verify_ssl" in proxy else True)
 
-        self._http_headers = {"User-Agent": self._user_agent,
+        self._http_headers = {"User-Agent": self.user_agent,
                               "Accept": "application/json",
                               "Referer": "https://academy.hackthebox.com/"}
-        self._http_cookies = {"htb_academy_session": app_session_cookie}
+        self._http_cookies = app_session_cookie
 
 
+    def create_session(self):
+        sess: Session = requests.session()
+        sess.proxies =  self._proxies
+        sess.headers = {"User-Agent": self.user_agent}
+        sess.verify = self._verify_ssl
+        return sess
 
     def set_proxies(self, proxies: Optional[dict]) -> None:
         """Set proxies."""

@@ -361,14 +361,20 @@ def _create_certificate_command_parser(subparsers):
                                              help="Filename (without extension) with or without a path specification. Default: Current working directory and certification ID as filename")
 
 def _create_academy_command_parser(subparsers):
-    from command.academy import InitCommand as AcademyInitCommand
-
     academy_parser: ArgumentParser = subparsers.add_parser("academy", help="Commands for accessing HTB Academy")
     academy_sub_parser = academy_parser.add_subparsers(title="commands", description="Available commands", dest="academy")
 
+    from command.academy import InitCommand as AcademyInitCommand
     academy_init_parser: ArgumentParser = academy_sub_parser.add_parser("init", help="Initialize the access for HTB Academy")
     academy_init_parser.set_defaults(func=AcademyInitCommand)
 
+
+    from command.academy import BadgeCommand as AcademyBadgeCommand
+    academy_badge_parser: ArgumentParser = academy_sub_parser.add_parser("badge", help="Commands for  HTB Academy badges")
+    academy_badge_parser.set_defaults(func=AcademyBadgeCommand)
+
+    badge_sub_parser = academy_badge_parser.add_subparsers(title="commands", description="Available commands", dest="badge")
+    badge_list_parser = badge_sub_parser.add_parser(name="list", help="List all badges")
 
 def _create_info_command_parser(subparsers):
     from command import InfoCommand

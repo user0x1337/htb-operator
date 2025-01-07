@@ -167,7 +167,7 @@ def create_table_active_vpn_connections(vpn_connections: List[dict]):
     return table
 
 
-def create_table_badge_list(badge_categories: List[dict]) -> Table | Panel | Group:
+def create_table_badge_list(badge_categories: List[dict], academy:bool=False) -> Table | Panel | Group:
     """Create a table with available and obtained badges"""
     panels = []
 
@@ -175,22 +175,29 @@ def create_table_badge_list(badge_categories: List[dict]) -> Table | Panel | Gro
         if len(badge_category["badges"]) == 0:
             continue
 
-        category_name = badge_category["name"]
-        table: Table = _create_badge_list_table_header()
+        category_name = badge_category["name"] if "name" in badge_category else badge_category["title"]
+        table: Table = _create_badge_list_table_header(academy=academy)
 
         counter = 0
         for badge in badge_category["badges"]:
             counter += 1
-
-            table.add_row(f'{counter}',
-                          f'{(badge["id"])}',
-                          f'{badge["name"]}',
-                          f'{badge["description"]}',
-                          f'{badge["users_count"]}',
-                          f'{badge["rarity"]}',
-                          f'{format_bool(badge["badge_obtained"], color_true="green", color_false="red")}',
-                          f'{"" if badge["badge_obtained_datetime"] is None else badge["badge_obtained_datetime"].strftime('%Y-%m-%d')}',
-                          )
+            if academy:
+                table.add_row(f'{counter}',
+                              f'{(badge["id"])}',
+                              f'{badge["name"] if "name" in badge else badge["title"]}',
+                              f'{badge["description"]}',
+                              f'{format_bool(badge["awarded"], color_true="green", color_false="red")}',
+                              f'{format_bool(badge["awarded_at"])}')
+            else:
+                table.add_row(f'{counter}',
+                              f'{(badge["id"])}',
+                              f'{badge["name"] if "name" in badge else badge["title"]}',
+                              f'{badge["description"]}',
+                              f'{badge["users_count"]}',
+                              f'{badge["rarity"]}',
+                              f'{format_bool(badge["badge_obtained"], color_true="green", color_false="red")}',
+                              f'{"" if badge["badge_obtained_datetime"] is None else badge["badge_obtained_datetime"].strftime('%Y-%m-%d')}',
+                              )
         panels.append(Panel(table,
                             title=f"[bold yellow]{category_name}[/bold yellow]",
                             border_style="yellow",
@@ -255,17 +262,22 @@ def _create_challenge_list_table_rows(challenge_info: List[dict], table: Table, 
     return found
 
 
-def _create_badge_list_table_header() -> Table:
+def _create_badge_list_table_header(academy:bool = False) -> Table:
     table = Table(expand=True, show_lines=False, box=None)
 
     table.add_column(header="#", width=1)
     table.add_column(header="ID", width=1)
-    table.add_column(header="Name", width=10)
-    table.add_column(header="Description", width=20)
-    table.add_column(header="# Users", justify="center", width=1)
-    table.add_column(header="Rarity [%]",  justify="center", width=3)
-    table.add_column(header="Obtained?", justify="center", width=3)
-    table.add_column(header="Earned date", justify="center", width=10)
+    table.add_column(header="Name", width=20)
+    table.add_column(header="Description", width=30)
+    if academy:
+        table.add_column(header="Obtained?", justify="center", width=3)
+        table.add_column(header="Awarded at", justify="center", width=10)
+    else:
+        table.add_column(header="# Users", justify="center", width=1)
+        table.add_column(header="Rarity [%]", justify="center", width=3)
+        table.add_column(header="Obtained?", justify="center", width=3)
+        table.add_column(header="Earned date", justify="center", width=10)
+
 
     return table
 
