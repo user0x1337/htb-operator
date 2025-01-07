@@ -56,6 +56,8 @@ You need an API-token from HTB. For that:
 
 5. Call `htb-operator init -api YOUR_API_TOKEN`
 
+The API token (and some other settings) will be locally stored on your system in `$HOME/.config/htb-operator/config.ini` (Linux) / `%APPDATA%\htb-operator\config.ini` (Windows).
+
 # Commands
 The tool is command based. You can call `-h` or `--help` for displaying the help information in each stage. The "top level" commands are displayed if you call the programm without any arguments:
 
