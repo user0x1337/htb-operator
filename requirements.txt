@@ -16,3 +16,4 @@ paramiko
 packaging
 toml
 urllib3
+cloudscraper
