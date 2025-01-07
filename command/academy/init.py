@@ -25,7 +25,8 @@ class InitCommand(BaseCommand):
 
         return sess
 
-    def execute(self) -> Optional[dict]:
+    def execute(self) -> None:
+        config = self.htb_cli.config
         # TODO: Refactor and move the code to academy_http_request/academy_client with an own method
         user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0"
         sess: Session = requests.session()
@@ -92,7 +93,9 @@ class InitCommand(BaseCommand):
             self.logger.info(f"{Fore.GREEN}Login successful{Style.RESET_ALL}")
             self.logger.info(f"{Fore.GREEN}Session tokens saved. Init completed. Having fun with academy commands.{Style.RESET_ALL}")
 
-            return res_cookies
+            htb_academy_dict = {"cookies": res_cookies}
+            config["HTB_ACADEMY"] = htb_academy_dict
+            self.htb_cli.config = config
+            self.htb_cli.save_config_file()
         else:
             self.logger.info(f"{Fore.GREEN}Init still valid. Conducting login procedure is not necessary.{Style.RESET_ALL}")
-            return None
