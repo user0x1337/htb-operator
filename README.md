@@ -275,7 +275,7 @@ htb-operator machine info --id 620
 ![image](https://github.com/user-attachments/assets/d426e72d-b26a-46f8-b30e-2dd9a3d6dbd9)
 
 ## submit
-Sumbit the flag for the active machine. Use the flag `--user-flag` for submitting the user flag, `--root-flag` for the root flag. You also need to use the flag `-d` for specifying the difficulty rating (from 1="Piece of Cake" to 10="Brainfuck"). 
+Sumbit the flag for the active machine. Use the flag `--user-flag` for submitting the user flag, `--root-flag` for the root flag. You also need to use the flag `-d` for specifying the level of difficulty (from 1="Piece of Cake" to 10="Brainfuck"). 
 ```bash
 htb-operator machine submit --user-flag <FLAG> -d <DIFFICULTY_RATING>
 ```
