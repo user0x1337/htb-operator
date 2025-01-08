@@ -421,13 +421,27 @@ def create_machine_info_panel(machine_info: dict) -> Table | Panel | Group:
                             title_align="left")
 
 
+    p_machine_info_status = None
+    if machine_info["info_status"] is not None and len(machine_info["info_status"]) > 0:
+        p_machine_info_status = Panel(Text.from_markup(machine_info["info_status"]),
+                                      title=f"[bold yellow]Info[/bold yellow]",
+                                      expand=True,
+                                      border_style="yellow",
+                                      title_align="left")
+
     table = Table.grid(expand=True)
     table.add_column()
     table.add_column()
     table.add_row(p_basic, p_top_10)
 
-
-    return Group(table, p_changelog, p_activity) if p_changelog is not None else Group(table, p_activity)
+    if p_machine_info_status and p_changelog:
+        return Group(table, p_changelog, p_machine_info_status, p_activity)
+    elif p_machine_info_status:
+        return Group(table, p_machine_info_status, p_activity)
+    elif p_changelog:
+        return Group(table, p_changelog, p_activity)
+    else:
+        return Group(table, p_activity)
 
 
 
