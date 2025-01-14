@@ -37,7 +37,7 @@ class BaseAcademyHttpRequest:
     def set_verify_ssl(self, verify_ssl: bool) -> None:
         raise NotImplementedError()
 
-    def post_request(self, endpoint: str, json=None, api_version: str = "v2") -> dict:
+    def post_request(self, endpoint: str, json=None) -> dict:
         raise NotImplementedError()
 
     def get_request(self, endpoint: Optional[str] = None, download=False, base: str = None, custom_url: Optional[str] = None) -> Union[list, dict, bytes]:
@@ -94,14 +94,17 @@ class AcademyHttpRequest(BaseAcademyHttpRequest):
         """Set verify SSL."""
         self._verify_ssl = verify_ssl
 
-    def post_request(self,endpoint: str, json=None, api_version: str = "v4") -> dict:
+    def post_request(self,
+                     endpoint: str,
+                     json=None,
+                     base: Optional[str] = None,
+                     custom_url: Optional[str]=None) -> dict:
         """Send post request to HTB API."""
-        if api_version is None:
-            api_version = self._api_version
-
+        if base is None:
+            base = self._api_base
 
         while True:
-            r = requests.post(url=f"{self._api_base}{api_version}/{endpoint}",
+            r = requests.post(url=custom_url if custom_url is not None else f"{base}{self._api_version}/{endpoint}",
                               headers= self._http_headers,
                               cookies=self._http_cookies,
                               json=json,
@@ -164,4 +167,5 @@ class AcademyHttpRequest(BaseAcademyHttpRequest):
             return r.content
         else:
             return r.json()
+
 

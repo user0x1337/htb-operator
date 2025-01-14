@@ -1,3 +1,4 @@
+import base64
 import getpass
 from typing import List
 from urllib.parse import unquote
@@ -91,6 +92,19 @@ class AcademyClient:
             return []
 
         return [BadgeCategory(_client=self, data=x) for x in data]
+
+
+    def submit_answer(self, answer: str, question_id: int) -> [bool, str]:
+        """Submit an answer"""
+
+        raise NotImplementedError
+
+        res = self.academy_http_request.post_request(endpoint="check/answer",
+                                                     json={answer: f"{base64.b64encode(answer.encode('utf-8'))}",
+                                                           question_id: question_id})
+
+
+
 
 
 class BaseAcademyApiObject(object):
