@@ -253,8 +253,8 @@ class ProLabInfo(client.BaseHtbApiObject):
 
         overview_data: dict = self._client.htb_http_request.get_request(endpoint=f"prolab/{self.id}/overview")["data"]
         if overview_data is not None:
-            self.discord_url = overview_data["social_links"].get('discord', None) if "social_links" in overview_data else None
-            self.forum = overview_data["social_links"].get('forum', None) if "social_links" in overview_data else None
+            self.discord_url = overview_data["social_links"].get('discord', None) if len(overview_data["social_links"]) > 0 and "social_links" in overview_data else None
+            self.forum = overview_data["social_links"].get('forum', None) if len(overview_data["social_links"]) > 0 and "social_links" in overview_data else None
 
 
     def get_flags(self) -> [ProLabFlag]:

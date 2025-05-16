@@ -1,12 +1,13 @@
 # Changelog
 
-Added some improvements and bugfixes.
+There are some bugfixes.
 
 ### Added
-- Command `machine info`: "Machine information" provided by HTB are now displayed. (Feature #15)
+- `-` 
 
 ### Changed 
 - `-`
 
 ### Fixed
-- `-`
+- Removed endgame because it is not supported by HTB, anymore.
+- Fix prolabs API calls
