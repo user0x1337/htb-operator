@@ -14,6 +14,7 @@ from .init import InitCommand
 from .proxy import ProxyCommand
 from .version import VersionCommand
 from .badge import BadgeCommand
+from .team import TeamCommand
 
 
 

@@ -8,6 +8,7 @@ from .exception.errors import RequestException, NoPwnBoxActiveException
 _vpn_server_cache = dict()
 # noinspection PyUnresolvedReferences
 _user_cache: dict[int, "User"] = dict()
+_team_cache: dict[int, "Team"] = dict()
 
 class HTBClient:
     # noinspection PyUnresolvedReferences
@@ -86,6 +87,38 @@ class HTBClient:
 
         data = self.htb_http_request.get_request(endpoint=f"rankings/user/ranking_bracket")["data"]
         return UserRankingHoF(data=data, _client=self)
+
+    # noinspection PyUnresolvedReferences
+    def get_team_members(self, team_id: int) -> List["User"]:
+        """Get the members of a team"""
+        from .user import User
+
+        data: list = self.htb_http_request.get_request(endpoint=f"team/members/{team_id}")
+        if data is None or len(data) == 0:
+            return []
+
+        return [User(_client=self, data=d) for d in data]
+
+
+    def get_team_info(self, team_id: int) -> "Team":
+        # noinspection PyUnresolvedReferences
+        from .team import Team
+        global _team_cache
+
+        if team_id <= 0:
+            return None
+
+        if team_id in _team_cache.keys():
+            return _team_cache[team_id]
+
+        data: dict = self.htb_http_request.get_request(endpoint=f"team/info/{team_id}")
+        if data is None or len(data.keys()) == 0:
+            return None
+
+        team = Team(_client=self, data=data)
+        _team_cache[team_id] = team
+
+        return team
 
 
     # noinspection PyUnresolvedReferences

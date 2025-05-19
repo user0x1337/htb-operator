@@ -1,6 +1,7 @@
 from .client import HTBClient, BaseHtbApiObject
 from .exception import *
-from .user import User, Team, UserRankingHoF
+from .team import Team
+from .user import User, UserRankingHoF
 from .activity import Activity
 from .fortress import Fortress, FortressUserProfile, FortressFlag, Company
 from .prolab import ProLabUserProfile, ProLabInfo, ProLabMasterInfo, ProLabFlag, ProLabMachine, ProLabMilestone, ProLabProgres, ProLabChangeLog

@@ -54,6 +54,9 @@ def create_arg_parser(htb_cli: "HtbCLI") -> ArgumentParser:
     # Badges command
     _create_badge_command_parser(subparsers=subparsers)
 
+    # Team Command
+    _create_team_command_parser(subparsers=subparsers)
+
     # help command
     subparsers.add_parser("help", help="show this help message and exit")
 
@@ -81,6 +84,16 @@ def _create_badge_command_parser(subparsers):
     badge_list_parser.add_argument("-s", "--username", type=str, default=None,help="Specify an username. Default is the own user")
     badge_list_parser.add_argument("--open", action="store_true",help="Filter badges which the user has not obtained, yet.")
     badge_list_parser.add_argument("--category", type=str, default=None,help="Filter badges by category. Indicating more than one category must be seperated by commas [,]")
+
+def _create_team_command_parser(subparsers):
+    from command import TeamCommand
+
+    team_parser: ArgumentParser = subparsers.add_parser("team", help="Commands for Teams")
+    team_parser.set_defaults(func=TeamCommand)
+    team_sub_parser = team_parser.add_subparsers(title="commands", description="Available commands", dest="teams")
+    team_info = team_sub_parser.add_parser(name="info", help="Info about the team")
+    team_info.add_argument("--id", type=int, metavar="Team ID",help="ID of the Team")
+
 
 
 def _create_sherlock_command_parser(subparsers):

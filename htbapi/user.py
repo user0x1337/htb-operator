@@ -3,32 +3,8 @@ from typing import Optional, List, Tuple, Dict
 
 import dateutil.parser
 
-from htbapi import client
-
-class Team(client.BaseHtbApiObject):
-    name: str
-    rank: str
-
-    # noinspection PyUnresolvedReferences
-    def __init__(self, data: dict, _client: "HTBClient"):
-        self._client = _client
-        self.id = data.get('id', -1)
-        self.name = data.get('name', '-')
-        self.rank = data.get('ranking', '-')
-
-    def __repr__(self):
-        return f"<Team '{self.name} | {self.id}'>"
-
-    def to_dict(self):
-        return {
-            "ID": self.id,
-            "Name": self.name,
-            "Rank": self.rank
-        }
-
-class University(Team):
-    def __repr__(self):
-        return f"<University '{self.name} | {self.id}'>"
+from htbapi import client, Team
+from htbapi.team import University
 
 
 class User(client.BaseHtbApiObject):
@@ -43,7 +19,7 @@ class User(client.BaseHtbApiObject):
     isDedicatedVip: bool
     isVip: bool
     rank: str
-    rank_id: int
+    rank_id: Optional[int]
     next_rank: str
     rank_ownership: float
     country_name: str
@@ -67,7 +43,7 @@ class User(client.BaseHtbApiObject):
         self.user_bloods = data.get('system_bloods', 0)
         self.points = data['points']
         self.rank = data['rank']  # Personal rank, e.g. "Pro Hacker"
-        self.rank_id = data['rank_id']
+        self.rank_id = data.get('rank_id', None)
         self.next_rank = data.get('next_rank', "")
         self.rank_ownership = data.get('rank_ownership', 0.0)
         self.ranking = data.get('ranking', 0)  # Hall of Fame ranking
@@ -78,7 +54,7 @@ class User(client.BaseHtbApiObject):
         self.timezone = data.get('timezone', "")
         self.public = data.get('public', False)
         self.server = data.get('server', "")
-        self.team = Team({}, _client) if data.get('team', None) is None else Team(data['team'], _client)
+        self.team = Team({}, _client) if data.get('team', None) is None else self._client.get_team_info(data["team"]["id"])
         self.respects = data.get('respects', 0)
         self.isVip = data.get('isVip', False)
         self.university = University({}, _client) if data.get('university', None) is None else University(data['university'], _client)
