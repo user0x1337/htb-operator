@@ -3,6 +3,7 @@ import hashlib
 import os
 import threading
 import zipfile
+from pathlib import Path
 from typing import Optional, List
 
 from colorama import Fore, Style
@@ -119,7 +120,10 @@ class ChallengeCommand(BaseCommand):
         if self.args.unzip:
             with zipfile.ZipFile(filepath, "r") as zip_ref:
                 zip_ref.extractall(path=os.path.dirname(filepath), pwd=DEFAULT_HTB_DOWNLOAD_PASSWORD.encode("utf8"))
-            self.logger.info(f'{Fore.GREEN}Zip file extracted to {os.path.dirname(filepath)}')
+            self.logger.info(f'{Fore.GREEN}Zip file extracted to {os.path.dirname(filepath)}{Style.RESET_ALL}')
+            if self.args.clear:
+                os.remove(filepath)
+                self.logger.info(f'{Fore.LIGHTYELLOW_EX}Zip file "{Path(filepath).name}" deleted.{Style.RESET_ALL}')
 
         # Need to be the last step inside the download branch
         if self.args.start_instance and challenge_download_info.docker:

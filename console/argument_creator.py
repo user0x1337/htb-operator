@@ -327,6 +327,8 @@ def _create_challenge_command_parser(subparsers):
                                          "If the directory doest not exist, it will be created.")
     challenge_download.add_argument("--unzip", action="store_true",
                                     help="Unzip the downloaded file after downloading in the target directory.")
+    challenge_download.add_argument("--clear", action="store_true",
+                                    help="Clear / Remove the downloaded file after unzipping. Works only if --unzip is specified.")
     challenge_download.add_argument("-s", "--start_instance", action="store_true",
                                     help="Try to start the instance when the download was successful.")
     challenge_instance: ArgumentParser = challenge_sub_parser.add_parser(name="instance",
