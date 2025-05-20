@@ -67,6 +67,8 @@ class ChallengeCommand(BaseCommand):
         except RequestException as e:
             self.logger.error(f'{Fore.RED}Error: {e.args[0]["message"]}{Style.RESET_ALL}')
 
+        return None
+
 
     def download(self):
         """Download the challenge"""
@@ -129,8 +131,10 @@ class ChallengeCommand(BaseCommand):
         if self.args.start_instance and challenge_download_info.docker:
             self.start_instance(challenge=challenge_download_info)
 
+        return None
 
-    def print_info(self):
+
+    def print_info(self) -> None:
         """Print the challenge info"""
         if self.challenge_id is None and self.challenge_name is None:
             self.logger.error("ID or Name must be specified. Use --help for more information.")
@@ -140,6 +144,7 @@ class ChallengeCommand(BaseCommand):
         challenge_info: ChallengeInfo = self.client.get_challenge(challenge_id_or_name=challenge_id_or_name)
         table = create_challenge_info_panel(channel_info=challenge_info.to_dict())
         self.console.print(table)
+        return None
 
     def _get_filter_category_list(self, category_dict:dict):
         cat_filter_list = []
@@ -184,7 +189,7 @@ class ChallengeCommand(BaseCommand):
         self.console.print((create_table_challenge_list(challenge_list=sorted([x.to_dict() for x in challenge_list], key=lambda x: x["difficulty_num"]), category_dict=category_dict)))
 
 
-    def start_instance(self, challenge: ChallengeInfo):
+    def start_instance(self, challenge: ChallengeInfo) -> None:
         """Start an instance"""
         if challenge.docker_ip is not None and len(challenge.docker_ip) > 0:
             self.logger.warning(f"{Fore.LIGHTYELLOW_EX}Instance already started: "
@@ -214,6 +219,7 @@ class ChallengeCommand(BaseCommand):
             self.logger.error(f'\r{Fore.RED}"{challenge.name}": {msg}{Style.RESET_ALL}')
 
 
+
     def stop_instance(self, challenge: ChallengeInfo):
         """Stop an instance"""
         if challenge.docker_ip is None or len(challenge.docker_ip) == 0:
@@ -228,6 +234,8 @@ class ChallengeCommand(BaseCommand):
         else:
             # Use print here because of the threading spinner. Otherwise, the row will not be overwritten
             self.logger.error(f'{Fore.RED}"{challenge.name}": {msg}{Style.RESET_ALL}')
+
+        return None
 
     def status_instance(self, challenge: ChallengeInfo):
         """status instance"""
@@ -257,6 +265,8 @@ class ChallengeCommand(BaseCommand):
         elif self.instance_command == "status":
             self.status_instance(challenge=challenge)
 
+        return None
+
 
     def download_writeup(self):
         if self.challenge_id is None and self.challenge_name is None:
@@ -279,6 +289,8 @@ class ChallengeCommand(BaseCommand):
 
         self.logger.info(f'{Fore.GREEN}Integrity check successful{Style.RESET_ALL}')
         self.logger.info(f'{Fore.GREEN}Writeup downloaded in {target_path}{Style.RESET_ALL}')
+
+        return None
 
     def search(self):
         if self.args.unsolved:
@@ -311,6 +323,8 @@ class ChallengeCommand(BaseCommand):
                                                         category_dict=category_dict)))
         self.logger.info(f'{Fore.GREEN}Found {len(challenges_list)} challenges which begin with "{self.challenge_name}"{Style.RESET_ALL}')
 
+        return None
+
 
     def execute(self):
         """Download the challenge."""
@@ -331,3 +345,7 @@ class ChallengeCommand(BaseCommand):
             self.download_writeup()
         elif self.challenge_command == "search":
             self.search()
+        else:
+            pass
+
+        return None
