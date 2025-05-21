@@ -67,7 +67,7 @@ class User(client.BaseHtbApiObject):
     def __repr__(self):
         return f"<User '{self.name} | {self.id}'>"
 
-    def to_dict(self, key_filter: list=None):
+    def to_dict(self, key_filter: list=None, export_team: bool=True):
         """Returns the object as a dictionary.
 
         :arg key_filter: list of keys to filter on
@@ -82,7 +82,6 @@ class User(client.BaseHtbApiObject):
             "Country": self.country_name,
             "Timezone": self.timezone,
             "Server": self.server,
-            "Team": self.team.to_dict(),
             "User Owns": self.user_owns,
             "System Owns": self.root_owns,
             "User Bloods": self.user_bloods,
@@ -98,6 +97,9 @@ class User(client.BaseHtbApiObject):
             "Ranking_Bracket": None if self.ranking_bracket is None else self.ranking_bracket.to_dict(),
             "Badges": self.badges,
         }
+
+        if export_team:
+            res += {"Team": self.team.to_dict(),}
 
         if key_filter and len(key_filter) > 0:
             res = {k: res[k] for k in key_filter if k in res}

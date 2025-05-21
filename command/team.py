@@ -4,7 +4,8 @@ from typing import List, Optional
 from colorama import Fore, Style
 
 from command.base import BaseCommand
-from htbapi import User
+from console import create_teams_info_panel
+from htbapi import User, Team
 
 
 class TeamCommand(BaseCommand):
@@ -20,16 +21,24 @@ class TeamCommand(BaseCommand):
 
 
     def info(self) -> None:
-        """Prints general information about the current team, its members then overall performance"""
-        if self.team_id is None:
-            self.logger.error(f'{Fore.RED}No team id{Style.RESET_ALL}')
+        """Prints general information about the current team, its members, then overall performance"""
+        if self.team_id is None and self.team_name is None:
+            self.logger.error(f'{Fore.RED}No team id and no team name{Style.RESET_ALL}')
             return None
 
-        # TODO: Accept team name and looks for the corresponding ID using API "search/fetch?query=NAME&tags=%5B%22teams%22%5D"
-        # TODO: -> Or move the search algorithm into get_team_info ...
+        # if no team id is given, search for the team by name and get the id
+        if self.team_id is None or self.team_id < 1:
+            ids: List[int] = self.client.search_for_teams_by_name(self.team_name)
+            if len(ids) == 0:
+                self.logger.error(f'{Fore.RED}Could not find any teams with name {self.team_name}{Style.RESET_ALL}')
+                return None
+            if len(ids) > 1:
+                self.logger.error(f'{Fore.RED}Found {len(ids)} teams containing the name {self.team_name}.{Style.RESET_ALL}')
+                return None
+            self.team_id = ids[0]
 
-        user: List[User] = self.client.get_team_members(team_id=self.team_id)
-        self.logger.info(f"{user[0].team}, members: {user}")
+        team: Team = self.client.get_team_info(team_id=self.team_id)
+        self.console.print(create_teams_info_panel(team_info=team.to_dict()))
 
         return None
 

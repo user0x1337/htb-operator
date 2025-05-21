@@ -257,7 +257,7 @@ class ProLabInfo(client.BaseHtbApiObject):
             self.forum = overview_data["social_links"].get('forum', None) if len(overview_data["social_links"]) > 0 and "social_links" in overview_data else None
 
 
-    def get_flags(self) -> [ProLabFlag]:
+    def get_flags(self) -> List[ProLabFlag]:
         """Get the corresponding flags"""
         res: dict = self._client.htb_http_request.get_request(endpoint=f"prolab/{self.id}/flags")
         if "status" in res and res["status"]:
@@ -289,7 +289,7 @@ class ProLabInfo(client.BaseHtbApiObject):
         else:
             return []
 
-    def submit_flag(self, flag: str) -> [bool, str]:
+    def submit_flag(self, flag: str) -> tuple[bool, str]:
         """Submit a flag"""
         try:
             data: dict = self._client.htb_http_request.post_request(endpoint=f"prolab/{self.id}/flag", json={'flag': flag})
@@ -297,7 +297,7 @@ class ProLabInfo(client.BaseHtbApiObject):
         except RequestException as e:
             return False, e.args[0]["message"]
 
-    def get_reset_status(self) -> [Optional[str], Optional[datetime]]:
+    def get_reset_status(self) -> tuple[Optional[str], Optional[datetime]]:
         """Get the progress. Returns a datetime if successful (and string is None), otherwise a string and datetime is None."""
         try:
             res: dict = self._client.htb_http_request.get_request(endpoint=f"prolab/{self.id}/reset")

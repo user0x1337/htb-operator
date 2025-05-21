@@ -79,6 +79,15 @@ class HTBClient:
                 if filter_difficulty is None or (d["difficulty"].lower() == filter_difficulty.lower())
                 ]
 
+    def search_for_teams_by_name(self, name: str) -> List[int]:
+        """Search for teams by name
+        returns: returns a list of team ids"""
+        data: dict = self.htb_http_request.get_request(endpoint=f'search/fetch?query={name}&tags=["teams"]')
+        if data is None or len(data.keys()) == 0 or len(data["teams"]) == 0:
+            return []
+
+        return [x["id"] for x in data["teams"]]
+
 
     # noinspection PyUnresolvedReferences
     def get_user_ranking(self) -> "UserRankingHoF":
@@ -88,20 +97,10 @@ class HTBClient:
         data = self.htb_http_request.get_request(endpoint=f"rankings/user/ranking_bracket")["data"]
         return UserRankingHoF(data=data, _client=self)
 
+
     # noinspection PyUnresolvedReferences
-    def get_team_members(self, team_id: int) -> List["User"]:
-        """Get the members of a team"""
-        from .user import User
-
-        data: list = self.htb_http_request.get_request(endpoint=f"team/members/{team_id}")
-        if data is None or len(data) == 0:
-            return []
-
-        return [User(_client=self, data=d) for d in data]
-
-
     def get_team_info(self, team_id: int) -> "Team":
-        # noinspection PyUnresolvedReferences
+        """Get the team info for a given team ID"""
         from .team import Team
         global _team_cache
 

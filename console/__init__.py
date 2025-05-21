@@ -10,4 +10,5 @@ from .cli_table import create_machine_list_group_by_retired, create_machine_list
 from .cli_panel import create_prolab_detail_info_panel, create_sherlock_list_group_by_retired_panel
 from .cli_table import create_table_challenge_list
 from .cli_table import create_table_badge_list
+from .cli_panel import create_teams_info_panel
 

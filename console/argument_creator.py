@@ -92,7 +92,8 @@ def _create_team_command_parser(subparsers):
     team_parser.set_defaults(func=TeamCommand)
     team_sub_parser = team_parser.add_subparsers(title="commands", description="Available commands", dest="teams")
     team_info = team_sub_parser.add_parser(name="info", help="Info about the team")
-    team_info.add_argument("--id", type=int, metavar="Team ID",help="ID of the Team")
+    team_info.add_argument("--id", type=int, metavar="Team ID",help="ID of the Team. Either --id or --name must be specified")
+    team_info.add_argument("--name", type=str, metavar="Team Name", help="Name of the Team. Either --id or --name must be specified")
 
 
 

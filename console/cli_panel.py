@@ -444,6 +444,66 @@ def create_machine_info_panel(machine_info: dict) -> Table | Panel | Group:
         return Group(table, p_activity)
 
 
+def create_teams_info_panel(team_info: dict) -> Table:
+    """Create a table for team information."""
+
+    basic = {
+        "ID": team_info["Id"],
+        "Name": team_info["Name"],
+        "Rank": team_info["Rank"],
+        "Motto": team_info["Motto"],
+        "Country Name": team_info["CountryName"],
+        "Country Code": team_info["CountryCode"],
+        "Captain": team_info["CaptainUsername"]
+    }
+
+    max_key_length = max(len(key) for key in basic.keys())
+    text_basic = "\n".join([
+        f"[bold yellow]{k.ljust(max_key_length)}[/bold yellow] : [bold white]{v}[/bold white]"
+        for k, v in basic.items()])
+
+    p_basic = Panel(renderable=Text.from_markup(text=text_basic, justify="left"),
+                    title=f"[bold yellow]Team Information[/bold yellow]",
+                    expand=True,
+                    border_style="yellow",
+                    title_align="left")
+
+    table = Table(expand=True, show_lines=False, box=None)
+    table.add_column(header="#", justify="left")
+    table.add_column(header="ID", justify="left")
+    table.add_column(header="Name", justify="left")
+    table.add_column(header="Points", justify="left")
+    table.add_column(header="Ranking", justify="left")
+    table.add_column(header="Rank", justify="left")
+
+    team_members = team_info["TeamMembers"]
+    for i, res in enumerate(team_members):
+        if team_info["CaptainUserID"] == res["ID"]:
+            name = "🪖 " + res["Name"]
+        else:
+            name = res["Name"]
+        table.add_row(f'{i + 1}',
+                      f'{res["ID"]}',
+                      f'{name}',
+                      f'{res["Points"]}',
+                      f'{res["Ranking"]}',
+                      f'{res["Rank"]}'
+                      )
+
+    p_table_members = Panel(table,
+                            title=f"[bold yellow]Members[/bold yellow]",
+                            border_style="yellow",
+                            title_align="left",
+                            expand=False)
+
+
+    table = Table.grid(expand=True)
+    table.add_column()
+    table.add_column()
+    table.add_row(p_basic, p_table_members)
+
+    return table
+
 
 def create_challenge_info_panel(channel_info: dict) -> Table:
     basic = {
