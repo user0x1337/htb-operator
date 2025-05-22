@@ -39,7 +39,7 @@ def create_season_list_table(seasons: list) -> Table | Panel:
             color_end = "[/bold bright_magenta]"
         elif res["state"] != "ended":
             color_begin = "[bold bright_green]"
-            color_end = "[/bold bright_green]]"
+            color_end = "[/bold bright_green]"
 
         table.add_row(f'{color_begin}{i + 1}{color_end}',
                       f'{color_begin}{res["id"]}{color_end}',
@@ -55,7 +55,7 @@ def create_season_list_table(seasons: list) -> Table | Panel:
                  expand=False)
 
 def create_benchmark_table(vpn_benchmark_results: list) -> Table | Panel:
-    """Create benchmark table"""
+    """Create a benchmark table"""
     table = Table(expand=True, show_lines=False, box=None)
     table.add_column(header="#",justify="left")
     table.add_column(header="Latency [ms]", justify="left")

@@ -40,7 +40,7 @@ class SeasonCommand(BaseCommand):
         seasons: List[SeasonList] = self.client.get_season_list()
         if seasons is None or len(seasons) == 0:
             self.logger.warning(f"{Fore.LIGHTYELLOW_EX}No seasons found{Style.RESET_ALL}")
-            return None
+            return
 
         seasons = sorted(seasons, key=lambda s: s.start_date, reverse=True)
         self.console.print(create_season_list_table(seasons=[x.to_dict() for x in seasons]))
