@@ -446,6 +446,7 @@ def create_machine_info_panel(machine_info: dict) -> Table | Panel | Group:
 
 def create_teams_info_panel(team_info: dict, team_invitations: list[dict]) -> Table:
     """Create a table for team information."""
+    from .cli_table import create_team_invitations_table
 
     basic = {
         "ID": team_info["Id"],
@@ -499,39 +500,12 @@ def create_teams_info_panel(team_info: dict, team_invitations: list[dict]) -> Ta
                             title_align="left",
                             expand=True)
 
-    table_invitations = Table(expand=True, show_lines=False, box=None)
-    table_invitations.add_column(header="#", justify="left")
-    table_invitations.add_column(header="ID", justify="left")
-    table_invitations.add_column(header="Name", justify="left")
-    table_invitations.add_column(header="Country", justify="left")
-    table_invitations.add_column(header="# User", justify="left")
-    table_invitations.add_column(header="# System", justify="left")
-    table_invitations.add_column(header="Points", justify="left")
-    table_invitations.add_column(header="Ranking", justify="left")
-    table_invitations.add_column(header="Rank", justify="left")
-
-    for i, res in enumerate(team_invitations):
-        table_invitations.add_row(f'{i + 1}',
-                                  f'{res["ID"]}',
-                                  f'{res["Name"]}',
-                                  f'{res["Country"]}',
-                                  f'{res["User Owns"]}',
-                                  f'{res["System Owns"]}',
-                                  f'{res["Points"]}',
-                                  f'{"-" if res["Ranking"] is None else res["Ranking"]}',
-                                  f'{res["Rank"]}'
-                                  )
-    p_table_invitation = Panel(table_invitations,
-                               title=f"[bold yellow]Invitations[/bold yellow]",
-                               border_style="yellow",
-                               title_align="left",
-                               expand=True)
 
     table = Table.grid(expand=True)
     table.add_column()
     table.add_column()
     table.add_column()
-    table.add_row(p_basic, p_table_members, p_table_invitation)
+    table.add_row(p_basic, p_table_members, create_team_invitations_table(team_invitations=team_invitations))
 
     return table
 

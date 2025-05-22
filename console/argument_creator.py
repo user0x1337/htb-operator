@@ -94,7 +94,21 @@ def _create_team_command_parser(subparsers):
     team_info = team_sub_parser.add_parser(name="info", help="Info about the team")
     team_info.add_argument("--id", type=int, metavar="Team ID",help="ID of the Team. Either --id or --name must be specified")
     team_info.add_argument("--name", type=str, metavar="Team Name", help="Name of the Team. Either --id or --name must be specified")
+    team_invitation = team_sub_parser.add_parser(name="invitation", help="Invitations of the team")
+    team_invitation_sub_parser = team_invitation.add_subparsers(title="commands", description="Available commands", dest="team_invitations")
+    invitation_show = team_invitation_sub_parser.add_parser(name="show", help="Show all invitations of the team")
+    invitation_show.add_argument("--id", type=int, metavar="Team ID",
+                                 help="ID of the Team. Either --id or --name must be specified")
+    invitation_show.add_argument("--name", type=str, metavar="Team Name",
+                                 help="Name of the Team. Either --id or --name must be specified")
 
+    invitation_accept = team_invitation_sub_parser.add_parser(name="accept", help="Accept invitation for the user into the team")
+    invitation_accept.add_argument("--id", type=int, metavar="Team ID",
+                                   help="ID of the Team. Either --id or --name must be specified")
+    invitation_accept.add_argument("--name", type=str, metavar="Team Name",
+                                   help="Name of the Team. Either --id or --name must be specified")
+    invitation_accept.add_argument("--user_id", type=int, metavar="User ID",
+                                   help="ID of the user.")
 
 
 def _create_sherlock_command_parser(subparsers):

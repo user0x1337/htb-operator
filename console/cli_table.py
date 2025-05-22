@@ -21,6 +21,36 @@ connection_down: float  # in bytes
 connection_up: float  # in bytes
 
 
+
+def create_team_invitations_table(team_invitations: list[dict], title: str = "Invitations") -> Table | Panel:
+    table_invitations = Table(expand=True, show_lines=False, box=None)
+    table_invitations.add_column(header="#", justify="left")
+    table_invitations.add_column(header="ID", justify="left")
+    table_invitations.add_column(header="Name", justify="left")
+    table_invitations.add_column(header="Country", justify="left")
+    table_invitations.add_column(header="# User", justify="left")
+    table_invitations.add_column(header="# System", justify="left")
+    table_invitations.add_column(header="Points", justify="left")
+    table_invitations.add_column(header="Ranking", justify="left")
+    table_invitations.add_column(header="Rank", justify="left")
+
+    for i, res in enumerate(team_invitations):
+        table_invitations.add_row(f'{i + 1}',
+                                  f'{res["ID"]}',
+                                  f'{res["Name"]}',
+                                  f'{res["Country"]}',
+                                  f'{res["User Owns"]}',
+                                  f'{res["System Owns"]}',
+                                  f'{res["Points"]}',
+                                  f'{"-" if res["Ranking"] is None else res["Ranking"]}',
+                                  f'{res["Rank"]}'
+                                  )
+    return Panel(table_invitations,
+                 title=f"[bold yellow]{title}[/bold yellow]",
+                 border_style="yellow",
+                 title_align="left",
+                 expand=True)
+
 def create_machine_list_table(machine_info: list, season_name: str) -> Table | Panel:
     table = Table(expand=True, show_lines=False, box=None)
     table.add_column(header="Week", justify="left")
