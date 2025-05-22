@@ -444,7 +444,7 @@ def create_machine_info_panel(machine_info: dict) -> Table | Panel | Group:
         return Group(table, p_activity)
 
 
-def create_teams_info_panel(team_info: dict) -> Table:
+def create_teams_info_panel(team_info: dict, team_invitations: list[dict]) -> Table:
     """Create a table for team information."""
 
     basic = {
@@ -467,10 +467,11 @@ def create_teams_info_panel(team_info: dict) -> Table:
 
     p_basic = Panel(renderable=Text.from_markup(text=text_basic, justify="left"),
                     title=f"[bold yellow]Team Information[/bold yellow]",
-                    expand=True,
                     border_style="yellow",
-                    title_align="left")
+                    title_align="left",
+                    expand=True)
 
+    # Team Members
     table = Table(expand=True, show_lines=False, box=None)
     table.add_column(header="#", justify="left")
     table.add_column(header="ID", justify="left")
@@ -492,18 +493,45 @@ def create_teams_info_panel(team_info: dict) -> Table:
                       f'{res["Ranking"]}',
                       f'{res["Rank"]}'
                       )
-
     p_table_members = Panel(table,
                             title=f"[bold yellow]Members[/bold yellow]",
                             border_style="yellow",
                             title_align="left",
-                            expand=False)
+                            expand=True)
 
+    table_invitations = Table(expand=True, show_lines=False, box=None)
+    table_invitations.add_column(header="#", justify="left")
+    table_invitations.add_column(header="ID", justify="left")
+    table_invitations.add_column(header="Name", justify="left")
+    table_invitations.add_column(header="Country", justify="left")
+    table_invitations.add_column(header="# User", justify="left")
+    table_invitations.add_column(header="# System", justify="left")
+    table_invitations.add_column(header="Points", justify="left")
+    table_invitations.add_column(header="Ranking", justify="left")
+    table_invitations.add_column(header="Rank", justify="left")
+
+    for i, res in enumerate(team_invitations):
+        table_invitations.add_row(f'{i + 1}',
+                                  f'{res["ID"]}',
+                                  f'{res["Name"]}',
+                                  f'{res["Country"]}',
+                                  f'{res["User Owns"]}',
+                                  f'{res["System Owns"]}',
+                                  f'{res["Points"]}',
+                                  f'{"-" if res["Ranking"] is None else res["Ranking"]}',
+                                  f'{res["Rank"]}'
+                                  )
+    p_table_invitation = Panel(table_invitations,
+                               title=f"[bold yellow]Invitations[/bold yellow]",
+                               border_style="yellow",
+                               title_align="left",
+                               expand=True)
 
     table = Table.grid(expand=True)
     table.add_column()
     table.add_column()
-    table.add_row(p_basic, p_table_members)
+    table.add_column()
+    table.add_row(p_basic, p_table_members, p_table_invitation)
 
     return table
 

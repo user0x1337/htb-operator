@@ -99,7 +99,7 @@ class User(client.BaseHtbApiObject):
         }
 
         if export_team:
-            res += {"Team": self.team.to_dict(),}
+            res["Team"] = self.team.to_dict()
 
         if key_filter and len(key_filter) > 0:
             res = {k: res[k] for k in key_filter if k in res}

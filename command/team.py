@@ -38,7 +38,9 @@ class TeamCommand(BaseCommand):
             self.team_id = ids[0]
 
         team: Team = self.client.get_team_info(team_id=self.team_id)
-        self.console.print(create_teams_info_panel(team_info=team.to_dict()))
+        invitations: List[User] = team.get_invitations()
+
+        self.console.print(create_teams_info_panel(team_info=team.to_dict(), team_invitations=[x.to_dict() for x in invitations]))
 
         return None
 
