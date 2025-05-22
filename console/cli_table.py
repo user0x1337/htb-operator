@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import List, Set
 
 from rich.console import Group
@@ -20,6 +20,64 @@ connection_ipv6: str
 connection_down: float  # in bytes
 connection_up: float  # in bytes
 
+
+def create_machine_list_table(machine_info: list, season_name: str) -> Table | Panel:
+    table = Table(expand=True, show_lines=False, box=None)
+    table.add_column(header="Week", justify="left")
+    table.add_column(header="ID", justify="left")
+    table.add_column(header="Name", justify="left")
+    table.add_column(header="Difficulty", justify="left")
+    table.add_column(header="Release date/time", justify="left")
+    table.add_column(header="User Flag?", justify="left")
+    table.add_column(header="Root Flag?", justify="left")
+    table.add_column(header="User Points", justify="left")
+    table.add_column(header="Root Points", justify="left")
+
+    for i, res in enumerate(machine_info):
+        if "Easy" == res["difficulty"]:
+            color = "bright_green"
+        elif "Medium" == res["difficulty"]:
+            color = "bright_yellow"
+        elif "Hard" == res["difficulty"]:
+            color = "bright_red"
+        elif "Insane" == res["difficulty"]:
+            color = "bright_magenta"
+        else:
+            color = "bright_white"
+
+        date = res["release_date"]
+        is_current_week = (date is not None and
+                           date.date() <= datetime.now().date() <= (date.date() + timedelta(days=7)))
+        is_next_week = (date is not None and
+                           datetime.now().date() <= date.date())
+
+        color_begin = ""
+        color_end = ""
+        if is_current_week:
+            color_begin = "[bold bright_green]"
+            color_end = "[/bold bright_green]"
+            color = "bright_green" # Exception for line highlighting -> overwrite the "difficult" color
+        elif is_next_week:
+            color_begin = "[bold bright_magenta]"
+            color_end = "[/bold bright_magenta]"
+            color = "bright_magenta" # Exception for line highlighting -> overwrite the "difficult" color
+
+        table.add_row(f'{color_begin}{i + 1}{color_end}',
+                      f'{color_begin}{'-' if res["id"] < 1 else res["id"]}{color_end}',
+                      f'{color_begin}{'-' if res["unknown"] else res["name"]}{color_end}',
+                      f'[bold {color}]{'-' if res["unknown"] else res["difficulty"]}[/bold {color}]',
+                      f'{color_begin}{'-' if res["unknown"] else res["release_date"].strftime("%Y-%m-%d %H:%M:%S %Z")}{color_end}',
+                      f'{color_begin}{'-' if res["unknown"] else format_bool(res["is_owned_user"])}{color_end}',
+                      f'{color_begin}{'-' if res["unknown"] else format_bool(res["is_owned_root"])}{color_end}',
+                      f'{color_begin}{'-' if res["unknown"] else res["user_points"]}{color_end}',
+                      f'{color_begin}{'-' if res["unknown"] else res["root_points"]}{color_end}'
+                      )
+
+    return Panel(table,
+                 title=f"[bold yellow]{season_name}[/bold yellow]",
+                 border_style="yellow",
+                 title_align="left",
+                 expand=False)
 
 def create_season_list_table(seasons: list) -> Table | Panel:
     table = Table(expand=True, show_lines=False, box=None)

@@ -175,6 +175,19 @@ class HTBClient:
         return [SeasonList(data=x, _client=self) for x in data]
 
     # noinspection PyUnresolvedReferences
+    def get_current_season_machines(self) -> List["SeasonMachine"]:
+        """Get the machines of the current season"""
+        from .machine import SeasonMachine
+
+        data_dict: dict = self.htb_http_request.get_request(endpoint=f"season/machines")
+        if data_dict is None or len(data_dict.keys()) == 0 or "data" not in data_dict.keys():
+            return []
+
+        data: list = data_dict["data"]
+        return [SeasonMachine(_client=self, data=d) for d in data]
+
+
+    # noinspection PyUnresolvedReferences
     def get_challenge_list(self,
                            retired:bool = False,
                            unsolved: Optional[bool] = None,

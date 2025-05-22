@@ -1,4 +1,5 @@
 import argparse
+import datetime
 from typing import Optional, List
 
 from colorama import Fore, Style
@@ -6,8 +7,8 @@ from rich.panel import Panel
 from rich.table import Table
 
 from command.base import BaseCommand
-from console import create_season_list_table, create_season_panel
-from htbapi import SeasonList, User, SeasonUserDetails
+from console import create_season_list_table, create_season_panel, create_machine_list_table
+from htbapi import SeasonList, User, SeasonUserDetails, SeasonMachine
 
 
 class SeasonCommand(BaseCommand):
@@ -49,14 +50,14 @@ class SeasonCommand(BaseCommand):
         """Get details about the seasons"""
         user: User = self.client.get_user(self.username)
         if not self.checks(obj=user):
-            return None
+            return
 
         season_list: List[SeasonList] = self.client.get_season_list()
         if self.season_ids is not None:
             season_list = [x for x in season_list if x.id in [int(sid) for sid in self.season_ids.split(",")]]
             if len(season_list) == 0:
                 self.logger.warning(f'{Fore.LIGHTYELLOW_EX}There are no season for id(s) "{self.season_ids}"{Style.RESET_ALL}')
-                return None
+                return
 
         season_details: dict[int, SeasonUserDetails] = {}
         for season in season_list:
@@ -98,13 +99,29 @@ class SeasonCommand(BaseCommand):
         self.console.print(table)
 
 
+    def print_machines(self):
+        """Print the machines of the current season"""
+        machines: List[SeasonMachine] = self.client.get_current_season_machines()
+        if machines is None or len(machines) == 0:
+            self.logger.warning(f"{Fore.LIGHTYELLOW_EX}No machines found{Style.RESET_ALL}")
+            return
+
+        seasons: List[SeasonList] = self.client.get_season_list()
+        current_season_name = next(x.name for x in seasons if x.active)
+
+        machines = sorted(machines, key=lambda s: datetime.datetime.fromisocalendar(datetime.MAXYEAR, 1,1 ).toordinal() if s.release_date is None else s.release_date.toordinal())
+        self.console.print(create_machine_list_table(machine_info=[x.to_dict() for x in machines], season_name=current_season_name))
+
+
     def execute(self):
         """Execute the command"""
         if self.seasons_command is None:
-            return None
+            return
         if self.seasons_command == "list":
             self.list()
         elif self.seasons_command == "info":
             self.info()
+        elif self.seasons_command == "machine":
+            self.print_machines()
         else:
             self.logger.error(f'{Fore.RED}Unknown command: {self.seasons_command}{Style.RESET_ALL}')

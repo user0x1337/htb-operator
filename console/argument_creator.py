@@ -115,6 +115,7 @@ def _create_season_command_parser(subparsers):
     seasons_parser.set_defaults(func=SeasonCommand)
     seasons_sub_parser = seasons_parser.add_subparsers(title="commands", description="Available commands", dest="seasons")
     seasons_sub_parser.add_parser(name="list", help="List all Seasons")
+    seasons_sub_parser.add_parser(name="machine", help="List all machines of the current season")
     seasons_info_parser = seasons_sub_parser.add_parser(name="info", help="Get detailed information about the seasons for a specific user")
     seasons_info_parser.add_argument("-s", "--username",  metavar="USERNAME", type=str, default=None, help="Specify an username to retrieve their information. Default is the own user")
     seasons_info_parser.add_argument("--ids", type=str, metavar="<ID1,ID2,ID3,...>", default=None,  help='Get the information for the given season id. More IDs must be separated by commas[,]. Default: all seasons')
