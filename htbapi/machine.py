@@ -14,11 +14,11 @@ class MachineBase(client.BaseHtbApiObject):
     # noinspection PyUnresolvedReferences
     def __init__(self, data: dict, _client: "HTBClient"):
         self._client = _client
-        self.id = data['id']
-        self.name = data['name']
+        self.id = data.get('id', -1)
+        self.name = data.get('name', '-')
         self.ip = None if 'ip' not in data else data.get('ip')
 
-    def _execute_post_machine_call(self, endpoint: str) -> [bool, str]:
+    def _execute_post_machine_call(self, endpoint: str) -> tuple[bool, str]:
         try:
             data: dict = self._client.htb_http_request.post_request(endpoint=endpoint, json={'machine_id': self.id})
             if "success" in data and type(data["success"]) == str and data["success"] == '0':
@@ -29,19 +29,19 @@ class MachineBase(client.BaseHtbApiObject):
             return False, e.args[0]["message"]
         return data["success"], data["message"]
 
-    def start(self) -> [bool, str]:
+    def start(self) -> tuple[bool, str]:
         return self._execute_post_machine_call(endpoint="vm/spawn")
 
-    def stop(self) -> [bool, str]:
+    def stop(self) -> tuple[bool, str]:
         return self._execute_post_machine_call(endpoint="vm/terminate")
 
-    def reset(self) -> [bool, str]:
+    def reset(self) -> tuple[bool, str]:
         return self._execute_post_machine_call(endpoint="vm/reset")
 
-    def extend(self) -> [bool, str]:
+    def extend(self) -> tuple[bool, str]:
         return self._execute_post_machine_call(endpoint="vm/extend")
 
-    def submit(self, flag: str) -> [bool, str]:
+    def submit(self, flag: str) -> tuple[bool, str]:
         try:
             data: dict = self._client.htb_http_request.post_request(endpoint=f"machine/own",
                                                                     json={'machine_id': self.id, 'flag': flag},
@@ -50,7 +50,7 @@ class MachineBase(client.BaseHtbApiObject):
         except RequestException as e:
             return False, e.args[0]["message"]
 
-    def rate_flag(self, difficulty: int, flag_type: str) -> [bool, str]:
+    def rate_flag(self, difficulty: int, flag_type: str) -> tuple[bool, str]:
         """Rate the flag given by the type parameter ("root" or "user") """
         if difficulty < 1 or difficulty > 10:
             raise IncorrectArgumentException("Difficulty must be between 1 and 10")
@@ -509,4 +509,44 @@ class MachineChangelog(client.BaseHtbApiObject):
             "released": self.released,
             "created_at": self.created_at,
             "updated_at": self.updated_at
+        }
+
+class SeasonMachine(MachineBase):
+    unknown: bool
+    is_released: bool = False
+    is_owned_root: bool = False
+    is_owned_user: bool = False
+    release_date: Optional[datetime] = None
+    difficulty: Optional[str] = None
+    root_points: Optional[int] = None
+    user_points: Optional[int] = None
+
+    # noinspection PyUnresolvedReferences
+    def __init__(self, data: dict, _client: "HTBClient"):
+        super().__init__(data, _client)
+        self.unknown = data.get('unknown', False)
+        if self.id is not None and self.id > 0:
+            self.release_date = dateutil.parser.parse(data.get('release_time')).replace(tzinfo=timezone.utc)
+            self.difficulty = data.get('difficulty_text')
+            self.is_released = data.get('is_released', False)
+            self.is_owned_root = data.get('is_owned_root', False)
+            self.is_owned_user = data.get('is_owned_user', False)
+            self.root_points = data.get('root_points', 0)
+            self.user_points = data.get('user_points', 0)
+
+    def __repr__(self):
+        return f"<SeasonMachine '{self.name} | {self.id}'>"
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "unknown": self.unknown,
+            "is_released": self.is_released,
+            "difficulty": self.difficulty,
+            "release_date": self.release_date,
+            "root_points": self.root_points,
+            "user_points": self.user_points,
+            "is_owned_root": self.is_owned_root,
+            "is_owned_user": self.is_owned_user
         }
