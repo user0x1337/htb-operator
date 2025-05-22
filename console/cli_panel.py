@@ -450,11 +450,14 @@ def create_teams_info_panel(team_info: dict) -> Table:
     basic = {
         "ID": team_info["Id"],
         "Name": team_info["Name"],
-        "Rank": team_info["Rank"],
+        "Captain": team_info["CaptainUsername"],
         "Motto": team_info["Motto"],
         "Country Name": team_info["CountryName"],
         "Country Code": team_info["CountryCode"],
-        "Captain": team_info["CaptainUsername"]
+        "Points": team_info["Points"],
+        "Rank": team_info["Rank"],
+        "Current Bracket": team_info["CurrentBracket"],
+        "NextBracket": "-" if team_info["NextBracket"] is None else team_info["NextBracket"],
     }
 
     max_key_length = max(len(key) for key in basic.keys())

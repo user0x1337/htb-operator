@@ -19,6 +19,9 @@ class Team(Base):
     country_code: Optional[str]
     captain_user_id: Optional[int]
     captain_username: Optional[str]
+    points: int
+    current_bracket: str
+    next_bracket: str
     # noinspection PyUnresolvedReferences
     __team_members: List["User"] = []
 
@@ -31,6 +34,17 @@ class Team(Base):
         self.country_code = data.get('country_code', None)
         self.captain_user_id = data["captain"]["id"] if "captain" in data else None
         self.captain_username = data["captain"]["name"]
+
+        ranking_data: dict = self._client.htb_http_request.get_request(endpoint=f"rankings/team/ranking_bracket/{self.id}")
+        if ranking_data is None or len(ranking_data.keys()) == 0 or "data" not in ranking_data.keys():
+            ranking_data = {}
+        else:
+            ranking_data = ranking_data["data"]
+
+        self.rank = str(ranking_data.get('rank', 0))
+        self.points = ranking_data.get('points', 0)
+        self.current_bracket = ranking_data.get('current_bracket', "")
+        self.next_bracket = ranking_data.get('next_bracket', "")
 
 
     # noinspection PyUnresolvedReferences
@@ -59,7 +73,10 @@ class Team(Base):
             "CountryCode": self.country_code,
             "CaptainUserID": self.captain_user_id,
             "CaptainUsername": self.captain_username,
-            "TeamMembers": [x.to_dict(export_team=False) for x in self.__team_members]
+            "TeamMembers": [x.to_dict(export_team=False) for x in self.__team_members],
+            "Points": self.points,
+            "CurrentBracket": self.current_bracket,
+            "NextBracket": self.next_bracket
         }
 
 class University(Base):
