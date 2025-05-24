@@ -77,7 +77,7 @@ def create_machine_list_table(machine_info: list, season_name: str) -> Table | P
 
         date = res["release_date"]
         is_current_week = (date is not None and
-                           date.date() <= datetime.now().date() <= (date.date() + timedelta(days=7)))
+                           date.date() <= datetime.now().date() <= (date.date() + timedelta(days=6)))
         is_next_week = (date is not None and
                            datetime.now().date() <= date.date())
 
