@@ -40,21 +40,25 @@ pipx install htb-operator
 
 # Configuration
 You need an API-token from HTB. For that:
+
+---
 1. Visit the URL: [https://app.hackthebox.com/account-settings](https://app.hackthebox.com/account-settings)
 
+---
 2. Click on "Create App Token"
-   
-![image](https://github.com/user-attachments/assets/48024f28-df90-4f39-b285-5a09a2ac8bb5)
+<img width="1465" height="181" alt="image" src="https://github.com/user-attachments/assets/99e85feb-020c-4ffb-9f37-54f437d42a78" />
 
+---
 3. Create a token
-   
-![image](https://github.com/user-attachments/assets/045e6828-fa0b-4cc7-b644-33384fc1e901)
+<img width="567" height="409" alt="image" src="https://github.com/user-attachments/assets/69d3edbc-b66b-454c-a33f-7ec339177696" />
 
+---
 4. Store the token
-   
-![image](https://github.com/user-attachments/assets/5eb05a1f-4716-4d23-869f-29255fb7404f)
+<img width="562" height="389" alt="image" src="https://github.com/user-attachments/assets/78631296-fc5c-4de8-9f7a-df47a20b5482" />
 
+---
 5. Call `htb-operator init -api YOUR_API_TOKEN`
+---
 
 The API token (and some other settings) will be locally stored on your system in `$HOME/.config/htb-operator/config.ini` (Linux) / `%APPDATA%\htb-operator\config.ini` (Windows).
 
