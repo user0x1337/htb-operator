@@ -40,7 +40,7 @@ pipx install htb-operator
 
 # Configuration
 You need an API-token from HTB. For that:
-1. Visit the URL: [https://app.hackthebox.com/profile/settings](https://app.hackthebox.com/profile/settings)
+1. Visit the URL: [https://app.hackthebox.com/account-settings](https://app.hackthebox.com/account-settings)
 
 2. Click on "Create App Token"
    
