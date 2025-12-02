@@ -21,6 +21,7 @@ dependencies = [
     "pexpect",
     "pyreadline3",
     "python-dateutil",
+    "libarchive-c",
     "rich",
     "pillow",
     "python-hosts",
