@@ -6,6 +6,7 @@ psutil
 pexpect
 pyreadline3
 python-dateutil
+libarchive-c
 rich
 pillow
 python-hosts==1.0.7
