@@ -2,7 +2,7 @@ import argparse
 import hashlib
 import os
 import threading
-import zipfile
+from libarchive import file_reader
 from pathlib import Path
 from typing import Optional, List
 
@@ -120,8 +120,21 @@ class ChallengeCommand(BaseCommand):
             self.logger.info(f'{Fore.GREEN}Good luck solving this challenge.{Style.RESET_ALL}')
 
         if self.args.unzip:
-            with zipfile.ZipFile(filepath, "r") as zip_ref:
-                zip_ref.extractall(path=os.path.dirname(filepath), pwd=DEFAULT_HTB_DOWNLOAD_PASSWORD.encode("utf8"))
+            base_dir = os.path.dirname(os.path.abspath(filepath))
+            with file_reader(path=filepath, passphrase=DEFAULT_HTB_DOWNLOAD_PASSWORD) as entries:
+                for entry in entries:
+                   path = Path(entry.pathname)
+                   target_path = Path(base_dir) / path
+
+                   if entry.isdir:
+                       target_path.mkdir(parents=True, exist_ok=True)
+                       continue
+
+                   target_path.parent.mkdir(parents=True, exist_ok=True)
+
+                   with open(target_path, "wb") as f:
+                       for block in entry.get_blocks():
+                           f.write(block)
             self.logger.info(f'{Fore.GREEN}Zip file extracted to {os.path.dirname(filepath)}{Style.RESET_ALL}')
             if self.args.clear:
                 os.remove(filepath)
