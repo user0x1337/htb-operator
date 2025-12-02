@@ -9,5 +9,4 @@ There are some bugfixes.
 - `-`
 
 ### Fixed
-- Removed endgame because it is not supported by HTB, anymore.
-- Fix prolabs API calls
+- #27: Fixed an unzipping bug in challenges. HTB changed the algorithm of their zip files.
