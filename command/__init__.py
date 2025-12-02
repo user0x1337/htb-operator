@@ -2,6 +2,7 @@ from .machine import MachineCommand
 from .challenge import ChallengeCommand
 from .base import InsufficientPermissions
 from .vpn import VpnCommand
+from .respect import RespectCommand
 from .prolabs import ProlabsCommand
 from .season import SeasonCommand
 from .pwnbox import PwnBoxCommand

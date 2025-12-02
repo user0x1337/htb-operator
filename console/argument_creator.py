@@ -54,6 +54,9 @@ def create_arg_parser(htb_cli: "HtbCLI") -> ArgumentParser:
     # Badges command
     _create_badge_command_parser(subparsers=subparsers)
 
+    # Respect command
+    _create_respect_command_parser(subparsers=subparsers)
+
     # help command
     subparsers.add_parser("help", help="show this help message and exit")
 
@@ -70,6 +73,11 @@ def _create_vhosts_command_parser(subparsers):
     vhost_add_sub_parser.add_argument("--no-machine-hostname", action="store_true" ,help="If indicated, the machine hostname will not be added automatically to the vhost.")
     vhost_sub_parser.add_parser(name="add-hostname", help='Add the hostname of the active running machine (e.g. for the machine "Alert" the hostname "alert.htb" will be added)')
 
+
+def _create_respect_command_parser(subparsers):
+    from command import RespectCommand
+    vhost_parser: ArgumentParser = subparsers.add_parser("respect", help="If you like htb-operator, please give the author a HTB respect (which is free of charge) by running this command")
+    vhost_parser.set_defaults(func=RespectCommand)
 
 def _create_badge_command_parser(subparsers):
     from command import BadgeCommand

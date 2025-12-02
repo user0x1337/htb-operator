@@ -39,13 +39,17 @@ class HTBClient:
 
         data = self.htb_http_request.get_request(endpoint=f"user/profile/basic/{user_id}")["profile"]
 
-        # Ranking brackets are only provided for own (authenticated) user. If username is None, we will definitely retrieve
+        # Ranking brackets are only provided for own (authenticated) user. If the username is None, we will definitely retrieve
         # the information for the own user.
         ranking_bracket = self.get_user_ranking() if username is None else None
 
         user: User = User(_client=self, data=data, ranking_bracket=ranking_bracket)
         _user_cache[user_id] = user
         return user
+
+    def give_user_respect(self, user_id: int) -> None:
+        """Give respect to a user by adding a +1 to their respect count."""
+        self.htb_http_request.post_request(endpoint=f"user/respect/{user_id}")
 
     # noinspection PyUnresolvedReferences
     def search_challenges(self, name: str,

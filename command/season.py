@@ -3,7 +3,6 @@ import datetime
 from typing import Optional, List
 
 from colorama import Fore, Style
-from rich.panel import Panel
 from rich.table import Table
 
 from command.base import BaseCommand
