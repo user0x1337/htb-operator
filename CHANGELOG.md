@@ -3,10 +3,10 @@
 There are some bugfixes.
 
 ### Added
-- `-` 
+- #1: Upcoming challenges are now displayed. 
 
 ### Changed 
 - `-`
 
 ### Fixed
-- #27: Fixed an unzipping bug in challenges. HTB changed the algorithm of their zip files.
+- `-`
