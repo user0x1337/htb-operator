@@ -39,6 +39,7 @@ class ChallengeBase(client.BaseHtbApiObject):
         self.solved = data.get('authUserSolve', False)
         self.isTodo = data.get('isTodo', False)
         self.recommended = data.get('recommended', 0)
+        self.state = data.get("state", "retired")
 
         if self.difficulty.lower() == "very easy":
             self.difficulty_num = 0
@@ -69,6 +70,7 @@ class ChallengeBase(client.BaseHtbApiObject):
             'isTodo': self.isTodo,
             'recommended': self.recommended,
             'difficulty_num': self.difficulty_num,
+            'state': self.state,
             }
 
     def submit(self, flag: str, difficulty: int):
@@ -183,8 +185,19 @@ class ChallengeList(ChallengeBase):
     # noinspection PyUnresolvedReferences
     def __init__(self, data: dict, _client: "HTBClient"):
         super().__init__(data, _client)
-        self.category_id = int(data.get("challenge_category_id", -1))
-        self.rating = data.get('rating', 0.0)
+
+        if "challenge_category_id" in data:
+            self.category_id = int(data.get("challenge_category_id", -1))
+        elif "category_id" in data:
+            self.category_id = int(data.get("category_id", -1))
+        else:
+            self.category_id = -1
+
+        if "rating" in data and data["rating"] is None:
+            self.rating = 0.0
+        else:
+            self.rating = data.get('rating', 0.0)
+
         self.avg_difficulty = data.get('avg_difficulty', 0)
         self.isActive = data.get('isActive', False)
 

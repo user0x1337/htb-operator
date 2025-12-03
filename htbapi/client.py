@@ -212,10 +212,15 @@ class HTBClient:
         if retired:
             data: list = self.htb_http_request.get_request(endpoint=f"challenge/list/retired")["challenges"]
         else:
-            data: list = self.htb_http_request.get_request(endpoint=f"challenge/list")["challenges"]
+            data: list =  self.htb_http_request.get_request(endpoint=f"challenge/list")["challenges"]
+            try:
+                data = data + self.htb_http_request.get_request(endpoint=f"challenges?state=unreleased&sort_type=asc")["data"]
+            except:
+                # Do nothing... We already got a valid list of challenges
+                pass
 
         return [ChallengeList(_client=self, data=d) for d in data
-                if unsolved is None and d["authUserSolve"] == d["authUserSolve"] or d["authUserSolve"] != unsolved
+                if unsolved is None or "authUserSolve" not in d or d["authUserSolve"] == d["authUserSolve"] or d["authUserSolve"] != unsolved
                 if filter_todo is None or not filter_todo or (d["isTodo"] == filter_todo)
                 if filter_category_list is None or len(filter_category_list) == 0 or (d["challenge_category_id"] in filter_category_list)
                 if filter_difficulty is None or (d["difficulty"].lower() == filter_difficulty.lower())]
