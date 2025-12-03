@@ -290,7 +290,12 @@ def _create_challenge_list_table_rows(challenge_info: List[dict], table: Table, 
             color = "bright_white"
 
         retiring: bool = False
-        if "retiring" in c and c["retiring"]:
+        upcoming: bool = False
+        if c["state"] == "unreleased":
+            upcoming = True
+            retiring_font_begin = "[bold bright_magenta]"
+            retiring_font_end = "[/bold bright_magenta]"
+        elif "retiring" in c and c["retiring"]:
             retiring = True
             retiring_font_begin = "[bold cyan]"
             retiring_font_end = "[/bold cyan]"
@@ -305,7 +310,7 @@ def _create_challenge_list_table_rows(challenge_info: List[dict], table: Table, 
                       f'{retiring_font_begin}{c["avg_difficulty"]}{retiring_font_end}',
                       f'{retiring_font_begin}{c["points"]}{retiring_font_end}',
                       f'{retiring_font_begin}{format_bool(c["solved"], color_true="green")}{retiring_font_end}',
-                      f'{retiring_font_begin}{format_bool(c["retired"], color_true="blue")}{retiring_font_end}',
+                      f'{retiring_font_begin}{format_bool(False, color_true="bright_magenta") + "/" + format_bool(True, color_true="bright_magenta") if upcoming else format_bool(c["retired"], color_true="blue")}{retiring_font_end}',
                       f'{retiring_font_begin}{round(c["rating"], 2)}{retiring_font_end}',
                       f'{retiring_font_begin}{format_bool(c["isTodo"])}{retiring_font_end}',
                       f'{retiring_font_begin}{c["release_date"].strftime('%Y-%m-%d')}{retiring_font_end}'
