@@ -33,6 +33,9 @@ def create_arg_parser(htb_cli: "HtbCLI") -> ArgumentParser:
     # proxy command
     _create_proxy_command_parser(subparsers=subparsers)
 
+    # config command
+    _create_config_command_parser(subparsers=subparsers)
+
     # version command
     _create_version_command_parser(subparsers=subparsers)
 
@@ -216,6 +219,16 @@ def _create_proxy_command_parser(subparsers):
                               help='Specify the http(s) proxy in the form "<http_proxy>,<https_proxy>" seperated by ","')
     proxy_parser.add_argument("--clear", action="store_true", help="Clear the proxies")
     proxy_parser.set_defaults(func=ProxyCommand)
+
+
+def _create_config_command_parser(subparsers):
+    from command import ConfigCommand
+
+    config_parser: ArgumentParser = subparsers.add_parser("config", help="General configuration settings")
+    ssl_group = config_parser.add_mutually_exclusive_group()
+    ssl_group.add_argument("--verify-ssl", action="store_true", help="Enable SSL certificate verification")
+    ssl_group.add_argument("--no-verify-ssl", action="store_true", help="Disable SSL certificate verification")
+    config_parser.set_defaults(func=ConfigCommand)
 
 
 def _create_init_command_parser(subparsers):

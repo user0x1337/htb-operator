@@ -37,14 +37,28 @@ class HtbCLI:
         except PackageNotFoundError:
             self.version = "0.0.0.1"
 
-        self.proxy = self.config["Proxy"] if "Proxy" in self.config else None
+        self.proxy = self.config["Proxy"] if "Proxy" in self.config else {}
+
+        # Migrate old verify_ssl location from Proxy section to HTB section
+        if "Proxy" in self.config and "verify_ssl" in self.config["Proxy"]:
+            if "HTB" not in self.config:
+                self.config["HTB"] = {}
+            self.config["HTB"]["verify_ssl"] = self.config["Proxy"]["verify_ssl"]
+            del self.config["Proxy"]["verify_ssl"]
+            self.save_config_file()
 
         if self.api_key is not None:
+            if "HTB" in self.config and "verify_ssl" in self.config["HTB"]:
+                verify_ssl = self.config["HTB"]["verify_ssl"].strip().lower() == "true"
+            else:
+                verify_ssl = True
+
             if htb_http_request is None:
                 htb_http_request = HtbHtbHttpRequest(app_token=self.api_key,
                                                      api_base=self._api_base,
                                                      user_agent=self._user_agent,
-                                                     proxy=self.proxy)
+                                                     proxy=self.proxy if self.proxy else None,
+                                                     verify_ssl=verify_ssl)
             self.client = HTBClient(htb_http_request=htb_http_request)
 
     def get_base_store_dir(self) -> str:
