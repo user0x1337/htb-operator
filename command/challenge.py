@@ -193,11 +193,44 @@ class ChallengeCommand(BaseCommand):
 
         filter_category_id = None
         cat_filter_list = self._get_filter_category_list(category_dict)
-        challenge_list: List[ChallengeList] = self.client.get_challenge_list(retired=self.args.retired,
-                                                                             unsolved=unsolved,
-                                                                             filter_todo=self.args.todo,
-                                                                             filter_category_list=cat_filter_list,
-                                                                             filter_difficulty=self.args.difficulty)
+
+        # Handle --all, --active, --retired flags
+        if hasattr(self.args, 'all') and self.args.all:
+            # Fetch both active and retired challenges
+            active_challenges: List[ChallengeList] = self.client.get_challenge_list(
+                retired=False,
+                unsolved=unsolved,
+                filter_todo=self.args.todo,
+                filter_category_list=cat_filter_list,
+                filter_difficulty=self.args.difficulty,
+            )
+            retired_challenges: List[ChallengeList] = self.client.get_challenge_list(
+                retired=True,
+                unsolved=unsolved,
+                filter_todo=self.args.todo,
+                filter_category_list=cat_filter_list,
+                filter_difficulty=self.args.difficulty,
+            )
+            challenge_list = active_challenges + retired_challenges
+        elif hasattr(self.args, 'retired') and self.args.retired:
+            # Fetch only retired challenges
+            challenge_list: List[ChallengeList] = self.client.get_challenge_list(
+                retired=True,
+                unsolved=unsolved,
+                filter_todo=self.args.todo,
+                filter_category_list=cat_filter_list,
+                filter_difficulty=self.args.difficulty,
+            )
+        else:
+            # Default behavior (backwards compatible): fetch active challenges
+            # This covers both explicit --active and no flag at all
+            challenge_list: List[ChallengeList] = self.client.get_challenge_list(
+                retired=False,
+                unsolved=unsolved,
+                filter_todo=self.args.todo,
+                filter_category_list=cat_filter_list,
+                filter_difficulty=self.args.difficulty,
+            )
 
         self.console.print((create_table_challenge_list(challenge_list=sorted([x.to_dict() for x in challenge_list], key=lambda x: x["difficulty_num"]), category_dict=category_dict)))
 

@@ -298,8 +298,13 @@ def _create_challenge_command_parser(subparsers):
                                                            dest="challenge")
     challenge_list_parser: ArgumentParser = challenge_sub_parser.add_parser(name="list",
                                                                             help="List all available challenges")
-    challenge_list_parser.add_argument("--retired", action="store_true", default=False,
+    challenge_status_group = challenge_list_parser.add_mutually_exclusive_group()
+    challenge_status_group.add_argument("--active", action="store_true", default=False,
+                                       help="only active challenges are listed (default behavior)")
+    challenge_status_group.add_argument("--retired", action="store_true", default=False,
                                        help="only retired challenges are listed")
+    challenge_status_group.add_argument("--all", action="store_true", default=False,
+                                       help="list all challenges (both active and retired)")
     challenge_list_parser.add_argument("--unsolved", action="store_true", help="only unsolved challenges are listed")
     challenge_list_parser.add_argument("--solved", action="store_true",
                                        help="only solved challenges are listed. If both --solved and --unsolved are specified, just unsolved will be returned")
