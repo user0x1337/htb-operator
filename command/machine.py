@@ -33,6 +33,7 @@ class MachineCommand(BaseCommand):
     limit_search: Optional[int]
     retired_machines: Optional[bool]
     active_machines: Optional[bool]
+    all_machines: Optional[bool]
 
 
     # noinspection PyUnresolvedReferences
@@ -52,6 +53,7 @@ class MachineCommand(BaseCommand):
         self.search_keyword = args.search if hasattr(args, "search") else None
         self.limit_search = args.limit if hasattr(args, "limit") else None
         self.active_machines = args.active if hasattr(args, "active") else None
+        self.all_machines = args.all if hasattr(args, "all") else None
 
 
         # Writing into hosts file needs root/admin privileges
@@ -327,9 +329,9 @@ class MachineCommand(BaseCommand):
         active_machine: ActiveMachineInfo = self.client.get_active_machine()
         if active_machine is None or active_machine.id != machine.id:
             if active_machine is not None and active_machine.id != machine.id:
-                start_new_maschine: bool = (input(
+                start_new_machine: bool = (input(
                     f'{Fore.LIGHTYELLOW_EX}The machine "{active_machine.name}" (ID: {active_machine.id}) already spawned. Do you want to stop the machine to start the machine "{machine.name}" (y/N): {Style.RESET_ALL}').strip().lower() == "y")
-                if not start_new_maschine:
+                if not start_new_machine:
                     return None
                 else:
                     self.args.stop_vpn = active_machine.vpn_server_id not in [x.server_id for x in self.client.get_active_connections()]
@@ -393,15 +395,18 @@ class MachineCommand(BaseCommand):
         retiring_machines: List[MachineInfo] = [x[1] for x in scheduled_machines]
 
         machines_result: List[MachineInfo] = []
-        # No filter set? -> Get all machines (both active and retired ones)
-        if self.retired_machines is None and self.active_machines is None or (not self.retired_machines and not self.active_machines):
+        # Handle --all, --active, --retired flags
+        if self.all_machines:
+            # Fetch both active and retired machines
             machines_result += self.client.get_machine_list(retired=False, keyword=self.search_keyword, limit=self.limit_search, os_filter=os_filter)
             machines_result += self.client.get_machine_list(retired=True, keyword=self.search_keyword, limit=self.limit_search, os_filter=os_filter)
             machines_result += [x[0] for x in scheduled_machines]
-
         elif self.retired_machines:
+            # Fetch only retired machines
             machines_result += self.client.get_machine_list(retired=True, keyword=self.search_keyword, limit=self.limit_search, os_filter=os_filter)
-        elif self.active_machines:
+        else:
+            # Default behavior (backwards compatible): fetch active machines
+            # This covers both explicit --active and no flag at all
             machines_result += self.client.get_machine_list(retired=False, keyword=self.search_keyword, limit=self.limit_search, os_filter=os_filter)
 
         if len(machines_result) == 0:
@@ -411,14 +416,14 @@ class MachineCommand(BaseCommand):
         if self.args.group_by_os:
             self.console.print(create_machine_list_group_by_os(machine_info=[x.to_dict() for x in machines_result]))
         else:
-            maschine_dict_list = []
+            machine_dict_list = []
             for machine in machines_result:
                 machine_dict = machine.to_dict()
                 if machine in retiring_machines:
                     machine_dict["retiring"] = True
-                maschine_dict_list.append(machine_dict)
+                machine_dict_list.append(machine_dict)
 
-            self.console.print(create_machine_list_group_by_retired(machine_info=maschine_dict_list))
+            self.console.print(create_machine_list_group_by_retired(machine_info=machine_dict_list))
 
 
     def reset_machine(self):

@@ -12,6 +12,7 @@ class SherlockCommand(BaseCommand):
     sherlock_command: Optional[str]
     sherlock_only_active: Optional[bool]
     sherlock_only_retired: Optional[bool]
+    sherlock_all: Optional[bool]
     filter_category: Optional[str]
 
     # noinspection PyUnresolvedReferences
@@ -20,6 +21,7 @@ class SherlockCommand(BaseCommand):
         self.sherlock_command = args.sherlock if hasattr(args, "sherlock") else None
         self.sherlock_only_active = args.active if hasattr(args, "active") else None
         self.sherlock_only_retired = args.retired if hasattr(args, "retired") else None
+        self.sherlock_all = args.all if hasattr(args, "all") else None
         self.filter_category = args.filter_category if hasattr(args, "filter_category") else None
 
     def list(self):
@@ -33,9 +35,35 @@ class SherlockCommand(BaseCommand):
                     continue
                 cats.append(filter_dict[filter_element.lower()])
 
-        sherlocks: List[SherlockInfo] = self.client.get_sherlocks(only_active=self.sherlock_only_active,
-                                                                  only_retired=self.sherlock_only_retired,
-                                                                  filter_sherlock_category=cats)
+        # Handle --all, --active, --retired flags
+        if self.sherlock_all:
+            # Fetch both active and retired sherlocks
+            active_sherlocks: List[SherlockInfo] = self.client.get_sherlocks(
+                only_active=True,
+                only_retired=False,
+                filter_sherlock_category=cats,
+            )
+            retired_sherlocks: List[SherlockInfo] = self.client.get_sherlocks(
+                only_active=False,
+                only_retired=True,
+                filter_sherlock_category=cats,
+            )
+            sherlocks = active_sherlocks + retired_sherlocks
+        elif self.sherlock_only_retired:
+            # Fetch only retired sherlocks
+            sherlocks: List[SherlockInfo] = self.client.get_sherlocks(
+                only_active=False,
+                only_retired=True,
+                filter_sherlock_category=cats,
+            )
+        else:
+            # Default behavior: fetch active sherlocks
+            # This covers both explicit --active and no flag at all
+            sherlocks: List[SherlockInfo] = self.client.get_sherlocks(
+                only_active=True,
+                only_retired=False,
+                filter_sherlock_category=cats,
+            )
 
         self.console.print(create_sherlock_list_group_by_retired_panel(
             sherlock_info=sorted([x.to_dict() for x in sherlocks],

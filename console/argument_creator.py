@@ -97,9 +97,14 @@ def _create_sherlock_command_parser(subparsers):
     sherlock_parser: ArgumentParser = subparsers.add_parser("sherlock", help="Commands for Sherlock")
     sherlock_parser.set_defaults(func=SherlockCommand)
     sherlock_sub_parser = sherlock_parser.add_subparsers(title="commands", description="Available commands", dest="sherlock")
-    sherlock_list_parser = sherlock_sub_parser.add_parser(name="list", help="List all sherlock")
-    sherlock_list_parser.add_argument("--active", action="store_true",help="Only active shelocks are displayed")
-    sherlock_list_parser.add_argument("--retired", action="store_true", help='Only retired shelocks are displayed. If "--active" is also indicated, "--retired" is ignored')
+    sherlock_list_parser = sherlock_sub_parser.add_parser(name="list", help="List active sherlocks")
+    sherlock_status_group = sherlock_list_parser.add_mutually_exclusive_group()
+    sherlock_status_group.add_argument("--active", action="store_true", default=False,
+                                      help="only active sherlocks are listed (default behavior)")
+    sherlock_status_group.add_argument("--retired", action="store_true", default=False,
+                                      help="only retired sherlocks are listed")
+    sherlock_status_group.add_argument("--all", action="store_true", default=False,
+                                      help="list all sherlocks (both active and retired)")
     sherlock_list_parser.add_argument("--filter-category", type=str, default=None, metavar="<CATEGORY-NAME>", help='Displays only the sherlocks which belongs to the given category. Adding more than one category must be seperated by commas [,]')
 
 
@@ -247,11 +252,11 @@ def _create_machine_command_parser(subparsers):
     machine_start.add_argument("--vhost-hostname", type=str, metavar="<HOSTNAME>", required=False, help="Add <HOSTNAME> to the hosts file. Adding more than one host must be seperated by commas [,]")
     machine_start.add_argument("--vhost-no-machine-hostname", action="store_true", help="If indicated, the machine hostname will not be added automatically to the vhost.")
 
-    maschine_stop_parser = machine_sub_parser.add_parser(name="stop", help="Stop the active machine. If no machine is active, this command will have no effect.")
-    maschine_stop_parser.add_argument("--clean-hosts-file", action="store_true", help='The machine\'s hosts will be removed from the hosts file. SUDO/Root privileges are required!')
-    maschine_stop_parser.add_argument("--stop-vpn", action="store_true", help='Stops all HTB VPN connection.')
-    maschine_reset_parser = machine_sub_parser.add_parser(name="reset", help="Reset the active machine. If no machine is active, this command will have no effect.")
-    maschine_reset_parser.add_argument("--update-hosts-file", action="store_true", help='The machine\'s hosts will be added to or be updated the hosts file after an IP is assigned. The machine name plus ".htb" is used as hostname. SUDO/Root privileges are required!')
+    machine_stop_parser = machine_sub_parser.add_parser(name="stop", help="Stop the active machine. If no machine is active, this command will have no effect.")
+    machine_stop_parser.add_argument("--clean-hosts-file", action="store_true", help='The machine\'s hosts will be removed from the hosts file. SUDO/Root privileges are required!')
+    machine_stop_parser.add_argument("--stop-vpn", action="store_true", help='Stops all HTB VPN connection.')
+    machine_reset_parser = machine_sub_parser.add_parser(name="reset", help="Reset the active machine. If no machine is active, this command will have no effect.")
+    machine_reset_parser.add_argument("--update-hosts-file", action="store_true", help='The machine\'s hosts will be added to or be updated the hosts file after an IP is assigned. The machine name plus ".htb" is used as hostname. SUDO/Root privileges are required!')
 
     machine_sub_parser.add_parser(name="status", help="Displays the active machine(s)")
     machine_sub_parser.add_parser(name="extend",help="Extends the uptime of the active machine")
@@ -259,17 +264,22 @@ def _create_machine_command_parser(subparsers):
     machine_info_parser = machine_sub_parser.add_parser(name="info", help="Displays detailed information for a machine")
     add_id_name_arguments(machine_info_parser)
 
-    maschine_list_parser = machine_sub_parser.add_parser(name="list", help="Lists all machines")
-    maschine_list_parser.add_argument("--retired", action="store_true", help="Lists only retired machines")
-    maschine_list_parser.add_argument("--active", action="store_true", help="Lists only active machines")
-    maschine_list_parser.add_argument("--limit", type=int, metavar="<LIMIT>", default=20, help="Lists the recent <LIMIT> machines of each type, separately (active vs. retired). Default: 20")
-    maschine_list_parser.add_argument("--search", type=str, metavar="<Keyword>", required=False, default=None, help="Search for machines which contains <KEYWORD> in their names.")
-    maschine_list_parser.add_argument("--filter-win", action="store_true", help="Filter machines with Windows OS")
-    maschine_list_parser.add_argument("--filter-linux", action="store_true", help="Filter machines with Linux OS")
-    maschine_list_parser.add_argument("--filter-freebsd", action="store_true", help="Filter machines with FreeBSD OS")
-    maschine_list_parser.add_argument("--filter-openbsd", action="store_true", help="Filter machines with OpenBSD OS")
-    maschine_list_parser.add_argument("--filter-other-os", action="store_true", help="Filter machines with other OS")
-    maschine_list_parser.add_argument("--group-by-os", action="store_true", help="Groups the results by OS")
+    machine_list_parser = machine_sub_parser.add_parser(name="list", help="List active machines")
+    machine_status_group = machine_list_parser.add_mutually_exclusive_group()
+    machine_status_group.add_argument("--active", action="store_true", default=False,
+                                     help="only active machines are listed (default behavior)")
+    machine_status_group.add_argument("--retired", action="store_true", default=False,
+                                     help="only retired machines are listed")
+    machine_status_group.add_argument("--all", action="store_true", default=False,
+                                     help="list all machines (both active and retired)")
+    machine_list_parser.add_argument("--limit", type=int, metavar="<LIMIT>", default=20, help="Lists the recent <LIMIT> machines of each type, separately (active vs. retired). Default: 20")
+    machine_list_parser.add_argument("--search", type=str, metavar="<Keyword>", required=False, default=None, help="Search for machines which contains <KEYWORD> in their names.")
+    machine_list_parser.add_argument("--filter-win", action="store_true", help="Filter machines with Windows OS")
+    machine_list_parser.add_argument("--filter-linux", action="store_true", help="Filter machines with Linux OS")
+    machine_list_parser.add_argument("--filter-freebsd", action="store_true", help="Filter machines with FreeBSD OS")
+    machine_list_parser.add_argument("--filter-openbsd", action="store_true", help="Filter machines with OpenBSD OS")
+    machine_list_parser.add_argument("--filter-other-os", action="store_true", help="Filter machines with other OS")
+    machine_list_parser.add_argument("--group-by-os", action="store_true", help="Groups the results by OS")
 
     machine_submit_flag: ArgumentParser = machine_sub_parser.add_parser(name="submit", help="Submit the flag to the active machine")
     machine_submit_flag.add_argument("-ufl", "--user-flag", type=str, metavar="Flag", help="The user flag")
@@ -297,7 +307,7 @@ def _create_challenge_command_parser(subparsers):
     challenge_sub_parser = challenge_parser.add_subparsers(title="commands", description="Available commands",
                                                            dest="challenge")
     challenge_list_parser: ArgumentParser = challenge_sub_parser.add_parser(name="list",
-                                                                            help="List all available challenges")
+                                                                            help="List active challenges")
     challenge_status_group = challenge_list_parser.add_mutually_exclusive_group()
     challenge_status_group.add_argument("--active", action="store_true", default=False,
                                        help="only active challenges are listed (default behavior)")
