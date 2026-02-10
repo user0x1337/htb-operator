@@ -75,7 +75,7 @@ class HTBClient:
                                                   "avg_difficulty": d["user_difficulty"],
                                                   "authUserSolve": d["is_owned"]
                                                   }) for d in data
-                if unsolved is None and d["is_owned"] == d["is_owned"] or d["is_owned"] != unsolved
+                if unsolved is None or d["is_owned"] != unsolved
                 if filter_todo is None or not filter_todo or (d["isTodo"] == filter_todo)
                 if filter_category_list is None or len(filter_category_list) == 0 or (
                             d["category_id"] in filter_category_list)
@@ -220,7 +220,7 @@ class HTBClient:
                 pass
 
         return [ChallengeList(_client=self, data=d) for d in data
-                if unsolved is None or "authUserSolve" not in d or d["authUserSolve"] == d["authUserSolve"] or d["authUserSolve"] != unsolved
+                if unsolved is None or "authUserSolve" not in d or d["authUserSolve"] != unsolved
                 if filter_todo is None or not filter_todo or (d["isTodo"] == filter_todo)
                 if filter_category_list is None or len(filter_category_list) == 0 or (d["challenge_category_id"] in filter_category_list)
                 if filter_difficulty is None or (d["difficulty"].lower() == filter_difficulty.lower())]
