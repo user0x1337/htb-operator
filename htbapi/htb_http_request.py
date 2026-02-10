@@ -56,7 +56,8 @@ class HtbHtbHttpRequest(BaseHtbHttpRequest):
                  user_agent: str,
                  download_cooldown: int = 30,
                  api_version: str = "v4",
-                 proxy: Optional[dict] = None) -> None:
+                 proxy: Optional[dict] = None,
+                 verify_ssl: bool = True) -> None:
         super().__init__(app_token=app_token,
                          api_base=api_base,
                          user_agent=user_agent,
@@ -67,10 +68,10 @@ class HtbHtbHttpRequest(BaseHtbHttpRequest):
         self._verify_ssl = True
         # noinspection PyUnresolvedReferences
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-        if proxy is not None:
+        self.set_verify_ssl(verify_ssl)
+        if proxy is not None and ("http" in proxy or "https" in proxy):
             self.set_proxies({"http": proxy["http"] if "http" in proxy and len(proxy["http"]) > 0 else None,
                               "https": proxy["https"] if "https" in proxy and len(proxy["https"]) > 0 else None})
-            self.set_verify_ssl(proxy["verify_ssl"].strip().lower() == "true" if "verify_ssl" in proxy else True)
 
         self._http_headers = {"Authorization": f"Bearer {self._app_token}",
                               "User-Agent": self._user_agent,

@@ -27,7 +27,6 @@ class ProxyCommand(BaseCommand):
             if len(proxy_list) > 1:
                 self.htb_cli.config["Proxy"]["https"] = proxy_list[1]
 
-            self.htb_cli.config["Proxy"]["verify_ssl"] = str(False)
             self.htb_cli.save_config_file()
         else:
             pass
