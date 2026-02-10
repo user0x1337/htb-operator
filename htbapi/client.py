@@ -222,7 +222,7 @@ class HTBClient:
         return [ChallengeList(_client=self, data=d) for d in data
                 if unsolved is None or "authUserSolve" not in d or d["authUserSolve"] != unsolved
                 if filter_todo is None or not filter_todo or (d["isTodo"] == filter_todo)
-                if filter_category_list is None or len(filter_category_list) == 0 or (d["challenge_category_id"] in filter_category_list)
+                if filter_category_list is None or len(filter_category_list) == 0 or (("category_id" in d and d["category_id"] in filter_category_list) or d["challenge_category_id"] in filter_category_list)
                 if filter_difficulty is None or (d["difficulty"].lower() == filter_difficulty.lower())]
 
     # noinspection PyUnresolvedReferences
