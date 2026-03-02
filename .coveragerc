@@ -1,0 +1,11 @@
+[run]
+branch = True
+source = htbapi
+omit =
+    tests/*
+    .venv/*
+    */__pycache__/*
+
+[report]
+show_missing = True
+skip_covered = False
