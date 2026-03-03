@@ -1,0 +1,85 @@
+name: Unit Tests
+
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run unit tests
+        run: |
+          pytest --junitxml=pytest-report.xml
+
+      - name: Upload test and coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-report
+          path: |
+            pytest-report.xml
+            coverage.xml
+            coverage-html
+          if-no-files-found: warn
+
+      - name: Add test summary
+        if: always()
+        run: |
+          python - <<'PY'
+          import os
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          lines = []
+
+          junit_path = Path("pytest-report.xml")
+          if junit_path.exists():
+              junit_root = ET.parse(junit_path).getroot()
+              tests = int(junit_root.attrib.get("tests", 0))
+              failures = int(junit_root.attrib.get("failures", 0))
+              errors = int(junit_root.attrib.get("errors", 0))
+              skipped = int(junit_root.attrib.get("skipped", 0))
+              passed = tests - failures - errors - skipped
+
+              lines.append("### Unit Test Summary")
+              lines.append(f"- Total: {tests}")
+              lines.append(f"- Passed: {passed}")
+              lines.append(f"- Failures: {failures}")
+              lines.append(f"- Errors: {errors}")
+              lines.append(f"- Skipped: {skipped}")
+              lines.append("")
+
+          coverage_path = Path("coverage.xml")
+          if coverage_path.exists():
+              cov_root = ET.parse(coverage_path).getroot()
+              line_rate = float(cov_root.attrib.get("line-rate", 0.0)) * 100
+              branch_rate = float(cov_root.attrib.get("branch-rate", 0.0)) * 100
+
+              lines.append("### Coverage Summary")
+              lines.append(f"- Line coverage: {line_rate:.2f}%")
+              lines.append(f"- Branch coverage: {branch_rate:.2f}%")
+              lines.append("")
+
+          if not lines:
+              lines.append("No report files were generated.")
+
+          summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
+          if summary_file:
+              Path(summary_file).write_text("\n".join(lines) + "\n", encoding="utf-8")
+          PY
