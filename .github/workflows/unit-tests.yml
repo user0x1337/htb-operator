@@ -5,6 +5,10 @@ on:
     branches:
       - "**"
 
+permissions:
+  contents: read
+  checks: write
+
 jobs:
   unit-tests:
     runs-on: ubuntu-latest
@@ -26,6 +30,16 @@ jobs:
       - name: Run unit tests
         run: |
           pytest --junitxml=pytest-report.xml
+
+      - name: Publish unit test results
+        if: always()
+        uses: dorny/test-reporter@v2
+        with:
+          name: Pytest Results
+          path: pytest-report.xml
+          reporter: java-junit
+          fail-on-error: false
+          fail-on-empty: false
 
       - name: Upload test and coverage reports
         if: always()
@@ -51,10 +65,17 @@ jobs:
           junit_path = Path("pytest-report.xml")
           if junit_path.exists():
               junit_root = ET.parse(junit_path).getroot()
-              tests = int(junit_root.attrib.get("tests", 0))
-              failures = int(junit_root.attrib.get("failures", 0))
-              errors = int(junit_root.attrib.get("errors", 0))
-              skipped = int(junit_root.attrib.get("skipped", 0))
+              if junit_root.tag == "testsuite":
+                  suites = [junit_root]
+              elif junit_root.tag == "testsuites":
+                  suites = list(junit_root.findall("testsuite"))
+              else:
+                  suites = list(junit_root.findall(".//testsuite"))
+
+              tests = sum(int(s.attrib.get("tests", 0)) for s in suites)
+              failures = sum(int(s.attrib.get("failures", 0)) for s in suites)
+              errors = sum(int(s.attrib.get("errors", 0)) for s in suites)
+              skipped = sum(int(s.attrib.get("skipped", 0)) for s in suites)
               passed = tests - failures - errors - skipped
 
               lines.append("### Unit Test Summary")
