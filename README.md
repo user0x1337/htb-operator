@@ -6,6 +6,9 @@
 ![GitHub Repo stars](https://img.shields.io/github/stars/user0x1337/htb-operator)
 
 <div>
+  <b>Tests</b><br>
+    <img src="https://camo.githubusercontent.com/b1b3a815788bebe20130df13f2d81f7d6d3ff068ec3a784fe09437d65c4a7f8e/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f74657374732d39302532307061737365642d73756363657373">
+  <br><br>
   <b>OS</b><br>
   <img alt="current version" src="https://img.shields.io/badge/Linux-supported-success"><br>
   <img alt="current version" src="https://img.shields.io/badge/Windows-supported_|_but_not_all_features-lightgreen"><br>
