@@ -25,6 +25,10 @@ IS_ROOT_OR_ADMIN: bool =  ((not IS_WINDOWS and os.getuid() == 0) or
 
 class HtbCLI:
     """Main class for the HTB-Command line interface"""
+    AUTHOR_USERNAME = "user01337"
+    RESPECT_PROMPT_DONE_KEY = "respect_prompt_done"
+    PROMPT_EXCLUDED_COMMANDS = {"help", "init", "respect", "version"}
+
     def __init__(self, htb_http_request: Optional[BaseHtbHttpRequest] = None):
         self.package_name = 'htb-operator'
         self.config = configparser.ConfigParser()
@@ -71,7 +75,7 @@ class HtbCLI:
         env_store_dir = os.environ.get("HTB_TERMINAL_STORE_DIR")
         return env_store_dir if env_store_dir else config_path
 
-    def load_cli_config(self) -> [str, str, str]:
+    def load_cli_config(self) -> tuple[str|None, str|None, str|None]:
         """Loads the API key from the config file if it exists."""
         config_path = self.get_config_path()
         if os.path.exists(config_path):
@@ -95,6 +99,32 @@ class HtbCLI:
         with open(config_path, "w") as configfile:
             self.config.write(configfile)
 
+    def maybe_prompt_author_respect(self, command_name: Optional[str]) -> None:
+        """Prompt the user to give respect to the author of htb-operator on HTB.
+
+        This function checks if the user has already given respect and if the command
+        is excluded from prompting. If not, it prompts the user to give respect.
+        """
+        if self.api_key is None or not hasattr(self, "client"):
+            return
+
+        if command_name in HtbCLI.PROMPT_EXCLUDED_COMMANDS:
+            return
+
+        if self.config.getboolean("HTB", HtbCLI.RESPECT_PROMPT_DONE_KEY, fallback=False):
+            return
+
+        answer = input("Would you like to give htb-operator's author on HTB a respect? [y/N]: ").strip().lower()
+
+        if "HTB" not in self.config:
+            self.config["HTB"] = {}
+        self.config["HTB"][HtbCLI.RESPECT_PROMPT_DONE_KEY] = str(True)
+        self.save_config_file()
+
+        if answer in {"y", "yes"}:
+            user = self.client.get_user(HtbCLI.AUTHOR_USERNAME)
+            self.client.give_user_respect(user_id=user.id)
+            print("Thank you very much for your respect!")
 
     def start(self):
         if IS_ROOT_OR_ADMIN:
@@ -110,6 +140,7 @@ class HtbCLI:
             print(f"{Fore.RED}HTB-Operator needs to be initialized. Use the \"init\" command.{Style.RESET_ALL}", file=sys.stderr)
         else:
             try:
+                self.maybe_prompt_author_respect(command_name=args.command)
                 if not (ismethod(args.func) or isfunction(args.func)) and issubclass(args.func, BaseCommand):
                     args.func(self, args).execute()
                 else:

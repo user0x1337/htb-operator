@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import configparser
 from datetime import datetime, timedelta, timezone
 
 import jwt
@@ -12,6 +13,7 @@ from command.init import InitCommand, DEFAULT_BASE_API_URL
 from command.proxy import ProxyCommand
 from command.respect import RespectCommand
 from command.version import VersionCommand
+from htb_operator import HtbCLI
 
 
 class LoggerStub:
@@ -153,6 +155,7 @@ def test_init_command_defaults_and_user_agent(monkeypatch) -> None:
 
     assert cli.config["HTB"]["api_base_url"] == DEFAULT_BASE_API_URL
     assert cli.config["HTB"]["USER_AGENT"] == f"{cli.package_name}/{cli.version}"
+    assert cli.config["HTB"]["respect_prompt_done"] == "False"
     assert cli.save_count == 1
 
 
@@ -175,6 +178,66 @@ def test_respect_command_calls_client() -> None:
 
     assert cli.client.get_user_calls == [("m4cz", None)]
     assert cli.client.respect_calls == [1337]
+
+
+class RespectPromptCLIStub:
+    def __init__(self, prompt_done: bool = False) -> None:
+        self.api_key = "token"
+        self.config = configparser.ConfigParser()
+        self.config["HTB"] = {}
+        if prompt_done:
+            self.config["HTB"]["respect_prompt_done"] = "True"
+        self.client = ClientStub()
+        self.save_count = 0
+
+    def save_config_file(self) -> None:
+        self.save_count += 1
+
+
+def test_respect_prompt_yes_triggers_respect_and_marks_done(monkeypatch) -> None:
+    cli = RespectPromptCLIStub()
+    monkeypatch.setattr("builtins.input", lambda *_: "yes")
+
+    HtbCLI.maybe_prompt_author_respect(cli, command_name="machine")
+
+    assert cli.client.get_user_calls == [("m4cz", None)]
+    assert cli.client.respect_calls == [1337]
+    assert cli.config["HTB"]["respect_prompt_done"] == "True"
+    assert cli.save_count == 1
+
+
+def test_respect_prompt_no_marks_done_without_respect(monkeypatch) -> None:
+    cli = RespectPromptCLIStub()
+    monkeypatch.setattr("builtins.input", lambda *_: "no")
+
+    HtbCLI.maybe_prompt_author_respect(cli, command_name="machine")
+
+    assert cli.client.get_user_calls == []
+    assert cli.client.respect_calls == []
+    assert cli.config["HTB"]["respect_prompt_done"] == "True"
+    assert cli.save_count == 1
+
+
+def test_respect_prompt_skips_when_already_done(monkeypatch) -> None:
+    cli = RespectPromptCLIStub(prompt_done=True)
+    monkeypatch.setattr("builtins.input", lambda *_: pytest.fail("input must not be called"))
+
+    HtbCLI.maybe_prompt_author_respect(cli, command_name="machine")
+
+    assert cli.client.get_user_calls == []
+    assert cli.client.respect_calls == []
+    assert cli.save_count == 0
+
+
+def test_respect_prompt_skips_for_excluded_command(monkeypatch) -> None:
+    cli = RespectPromptCLIStub()
+    monkeypatch.setattr("builtins.input", lambda *_: pytest.fail("input must not be called"))
+
+    HtbCLI.maybe_prompt_author_respect(cli, command_name="respect")
+
+    assert cli.client.get_user_calls == []
+    assert cli.client.respect_calls == []
+    assert cli.save_count == 0
 
 
 def test_version_command_execute_prints_version() -> None:

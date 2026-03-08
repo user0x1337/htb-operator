@@ -32,6 +32,7 @@ class InitCommand(BaseCommand):
         htb_dict["USER_AGENT"] = f"{self.htb_cli.package_name}/{self.htb_cli.version}"
         htb_dict["DOWNLOAD_COOLDOWN"] = 30
         htb_dict["verify_ssl"] = str(True)
+        htb_dict["respect_prompt_done"] = str(False)
 
         windows_dict["OpenVPN-Path"] = ""
 
