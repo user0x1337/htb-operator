@@ -200,7 +200,7 @@ def test_respect_prompt_yes_triggers_respect_and_marks_done(monkeypatch) -> None
 
     HtbCLI.maybe_prompt_author_respect(cli, command_name="machine")
 
-    assert cli.client.get_user_calls == [("m4cz", None)]
+    assert cli.client.get_user_calls == [("user01337", None)]
     assert cli.client.respect_calls == [1337]
     assert cli.config["HTB"]["respect_prompt_done"] == "True"
     assert cli.save_count == 1
