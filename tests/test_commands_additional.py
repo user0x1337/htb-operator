@@ -73,6 +73,62 @@ class ProlabStub:
         return {"name": "Example Prolab"}
 
 
+class ProlabMilestoneStub:
+    def __init__(self, percent: int, text: str, reached: bool) -> None:
+        self.percent = percent
+        self.text = text
+        self.is_milestone_reached = reached
+        self.rarity = 5
+        self.description = f"{text} description"
+
+
+class ProlabProgressStub:
+    def __init__(self) -> None:
+        self.ownership = 42.5
+        self.ownership_required_for_certification = 70
+        self.milestones = [
+            ProlabMilestoneStub(25, "Quarter", True),
+            ProlabMilestoneStub(50, "Half", False),
+        ]
+
+
+class ProlabChangeLogStub:
+    def __init__(self, created_at: datetime, log_type: str, title: str) -> None:
+        self.created_at = created_at
+        self.type = log_type
+        self.title = title
+        self.description = f"{title} description"
+        self.user = SimpleNamespace(name="alice")
+
+
+class ProlabDetailsStub:
+    def __init__(self) -> None:
+        self.name = "Example Prolab"
+
+    @staticmethod
+    def get_flags():
+        return [SimpleNamespace(id=1, title="Flag 1", points=10, owned=True)]
+
+    @staticmethod
+    def get_machines():
+        return [SimpleNamespace(id=11, name="box1", os="Linux")]
+
+    @staticmethod
+    def get_progress():
+        return ProlabProgressStub()
+
+    @staticmethod
+    def get_changelogs():
+        return [
+            ProlabChangeLogStub(datetime(2025, 1, 1, tzinfo=timezone.utc), "update", "Updated VPN"),
+            ProlabChangeLogStub(datetime(2024, 12, 31, tzinfo=timezone.utc), "add", "Added host"),
+        ]
+
+    @staticmethod
+    def get_reset_status():
+        return None, datetime(2024, 10, 1, 12, 0, 0, tzinfo=timezone.utc)
+
+
 class SherlockInfoStub:
     def __init__(self, name: str, state: str) -> None:
         self.name = name
@@ -251,6 +307,93 @@ def test_prolabs_execute_unknown_command_logs_error() -> None:
     ProlabsCommand(htb_cli=cli, args=argparse.Namespace(prolabs="unknown", flag=None)).execute()
 
     assert any("unknown command" in msg.lower() for msg in cli.logger.errors)
+
+
+def test_prolabs_checks_require_id_or_name_for_progress() -> None:
+    cli = CLIStub()
+    args = argparse.Namespace(prolabs="progress", id=None, name=None, flag=None, limit=20)
+    cmd = ProlabsCommand(htb_cli=cli, args=args)
+
+    assert cmd.checks() is False
+    assert any("id or name must be specified" in msg.lower() for msg in cli.logger.errors)
+
+
+def test_prolabs_flags_and_machines_print_tables() -> None:
+    class ClientStub:
+        @staticmethod
+        def get_prolab(prolab_id=None, prolab_name=None):
+            return ProlabDetailsStub()
+
+    cli = CLIStub(client=ClientStub())
+    flags_args = argparse.Namespace(prolabs="flags", id=1, name=None, flag=None, limit=20)
+    machines_args = argparse.Namespace(prolabs="machines", id=1, name=None, flag=None, limit=20)
+
+    ProlabsCommand(htb_cli=cli, args=flags_args).execute()
+    ProlabsCommand(htb_cli=cli, args=machines_args).execute()
+
+    assert len(cli.console.printed) == 2
+
+
+def test_prolabs_progress_warns_when_missing() -> None:
+    class MissingProgressProlabStub(ProlabDetailsStub):
+        @staticmethod
+        def get_progress():
+            return None
+
+    class ClientStub:
+        @staticmethod
+        def get_prolab(prolab_id=None, prolab_name=None):
+            return MissingProgressProlabStub()
+
+    cli = CLIStub(client=ClientStub())
+    args = argparse.Namespace(prolabs="progress", id=7, name=None, flag=None, limit=20)
+    ProlabsCommand(htb_cli=cli, args=args).execute()
+
+    assert any("no progress information available" in msg.lower() for msg in cli.logger.warnings)
+
+
+def test_prolabs_progress_prints_group_panel() -> None:
+    class ClientStub:
+        @staticmethod
+        def get_prolab(prolab_id=None, prolab_name=None):
+            return ProlabDetailsStub()
+
+    cli = CLIStub(client=ClientStub())
+    args = argparse.Namespace(prolabs="progress", id=7, name=None, flag=None, limit=20)
+    ProlabsCommand(htb_cli=cli, args=args).execute()
+
+    assert len(cli.console.printed) == 1
+
+
+def test_prolabs_changelog_warns_when_empty() -> None:
+    class EmptyChangelogProlabStub(ProlabDetailsStub):
+        @staticmethod
+        def get_changelogs():
+            return []
+
+    class ClientStub:
+        @staticmethod
+        def get_prolab(prolab_id=None, prolab_name=None):
+            return EmptyChangelogProlabStub()
+
+    cli = CLIStub(client=ClientStub())
+    args = argparse.Namespace(prolabs="changelog", id=7, name=None, flag=None, limit=20)
+    ProlabsCommand(htb_cli=cli, args=args).execute()
+
+    assert any("no changelog entries found" in msg.lower() for msg in cli.logger.warnings)
+
+
+def test_prolabs_reset_status_prints_panel() -> None:
+    class ClientStub:
+        @staticmethod
+        def get_prolab(prolab_id=None, prolab_name=None):
+            return ProlabDetailsStub()
+
+    cli = CLIStub(client=ClientStub())
+    args = argparse.Namespace(prolabs="reset-status", id=7, name=None, flag=None, limit=20)
+    ProlabsCommand(htb_cli=cli, args=args).execute()
+
+    assert len(cli.console.printed) == 1
 
 
 def test_sherlock_list_all_fetches_active_and_retired(monkeypatch) -> None:

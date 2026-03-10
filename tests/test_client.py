@@ -5,6 +5,7 @@ from typing import Dict, List
 import pytest
 
 from htbapi.exception.errors import RequestException, NoPwnBoxActiveException
+from htbapi.prolab import ProLabProgres
 from htbapi.sherlock import SherlockCategory
 
 
@@ -423,3 +424,46 @@ def test_get_all_vpn_server_uses_cache_and_location_filter(client, stub_http) ->
     assert first[2].product == "labs"
     assert len(stub_http.calls) == call_count
     assert list(second.keys()) == [2]
+
+
+def test_prolab_progress_parses_milestone_legacy_key(client) -> None:
+    progress_data = {
+        "ownership": 12.5,
+        "ownership_required_for_certification": 70,
+        "keyed_pro_lab_mile_stone": [
+            {
+                "percent": 25,
+                "text": "Quarter",
+                "description": "25%",
+                "rarity": 5,
+                "is_mile_stone_reached": 1,
+            }
+        ],
+    }
+
+    progress = ProLabProgres(data=progress_data, _client=client, _pro_lab=object())
+
+    assert len(progress.milestones) == 1
+    assert progress.milestones[0].is_milestone_reached is True
+    assert progress.milestones[0].percent == 25
+
+
+def test_prolab_progress_parses_alternative_milestones_shape(client) -> None:
+    progress_data = {
+        "progress": "33.3",
+        "ownership_required_for_certificate": "80",
+        "milestones": [
+            {
+                "title": "Third",
+                "is_reached": "true",
+            }
+        ],
+    }
+
+    progress = ProLabProgres(data=progress_data, _client=client, _pro_lab=object())
+
+    assert progress.ownership == 33.3
+    assert progress.ownership_required_for_certification == 80
+    assert len(progress.milestones) == 1
+    assert progress.milestones[0].text == "Third"
+    assert progress.milestones[0].is_milestone_reached is True

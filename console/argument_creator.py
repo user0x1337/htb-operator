@@ -140,20 +140,44 @@ def _create_prolabs_command_parser(subparsers):
     """Prolabs command"""
     from command import ProlabsCommand
 
+    def add_id_name_arguments(parser: ArgumentParser):
+        parser.add_argument("--id", type=int, metavar="Prolab ID",
+                            help="ID of the Prolab. Either --id or --name must be specified")
+        parser.add_argument("--name", type=str, metavar="Prolab Name",
+                            help="Name of the Prolab. Either --id or --name must be specified")
+
     prolabs_parser: ArgumentParser = subparsers.add_parser("prolabs", help="Commands for Prolabs")
     prolabs_parser.set_defaults(func=ProlabsCommand)
     prolabs_sub_parser = prolabs_parser.add_subparsers(title="commands", description="Available commands", dest="prolabs")
     prolabs_sub_parser.add_parser(name="list", help="List all Prolabs")
 
     prolab_info_parser = prolabs_sub_parser.add_parser(name="info", help="Get the info for the corresponding Prolab")
-    prolab_info_parser.add_argument("--id", type=int, metavar="Prolab ID", help="ID of the Prolab. Either --id or --name must be specified")
-    prolab_info_parser.add_argument("--name", type=str, metavar="Prolab Name", help="Name of the Prolab. Either --id or --name must be specified")
+    add_id_name_arguments(prolab_info_parser)
+
+    prolabs_flags_parser: ArgumentParser = prolabs_sub_parser.add_parser(name="flags",
+                                                                         help="List all flags for the corresponding Prolab (also available via `info`)")
+    add_id_name_arguments(prolabs_flags_parser)
+
+    prolabs_machines_parser: ArgumentParser = prolabs_sub_parser.add_parser(name="machines",
+                                                                            help="List all machines for the corresponding Prolab (also available via `info`)")
+    add_id_name_arguments(prolabs_machines_parser)
+
+    prolabs_progress_parser: ArgumentParser = prolabs_sub_parser.add_parser(name="progress",
+                                                                            help="Show progress and milestones for the corresponding Prolab")
+    add_id_name_arguments(prolabs_progress_parser)
+
+    prolabs_changelog_parser: ArgumentParser = prolabs_sub_parser.add_parser(name="changelog",
+                                                                             help="Show changelog entries for the corresponding Prolab")
+    add_id_name_arguments(prolabs_changelog_parser)
+    prolabs_changelog_parser.add_argument("--limit", type=int, default=20, metavar="<N>",
+                                          help="Show at most <N> changelog entries. Use 0 or a negative value for all entries. Default: 20")
+
+    prolabs_reset_status_parser: ArgumentParser = prolabs_sub_parser.add_parser(name="reset-status",
+                                                                                help="Show reset status and last reset timestamp for the corresponding Prolab")
+    add_id_name_arguments(prolabs_reset_status_parser)
 
     prolabs_submit_flag: ArgumentParser = prolabs_sub_parser.add_parser(name="submit", help="Submit the flag")
-    prolabs_submit_flag.add_argument("--id", type=int, metavar="Prolab ID",
-                                     help="ID of the Prolab. Either --id or --name must be specified")
-    prolabs_submit_flag.add_argument("--name", type=str, metavar="Prolab Name",
-                                     help="Name of the Prolab. Either --id or --name must be specified")
+    add_id_name_arguments(prolabs_submit_flag)
     prolabs_submit_flag.add_argument("-fl", "--flag", type=str, metavar="Flag", help="The flag")
 
 def _create_api_key_command_parser(subparsers):

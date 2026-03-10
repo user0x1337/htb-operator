@@ -343,6 +343,38 @@ htb-operator prolabs info --name APTLabs
 ```
 ![image](https://github.com/user-attachments/assets/6b751c2e-6572-4020-aaf6-4ca64943462b)
 
+`info` already includes the ProLab flags and machines. For focused views, you can also use dedicated subcommands:
+
+## flags
+List only the ProLab flags.
+```bash
+htb-operator prolabs flags --name APTLabs
+```
+
+## machines
+List only the ProLab machines.
+```bash
+htb-operator prolabs machines --name APTLabs
+```
+
+## progress
+Show ownership/certificate progress and milestone status.
+```bash
+htb-operator prolabs progress --name APTLabs
+```
+
+## changelog
+Show ProLab changelog entries. By default, the latest 20 entries are shown.
+```bash
+htb-operator prolabs changelog --name APTLabs --limit 20
+```
+
+## reset-status
+Show reset status and the timestamp of the last reset (if available).
+```bash
+htb-operator prolabs reset-status --name APTLabs
+```
+
 ## submit
 You can use the `submit` subcommand for submitting flags. For example:
 ```
@@ -455,7 +487,6 @@ It terminates a running Pwnbox instance.
 htb-operator pwnbox terminate
 ```
 ![image](https://github.com/user-attachments/assets/53f6f518-7152-409e-9ae1-096dc2494104)
-
 
 
 

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Tuple
 
 import dateutil.parser
 
@@ -67,18 +67,52 @@ class ProLabMilestone(client.BaseHtbApiObject):
     is_milestone_reached: bool
     rarity: int
 
+    @staticmethod
+    def _read_bool(raw_value, default: bool = False) -> bool:
+        """Parse booleans from different API representations."""
+        if raw_value is None:
+            return default
+        if isinstance(raw_value, bool):
+            return raw_value
+        if isinstance(raw_value, (int, float)):
+            return raw_value != 0
+        if isinstance(raw_value, str):
+            normalized = raw_value.strip().lower()
+            if normalized in ["true", "1", "yes", "y"]:
+                return True
+            if normalized in ["false", "0", "no", "n", ""]:
+                return False
+        return default
+
     # noinspection PyUnresolvedReferences
     def __init__(self, data: dict, _client: "HTBClient", _pro_lab_progress: "ProLabProgres"):
         assert _pro_lab_progress is not None
 
         self._pro_lab_progress = _pro_lab_progress
         self._client = _client
-        self.percent = data['percent']
-        self.icon = data['icon']
-        self.text = data['text']
-        self.description = data['description']
-        self.is_milestone_reached = data['is_milestone_reached']
-        self.rarity = data['rarity']
+
+        try:
+            self.percent = int(data.get('percent', 0))
+        except (TypeError, ValueError):
+            self.percent = 0
+
+        self.icon = data.get('icon', "")
+        self.text = data.get('text', data.get('title', "-"))
+        self.description = data.get('description', "")
+
+        raw_reached = data.get('isMilestoneReached', None)
+        if raw_reached is None:
+            raw_reached = data.get('isMilestoneReached', None)
+        if raw_reached is None:
+            raw_reached = data.get('is_reached', None)
+        if raw_reached is None:
+            raw_reached = data.get('reached', None)
+        self.is_milestone_reached = ProLabMilestone._read_bool(raw_reached, default=False)
+
+        try:
+            self.rarity = int(data.get('rarity', 0))
+        except (TypeError, ValueError):
+            self.rarity = 0
 
     def __repr__(self):
         return f"<ProLabMilestone '{self.text}'>"
@@ -143,9 +177,28 @@ class ProLabProgres:
 
         self._pro_lab = _pro_lab
         self._client = _client
-        self.ownership = data.get('ownership', 0.0)
-        self.ownership_required_for_certification = data.get('ownership_required_for_certification', 0)
-        self.milestones = [ProLabMilestone(_client=_client, data=x, _pro_lab_progress=self) for x in data.get('keyed_pro_lab_mile_stone', [])]
+        try:
+            self.ownership = float(data.get('ownership', data.get('progress', 0.0)))
+        except (TypeError, ValueError):
+            self.ownership = 0.0
+
+        required_cert = data.get('ownership_required_for_certification',
+                                 data.get('ownership_required_for_certificate', 0))
+        try:
+            self.ownership_required_for_certification = int(required_cert)
+        except (TypeError, ValueError):
+            self.ownership_required_for_certification = 0
+
+        milestones_data = data.get('keyed_pro_lab_mile_stone')
+        if milestones_data is None:
+            milestones_data = data.get('keyed_pro_lab_milestone')
+        if milestones_data is None:
+            milestones_data = data.get('milestones', [])
+        if milestones_data is None or not isinstance(milestones_data, list):
+            milestones_data = []
+
+        self.milestones = [ProLabMilestone(_client=_client, data=x, _pro_lab_progress=self)
+                           for x in milestones_data if isinstance(x, dict)]
 
     def __repr__(self):
         return f"<ProLabProgres '{self.ownership}'>"
@@ -257,7 +310,7 @@ class ProLabInfo(client.BaseHtbApiObject):
             self.forum = overview_data["social_links"].get('forum', None) if len(overview_data["social_links"]) > 0 and "social_links" in overview_data else None
 
 
-    def get_flags(self) -> [ProLabFlag]:
+    def get_flags(self) -> List["ProLabFlag"]:
         """Get the corresponding flags"""
         res: dict = self._client.htb_http_request.get_request(endpoint=f"prolab/{self.id}/flags")
         if "status" in res and res["status"]:
@@ -289,7 +342,7 @@ class ProLabInfo(client.BaseHtbApiObject):
         else:
             return []
 
-    def submit_flag(self, flag: str) -> [bool, str]:
+    def submit_flag(self, flag: str) -> Tuple[bool, str]:
         """Submit a flag"""
         try:
             data: dict = self._client.htb_http_request.post_request(endpoint=f"prolab/{self.id}/flag", json={'flag': flag})
@@ -297,7 +350,7 @@ class ProLabInfo(client.BaseHtbApiObject):
         except RequestException as e:
             return False, e.args[0]["message"]
 
-    def get_reset_status(self) -> [Optional[str], Optional[datetime]]:
+    def get_reset_status(self) -> Tuple[Optional[str], Optional[datetime]]:
         """Get the progress. Returns a datetime if successful (and string is None), otherwise a string and datetime is None."""
         try:
             res: dict = self._client.htb_http_request.get_request(endpoint=f"prolab/{self.id}/reset")
