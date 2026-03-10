@@ -436,7 +436,7 @@ def test_prolab_progress_parses_milestone_legacy_key(client) -> None:
                 "text": "Quarter",
                 "description": "25%",
                 "rarity": 5,
-                "is_mile_stone_reached": 1,
+                "isMilestoneReached": 1,
             }
         ],
     }
