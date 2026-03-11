@@ -325,8 +325,8 @@ class HTBClient:
         assert user_id is not None
         from .machine import MachineOsUserProfile
 
-        data: dict = self.htb_http_request.get_request(endpoint=f"user/profile/progress/machines/os/{user_id}")["profile"]
-        return [MachineOsUserProfile(_client=self, data=x) for x in data["operating_systems"]]
+        data: dict = self.htb_http_request.get_request(endpoint=f"user/profile/progress/machines/{user_id}")["profile"]
+        return [MachineOsUserProfile(_client=self, data=x) for x in data["machine_os"]]
 
     # noinspection PyUnresolvedReferences
     def get_challenge_progress_profile_summary(self, user_id: int) -> List["ChallengeUserProfile"]:
