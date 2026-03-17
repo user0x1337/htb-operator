@@ -12,7 +12,7 @@
   <b>OS</b><br>
   <img alt="current version" src="https://img.shields.io/badge/Linux-supported-success"><br>
   <img alt="current version" src="https://img.shields.io/badge/Windows-supported_|_but_not_all_features-lightgreen"><br>
-  <img alt="current version" src="https://img.shields.io/badge/MacOS-supported_|_untested-yellow">
+  <img alt="current version" src="https://img.shields.io/badge/MacOS-supported-success">
   <br><br>
   <b>Architecture</b><br>
   <img alt="amd64" src="https://img.shields.io/badge/amd64%20(x86__64)-supported-success"><br>
