@@ -170,23 +170,16 @@ class VpnCommand(BaseCommand):
             raise NotImplementedError
 
         try:
-            result = subprocess.run(['ip', 'link'],
-                                    stdout=subprocess.PIPE,
-                                    text=True)
+            interfaces = set()
+            try:
+                interfaces = set(psutil.net_if_stats().keys())
+            except Exception:
+                interfaces = set()
 
-            interfaces = result.stdout.splitlines()
-            used_tuns = set()
-            for line in interfaces:
-                if self.target_interface not in line:
-                    continue
+            if len(interfaces) == 0:
+                interfaces = set(psutil.net_if_addrs().keys())
 
-                parts = line.split(":")
-                if len(parts) <= 1:
-                    continue
-
-                interface_name = parts[1].strip()
-                if interface_name.startswith(self.target_interface):
-                    used_tuns.add(interface_name)
+            used_tuns = {name for name in interfaces if name.startswith(self.target_interface)}
 
             if len(used_tuns) == 0:
                 return self.target_interface
