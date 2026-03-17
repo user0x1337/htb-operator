@@ -9,4 +9,5 @@ There are some bugfixes and changes.
 - 
 
 ### Fixed
-- #36: Fixed command "machine info"
+- #38: macOS: VPN connections can now be started successfully.
+- #37: Fixed handling of Prolab VPN listings.
