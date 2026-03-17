@@ -472,8 +472,11 @@ class HTBClient:
                         len(_vpn_server_cache[caching_key].keys()) > 0):
                     vpn_servers = vpn_servers | _vpn_server_cache.get(caching_key)
                     continue
-
-                data: dict = self.htb_http_request.get_request(endpoint=f"connections/servers/prolab/{prolab.id}")["data"]
+                try:
+                    data: dict = self.htb_http_request.get_request(endpoint=f"connections/servers/prolab/{prolab.id}")["data"]
+                except RequestException:
+                    # Ignore RequestException because we do not have read permission for some resources (e.g., when an account type is free).
+                    continue
                 servers = parse_data(data, my_location=vpn_location)
                 _vpn_server_cache[caching_key] = servers
                 vpn_servers = vpn_servers | servers
@@ -482,7 +485,7 @@ class HTBClient:
 
     # noinspection PyUnresolvedReferences
     def get_accessible_vpn_server(self) -> dict[int, "AccessibleVpnServer"]:
-        """Get all VPN Server which are directly accessible without switching the VPN-Server"""
+        """Get all VPN Servers that are directly accessible without switching the VPN-Server"""
         from .vpn import AccessibleVpnServer
 
         data: dict = self.htb_http_request.get_request(endpoint=f"connections")["data"]
