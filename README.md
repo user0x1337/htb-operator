@@ -7,7 +7,7 @@
 
 <div>
   <b>Tests</b><br>
-    <img src="https://camo.githubusercontent.com/b1b3a815788bebe20130df13f2d81f7d6d3ff068ec3a784fe09437d65c4a7f8e/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f74657374732d39302532307061737365642d73756363657373">
+    <img src="https://camo.githubusercontent.com/17b7e1414777604dd31e53667892a72dc70a8671d4a97ed302fe277efee9c8e9/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f74657374732d3130322532307061737365642d73756363657373">
   <br><br>
   <b>OS</b><br>
   <img alt="current version" src="https://img.shields.io/badge/Linux-supported-success"><br>
