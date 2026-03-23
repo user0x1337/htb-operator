@@ -8,11 +8,13 @@ import jwt
 import pytest
 
 from command.api_key import ApiKey
+from command.base import BaseCommand
 from command.config import ConfigCommand
 from command.init import InitCommand, DEFAULT_BASE_API_URL
 from command.proxy import ProxyCommand
 from command.respect import RespectCommand
 from command.version import VersionCommand
+from htbapi.exception.errors import RequestException
 from htb_operator import HtbCLI
 
 
@@ -288,3 +290,92 @@ def test_version_command_check_outdated_user_accepts(monkeypatch) -> None:
     cmd.check_for_update()
 
     assert called["count"] == 1
+
+
+class ParserStub:
+    def __init__(self, args: argparse.Namespace) -> None:
+        self._args = args
+        self.help_called = False
+
+    def parse_args(self) -> argparse.Namespace:
+        return self._args
+
+    def print_help(self) -> None:
+        self.help_called = True
+
+
+class StartCLIStub:
+    def __init__(self, api_key: str | None = "token") -> None:
+        self.logger = LoggerStub()
+        self.console = ConsoleStub()
+        self.api_key = api_key
+        self.start_calls = 0
+        self.stop_calls = 0
+        self.prompt_calls = []
+        self._wait_animation_thread = None
+
+    def maybe_prompt_author_respect(self, command_name: str | None) -> None:
+        self.prompt_calls.append(command_name)
+
+    def start_wait_animation(self, text: str = "Please wait...", stream=None) -> None:
+        self.start_calls += 1
+
+    def stop_wait_animation(self) -> None:
+        self.stop_calls += 1
+
+
+class DummyCommand(BaseCommand):
+    execute_calls = 0
+
+    def execute(self):
+        DummyCommand.execute_calls += 1
+
+
+def test_start_wraps_base_command_with_wait_animation(monkeypatch) -> None:
+    DummyCommand.execute_calls = 0
+    cli = StartCLIStub(api_key="token")
+    args = argparse.Namespace(command="machine", func=DummyCommand)
+    parser = ParserStub(args=args)
+    monkeypatch.setattr("htb_operator.create_arg_parser", lambda *_: parser)
+
+    HtbCLI.start(cli)
+
+    assert DummyCommand.execute_calls == 1
+    assert cli.start_calls == 1
+    assert cli.stop_calls == 1
+    assert cli.prompt_calls == ["machine"]
+
+
+def test_start_wraps_function_command_with_wait_animation(monkeypatch) -> None:
+    called = {"count": 0}
+
+    def fn(_args):
+        called["count"] += 1
+
+    cli = StartCLIStub(api_key=None)
+    args = argparse.Namespace(command="version", func=fn)
+    parser = ParserStub(args=args)
+    monkeypatch.setattr("htb_operator.create_arg_parser", lambda *_: parser)
+
+    HtbCLI.start(cli)
+
+    assert called["count"] == 1
+    assert cli.start_calls == 1
+    assert cli.stop_calls == 1
+    assert cli.prompt_calls == ["version"]
+
+
+def test_start_stops_wait_animation_on_request_exception(monkeypatch) -> None:
+    def fn(_args):
+        raise RequestException({"message": "boom"})
+
+    cli = StartCLIStub(api_key="token")
+    args = argparse.Namespace(command="machine", func=fn)
+    parser = ParserStub(args=args)
+    monkeypatch.setattr("htb_operator.create_arg_parser", lambda *_: parser)
+
+    HtbCLI.start(cli)
+
+    assert cli.start_calls == 1
+    assert cli.stop_calls == 1
+    assert any("boom" in msg for msg in cli.logger.errors)

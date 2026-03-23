@@ -3,9 +3,12 @@
 import argparse
 import configparser
 import ctypes
+import itertools
 import logging
 import os
 import sys
+import threading
+import time
 from argparse import ArgumentParser
 from importlib.metadata import version, PackageNotFoundError
 from inspect import isfunction, ismethod
@@ -29,12 +32,39 @@ class HtbCLI:
     RESPECT_PROMPT_DONE_KEY = "respect_prompt_done"
     PROMPT_EXCLUDED_COMMANDS = {"help", "init", "respect", "version"}
 
+    class _OutputProxy:
+        def __init__(self, wrapped, on_write):
+            self._wrapped = wrapped
+            self._on_write = on_write
+
+        def write(self, data):
+            if data:
+                self._on_write()
+            return self._wrapped.write(data)
+
+        def flush(self):
+            return self._wrapped.flush()
+
+        def fileno(self):
+            return self._wrapped.fileno()
+
+        def isatty(self):
+            return self._wrapped.isatty()
+
+        def __getattr__(self, item):
+            return getattr(self._wrapped, item)
+
     def __init__(self, htb_http_request: Optional[BaseHtbHttpRequest] = None):
         self.package_name = 'htb-operator'
         self.config = configparser.ConfigParser()
         self.logger = setup_logger()
         self.api_key, self._api_base, self._user_agent = self.load_cli_config()
         self.console = Console()
+        self._wait_animation_stop: Optional[threading.Event] = None
+        self._wait_animation_thread: Optional[threading.Thread] = None
+        self._wait_animation_lock = threading.Lock()
+        self._wait_animation_stream = sys.stdout
+        self._wait_animation_last_len = 0
 
         try:
             self.version = version(self.package_name)
@@ -64,6 +94,48 @@ class HtbCLI:
                                                      proxy=self.proxy if self.proxy else None,
                                                      verify_ssl=verify_ssl)
             self.client = HTBClient(htb_http_request=htb_http_request)
+
+    def _animate_wait(self, text: str) -> None:
+        spinner = itertools.cycle(['|', '/', '-', '\\'])
+        while self._wait_animation_stop is not None and not self._wait_animation_stop.is_set():
+            frame = f"{text} {next(spinner)}"
+            padding = max(self._wait_animation_last_len - len(frame), 0)
+            self._wait_animation_stream.write(f'\r{frame}{" " * padding}')
+            self._wait_animation_stream.flush()
+            self._wait_animation_last_len = len(frame)
+            time.sleep(0.1)
+
+    def start_wait_animation(self, text: str = "Please wait...", stream=None) -> None:
+        with self._wait_animation_lock:
+            if self._wait_animation_thread is not None and self._wait_animation_thread.is_alive():
+                return
+            self._wait_animation_stream = stream if stream is not None else sys.stdout
+            self._wait_animation_stop = threading.Event()
+            self._wait_animation_last_len = 0
+            self._wait_animation_thread = threading.Thread(target=self._animate_wait, args=(text,), daemon=True)
+            self._wait_animation_thread.start()
+
+    def stop_wait_animation(self) -> None:
+        with self._wait_animation_lock:
+            stop_event = self._wait_animation_stop
+            animation_thread = self._wait_animation_thread
+            wait_stream = self._wait_animation_stream
+            self._wait_animation_stop = None
+            self._wait_animation_thread = None
+
+        had_animation = stop_event is not None or (animation_thread is not None and animation_thread.is_alive())
+        if stop_event is not None:
+            stop_event.set()
+        if animation_thread is not None and animation_thread.is_alive():
+            animation_thread.join()
+
+        if not had_animation:
+            return
+
+        # Clear spinner line after command output is ready.
+        wait_stream.write(f'\r{" " * self._wait_animation_last_len}\r')
+        wait_stream.flush()
+        self._wait_animation_last_len = 0
 
     def get_base_store_dir(self) -> str:
         if sys.platform.startswith("win"):
@@ -141,10 +213,35 @@ class HtbCLI:
         else:
             try:
                 self.maybe_prompt_author_respect(command_name=args.command)
-                if not (ismethod(args.func) or isfunction(args.func)) and issubclass(args.func, BaseCommand):
-                    args.func(self, args).execute()
-                else:
-                    args.func(args)
+                original_stdout = sys.stdout
+                original_stderr = sys.stderr
+                stdout_proxy = HtbCLI._OutputProxy(original_stdout, self.stop_wait_animation)
+                stderr_proxy = HtbCLI._OutputProxy(original_stderr, self.stop_wait_animation)
+                old_handler_streams = []
+
+                for handler in getattr(self.logger, "handlers", []):
+                    if not hasattr(handler, "stream"):
+                        continue
+                    old_handler_streams.append((handler, handler.stream))
+                    if handler.stream is original_stderr:
+                        handler.stream = stderr_proxy
+                    elif handler.stream is original_stdout:
+                        handler.stream = stdout_proxy
+
+                self.start_wait_animation(stream=original_stdout)
+                sys.stdout = stdout_proxy
+                sys.stderr = stderr_proxy
+                try:
+                    if not (ismethod(args.func) or isfunction(args.func)) and issubclass(args.func, BaseCommand):
+                        args.func(self, args).execute()
+                    else:
+                        args.func(args)
+                finally:
+                    sys.stdout = original_stdout
+                    sys.stderr = original_stderr
+                    for handler, stream in old_handler_streams:
+                        handler.stream = stream
+                    self.stop_wait_animation()
             except RequestException as e:
                 if len(e.args) > 0 and "message" in e.args[0]:
                     self.logger.error(f'{Fore.RED}{e.args[0]["message"]}{Style.RESET_ALL}')

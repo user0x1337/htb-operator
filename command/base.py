@@ -46,6 +46,9 @@ class BaseCommand(object):
 
 
     def animate_spinner(self, text: str, title: str):
+        # Disable global command spinner while command-specific spinner is active.
+        if hasattr(self.htb_cli, "stop_wait_animation"):
+            self.htb_cli.stop_wait_animation()
         spinner = itertools.cycle(['|', '/', '-', '\\'])  # Rotating cross
 
         while not self.stop_animation.is_set():
