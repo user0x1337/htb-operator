@@ -250,7 +250,7 @@ htb-operator machine start --id 620 --script /tmp/example.sh --start-vpn --updat
 In this example, a warning appeared because a VPN connection was already running. This is informational and can usually be ignored.
 
 ## stop
-Stops the currently active machine. This action requires **root/sudo/admin** permissions. On Linux, you will be prompted for your sudo password.
+Stops the currently active machine. 
 
 ```bash
 htb-operator machine stop
@@ -259,7 +259,7 @@ htb-operator machine stop
 ![image](https://github.com/user-attachments/assets/29a0a12b-3247-4594-ade6-7f8a4aff9067)
 
 ### `--stop-vpn`
-Stops all running HTB VPN connections after stopping the machine.
+Stops all running HTB VPN connections after stopping the machine. This action requires **root/sudo/admin** permissions. On Linux, you will be prompted for your sudo password.
 
 ```bash
 htb-operator machine stop --stop-vpn
