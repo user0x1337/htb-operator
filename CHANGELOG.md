@@ -1,13 +1,12 @@
 # Changelog
 
-There are some bugfixes and changes.
+This release includes bug fixes and enhancements.
 
 ### Added
-- 
+- #39: Added a `Please wait...` animation while a command is running. The animation is removed from the console as soon as output is available.
 
-### Changed 
-- 
+### Changed
+-
 
 ### Fixed
-- #38: macOS: VPN connections can now be started successfully.
-- #37: Fixed handling of Prolab VPN listings.
+- #40: Fixed an error in `challenge list --unsolved --category Web` that caused `Error: challenge_category_id`.
