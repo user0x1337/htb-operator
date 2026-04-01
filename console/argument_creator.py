@@ -51,6 +51,9 @@ def create_arg_parser(htb_cli: "HtbCLI") -> ArgumentParser:
     # VPN command
     _create_vpn_command_parser(subparsers=subparsers)
 
+    # Fortress command
+    _create_fortress_command_parser(subparsers=subparsers)
+
     # Sherlock command
     _create_sherlock_command_parser(subparsers=subparsers)
 
@@ -92,6 +95,16 @@ def _create_badge_command_parser(subparsers):
     badge_list_parser.add_argument("-s", "--username", type=str, default=None,help="Specify an username. Default is the own user")
     badge_list_parser.add_argument("--open", action="store_true",help="Filter badges which the user has not obtained, yet.")
     badge_list_parser.add_argument("--category", type=str, default=None,help="Filter badges by category. Indicating more than one category must be seperated by commas [,]")
+
+
+def _create_fortress_command_parser(subparsers):
+    from command import FortressCommand
+
+    fortress_parser: ArgumentParser = subparsers.add_parser("fortress", help="Commands for Fortresses")
+    fortress_parser.set_defaults(func=FortressCommand)
+    fortress_sub_parser = fortress_parser.add_subparsers(title="commands", description="Available commands",
+                                                         dest="fortress")
+    fortress_list_parser = fortress_sub_parser.add_parser(name="list", help="List all fortresses")
 
 
 def _create_sherlock_command_parser(subparsers):

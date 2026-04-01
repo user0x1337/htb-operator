@@ -1,5 +1,6 @@
 import os
 import time
+from sys import api_version
 from typing import Optional, List, cast, Tuple
 
 from .exception.errors import RequestException, NoPwnBoxActiveException
@@ -672,7 +673,19 @@ class HTBClient:
         from .fortress import Fortress
 
         data: dict = self.htb_http_request.get_request(endpoint=f'fortresses')["data"]
-        return [Fortress(_client=self, data=self.htb_http_request.get_request(endpoint=f'fortress/{x["id"]}')["data"]) for x in data.values()]
+        return [Fortress(_client=self, data=self.htb_http_request.get_request(endpoint=f'fortress/{x["id"]}', api_version="v4")["data"]) for x in data]
+
+    # noinspection PyUnresolvedReferences
+    def get_fortress_data(self, fortress_id: int) -> Optional["Fortress"]:
+        """Get fortress data"""
+        from .fortress import Fortress
+        assert fortress_id is not None and fortress_id >= 0
+
+        data: dict = self.htb_http_request.get_request(endpoint=f'fortress/{fortress_id}', api_version="v4")
+        if data is None or len(data.keys()) == 0 or "data" not in data.keys():
+            return None
+
+        return Fortress(data=data["data"], _client=self)
 
 
     def __repr__(self):
