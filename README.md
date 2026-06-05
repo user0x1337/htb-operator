@@ -25,6 +25,8 @@
   <br><br>
 </div>
 
+### Unofficial CLI automation tool for Hack The Box workflows
+
 HTB-Operator is developed and maintained by [user0x1337](https://github.com/user0x1337). It interacts with the [Hack The Box](https://www.hackthebox.com/) API, a popular cybersecurity training platform. Its primary goal is to save time when working with HTB.
 
 <img alt="current version" src="https://img.shields.io/badge/Status-Under_Development-red">
@@ -68,6 +70,19 @@ The API token (and other settings) is stored locally at:
 
 - Linux: `$HOME/.config/htb-operator/config.ini`
 - Windows: `%APPDATA%\htb-operator\config.ini`
+
+
+# Security Notice
+
+HTB-Operator is an unofficial command-line tool for automating legitimate Hack The Box workflows. It is intended for use with your own Hack The Box account and within authorized HTB lab environments only.
+
+The tool stores local configuration values, including the HTB API token, in the user's configuration directory. Keep this file private and do not commit API tokens, VPN files, logs, flags, configuration files, or challenge-related secrets to public repositories.
+
+Some features may require elevated privileges, for example starting or stopping VPN connections or modifying the local hosts file. Review these actions carefully before execution.
+
+Automation features such as custom scripts are executed locally on your system. Only run scripts you understand and trust.
+
+HTB-Operator is not affiliated with, endorsed by, or officially supported by Hack The Box.
 
 # Commands
 The tool is command-based. You can use `-h` or `--help` at any level to display help information. The top-level commands are shown when you run the program without arguments:
