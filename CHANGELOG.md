@@ -1,12 +1,7 @@
 # Changelog
 
-This release includes bug fixes and enhancements.
-
-### Added
-- #39: Added a `Please wait...` animation while a command is running. The animation is removed from the console as soon as output is available.
-
-### Changed
--
+This release includes bug fixes and reliability improvements.
 
 ### Fixed
-- #40: Fixed an error in `challenge list --unsolved --category Web` that caused `Error: challenge_category_id`.
+- Fixed challenge instance startup and shtudown by updating the implementation to use the currently supported HTB API route.
+- Fixed challenge downloads when HTB does not provide a file hash, preventing valid downloads from being incorrectly treated as failed.

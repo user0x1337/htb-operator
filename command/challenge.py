@@ -104,20 +104,24 @@ class ChallengeCommand(BaseCommand):
         if filepath is None:
             return None
 
-        print(
-            f'\r{Fore.CYAN}[+] Challenge "{challenge_download_info.name}": Download completed. Stored in {filepath}. Size: {os.path.getsize(filepath) // 1024} KB. Start integrity check.{Style.RESET_ALL}')
-        with open(filepath, "rb") as f:
-            file_hash = hashlib.sha256(f.read()).hexdigest()
+        print(f'\r{Fore.CYAN}[+] Challenge "{challenge_download_info.name}": Download completed. Stored in {filepath}. Size: {os.path.getsize(filepath) // 1024} KB. Start integrity check.{Style.RESET_ALL}')
 
-        self.logger.info(
-            f'{Fore.CYAN}Challenge "{challenge_download_info.name}": HTB hash = {challenge_download_info.download_sha256} | File hash = {file_hash}{Style.RESET_ALL}')
-        if file_hash != challenge_download_info.download_sha256:
+        # See @https://github.com/user0x1337/htb-operator/issues/43 -> Hash value is not always provided by the HTB API.
+        if challenge_download_info.download_sha256 is not None and len(challenge_download_info.download_sha256) > 0:
+            with open(filepath, "rb") as f:
+                file_hash = hashlib.sha256(f.read()).hexdigest()
+
             self.logger.info(
-                f'{Fore.RED}[ERROR] Challenge "{challenge_download_info.name}": Integrity check failed. Hash provided by htb ({challenge_download_info.download_sha256}) does not match the file hash ({file_hash}). File is NOT removed. Be careful. {Style.RESET_ALL}\n')
+                f'{Fore.CYAN}Challenge "{challenge_download_info.name}": HTB hash = {challenge_download_info.download_sha256} | File hash = {file_hash}{Style.RESET_ALL}')
+            if file_hash != challenge_download_info.download_sha256:
+                self.logger.info(
+                    f'{Fore.RED}[ERROR] Challenge "{challenge_download_info.name}": Integrity check failed. Hash provided by htb ({challenge_download_info.download_sha256}) does not match the file hash ({file_hash}). File is NOT removed. Be careful. {Style.RESET_ALL}\n')
+            else:
+                self.logger.info(
+                    f'{Fore.GREEN}Challenge "{challenge_download_info.name}": Integrity check passed. ZIP password: {Style.RESET_ALL}{Fore.MAGENTA}{DEFAULT_HTB_DOWNLOAD_PASSWORD}{Style.RESET_ALL}')
+                self.logger.info(f'{Fore.GREEN}Good luck solving this challenge.{Style.RESET_ALL}')
         else:
-            self.logger.info(
-                f'{Fore.GREEN}Challenge "{challenge_download_info.name}": Integrity check passed. ZIP password: {Style.RESET_ALL}{Fore.MAGENTA}{DEFAULT_HTB_DOWNLOAD_PASSWORD}{Style.RESET_ALL}')
-            self.logger.info(f'{Fore.GREEN}Good luck solving this challenge.{Style.RESET_ALL}')
+            print(f'\r{Fore.CYAN}[+] Integrity check skipped for challenge "{challenge_download_info.name}". No hash value is provided by the HTB API.{Style.RESET_ALL}')
 
         if self.args.unzip:
             base_dir = os.path.dirname(os.path.abspath(filepath))

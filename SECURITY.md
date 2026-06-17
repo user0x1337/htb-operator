@@ -2,10 +2,12 @@
 
 ## Supported Versions
 
-Since there is no release yet, security issues can be reported here.
+Security reports are accepted for the latest released version of HTB-Operator.
 
 ## Reporting a Vulnerability
 
-No trivial vulnerabilities. Since the user can start the tool as root/admin, "trivial" RCE or similar are not accepted. If downloads from HTB leads to RCE, this will be accepted.
+Please report security issues by creating a GitHub issue.
 
-For reporting, please create an issue. It's open-source, no secretiveness.
+This project is open source, so reports should focus on meaningful security issues affecting HTB-Operator itself. Since users may intentionally run the tool with elevated privileges for VPN or hosts-file operations, issues based solely on local code execution through user-provided scripts or intentionally executed commands are generally out of scope.
+
+Security issues related to unsafe handling of HTB-provided downloads, API responses, credentials, tokens, or configuration files are in scope.
