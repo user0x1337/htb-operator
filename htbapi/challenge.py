@@ -91,7 +91,7 @@ class ChallengeBase(client.BaseHtbApiObject):
 
         :returns: The message from the backend.
         """
-        data: dict = self._client.htb_http_request.post_request(endpoint=f"challenge/start", json={'challenge_id': self.id})
+        data: dict = self._client.htb_http_request.post_request(endpoint=f"container/start", json={'challenge_id': self.id})
         return data["message"]
 
     def stop_instance(self) -> str:
@@ -99,7 +99,7 @@ class ChallengeBase(client.BaseHtbApiObject):
 
         :returns: The message from the backend.
         """
-        data: dict = self._client.htb_http_request.post_request(endpoint=f"challenge/stop", json={'challenge_id': self.id})
+        data: dict = self._client.htb_http_request.post_request(endpoint=f"container/stop", json={'challenge_id': self.id})
         return data["message"]
 
 
