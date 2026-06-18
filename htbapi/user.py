@@ -117,7 +117,6 @@ class User(client.BaseHtbApiObject):
             "Subscription": "VIP" if self.isVip else
                             "VIP+" if self.isDedicatedVip else
                             "Normal",
-            "Ranking_Bracket": None if self.ranking_bracket is None else self.ranking_bracket.to_dict(),
             "Badges": self.badges,
         }
 

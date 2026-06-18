@@ -552,22 +552,14 @@ def create_ranking_panel(ranking_dict: dict) -> Panel:
     assert ranking_dict is not None
     assert len(ranking_dict.keys()) > 0
 
-    if ranking_dict["Rank Requirement"] is None:
-        ranking_dict["Rank Requirement"] = "-"
-    else:
-        ranking_dict["Rank Requirement"] = f"{ranking_dict["Rank Requirement"]}%"
-
-    # Ranking brackets are optional
-    if ranking_dict["Ranking_Bracket"] is not None:
-        ranking_dict["Points"] = f'{ranking_dict["Points"]} ({ranking_dict["Ranking_Bracket"]["Points_Next_Bracket"]} pts needed for {ranking_dict["Ranking_Bracket"]["Next_Bracket"]})'
 
     ranking_dict = {
-        "Rank": ranking_dict["Rank"],
-        "Ranking": ranking_dict["Ranking"],
-        "Points": ranking_dict["Points"],
-        "Team": ranking_dict["Team"]["Rank"],
-        "University": ranking_dict["University"]["Rank"],
-        "Ownership": f'{ranking_dict["Ownership"]}% / {ranking_dict["Rank Requirement"]}',
+        "Rank": "TBD",
+        "Ranking": "TBD",
+        "Points": 0,
+        "Team": "TBD",
+        "University": "TBD",
+        "Ownership": f'TBD',
     }
 
     return _create_custom_panel(custom_dict=ranking_dict, panel_title="Ranking Information")

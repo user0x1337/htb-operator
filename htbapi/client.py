@@ -640,11 +640,16 @@ class HTBClient:
         """Retrieves a list of `Activity` from the API"""
         from .activity import Activity
 
-        data:dict = self.htb_http_request.get_request(endpoint=f'user/profile/activity/{user_id}')["profile"]
-        if len(data["activity"]) == 0:
+        page_number = 1
+        activity_dict:dict = self.htb_http_request.get_request(endpoint=f'user/profile/activity/{user_id}?page={page_number}', api_version="v5")
+
+        meta:dict = activity_dict["meta"]
+        data:list = activity_dict["data"]
+
+        if len(data) == 0:
             return []
 
-        return [Activity(data=x, _client=self) for x in data["activity"]]
+        return [Activity(data=x, _client=self) for x in data]
 
     # noinspection PyUnresolvedReferences
     def get_fortress_list(self) -> List["Fortress"]:
