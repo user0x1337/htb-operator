@@ -47,9 +47,9 @@ class StubHtbHttpRequest:
             raise response
         return response
 
-    def get_request(self, endpoint: str | None = None, download: bool = False, base: str | None = None, custom_url: str | None = None) -> Any:
+    def get_request(self, endpoint: str | None = None, download: bool = False, base: str | None = None, custom_url: str | None = None, api_version: str = "v4") -> Any:
         key = custom_url if custom_url is not None else endpoint
-        self.calls.append(("GET", key, {"endpoint": endpoint, "download": download, "custom_url": custom_url}))
+        self.calls.append(("GET", key, {"endpoint": endpoint, "download": download, "custom_url": custom_url, "api_version": api_version}))
         return self._pop_response(self.get_routes, key)
 
     def post_request(self, endpoint: str, json: Any = None, api_version: str = "v4") -> Any:
