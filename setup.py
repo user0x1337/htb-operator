@@ -6,6 +6,8 @@ setup(
     packages=find_packages(),
     py_modules=["htb_operator"],
     install_requires=[
+        "httpx",
+        "httpx[http2]",
         "requests",
         "colorama",
         "pyjwt",
