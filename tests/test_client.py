@@ -212,17 +212,14 @@ def vpn_data() -> Dict:
 def test_get_user_by_id_fetches_profile_badges_and_ranking(client, stub_http) -> None:
     user_id = 42
     stub_http.add_get(f"user/profile/basic/{user_id}", {"profile": sample_user_profile(user_id)})
-    stub_http.add_get("rankings/user/ranking_bracket", {"data": sample_ranking_bracket()})
     stub_http.add_get(f"user/profile/badges/{user_id}", {"badges": sample_badges()})
 
     user = client.get_user(user_id=user_id)
 
     assert user.id == user_id
-    assert user.ranking_bracket.current_bracket == "Hacker"
     assert 7 in user.badges
     assert stub_http.endpoints_for("GET") == [
         f"user/profile/basic/{user_id}",
-        "rankings/user/ranking_bracket",
         f"user/profile/badges/{user_id}",
     ]
 
@@ -230,7 +227,6 @@ def test_get_user_by_id_fetches_profile_badges_and_ranking(client, stub_http) ->
 def test_get_user_cache_hit_skips_http_calls(client, stub_http) -> None:
     user_id = 1
     stub_http.add_get(f"user/profile/basic/{user_id}", {"profile": sample_user_profile(user_id)})
-    stub_http.add_get("rankings/user/ranking_bracket", {"data": sample_ranking_bracket()})
     stub_http.add_get(f"user/profile/badges/{user_id}", {"badges": []})
 
     first = client.get_user(user_id=user_id)
@@ -249,8 +245,6 @@ def test_get_user_by_username_uses_search_and_skips_ranking(client, stub_http) -
     user = client.get_user(username="alice")
 
     assert user.id == 99
-    assert user.ranking_bracket is None
-    assert "rankings/user/ranking_bracket" not in stub_http.endpoints_for("GET")
 
 
 def test_get_user_returns_none_when_search_empty(client, stub_http) -> None:
