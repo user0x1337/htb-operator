@@ -272,7 +272,7 @@ class MachineCommand(BaseCommand):
             return True
 
         if not self.args.wait_for_release:
-            self.logger.error(f'Machine has not been release, yet. Release date: {machine.release_date.isoformat()}')
+            self.logger.error(f'Machine has not been released, yet. Release date: {machine.release_date.isoformat()}')
             return False
 
         self.logger.warning(f'{Fore.LIGHTYELLOW_EX}Machine has not been released, yet. Release date: {machine.release_date.strftime("%Y-%m-%d %H:%M:%S %Z")}. Waiting for release date/time to continue...{Style.RESET_ALL}')
@@ -398,16 +398,15 @@ class MachineCommand(BaseCommand):
         # Handle --all, --active, --retired flags
         if self.all_machines:
             # Fetch both active and retired machines
-            machines_result += self.client.get_machine_list(retired=False, keyword=self.search_keyword, limit=self.limit_search, os_filter=os_filter)
-            machines_result += self.client.get_machine_list(retired=True, keyword=self.search_keyword, limit=self.limit_search, os_filter=os_filter)
+            machines_result += self.client.get_machine_list(keyword=self.search_keyword, limit=self.limit_search, os_filter=os_filter)
             machines_result += [x[0] for x in scheduled_machines]
         elif self.retired_machines:
             # Fetch only retired machines
-            machines_result += self.client.get_machine_list(retired=True, keyword=self.search_keyword, limit=self.limit_search, os_filter=os_filter)
+            machines_result += self.client.get_machine_list(state="retired", keyword=self.search_keyword, limit=self.limit_search, os_filter=os_filter)
         else:
             # Default behavior (backwards compatible): fetch active machines
             # This covers both explicit --active and no flag at all
-            machines_result += self.client.get_machine_list(retired=False, keyword=self.search_keyword, limit=self.limit_search, os_filter=os_filter)
+            machines_result += self.client.get_machine_list(state="active", keyword=self.search_keyword, limit=self.limit_search, os_filter=os_filter)
 
         if len(machines_result) == 0:
             self.logger.warning(f'{Fore.LIGHTYELLOW_EX}No machines found{Style.RESET_ALL}')

@@ -1,6 +1,8 @@
 import os
 import time
 from typing import Optional, List, cast, Tuple
+import dateutil.parser
+from datetime import datetime, timezone
 
 from .exception.errors import RequestException, NoPwnBoxActiveException
 
@@ -537,7 +539,7 @@ class HTBClient:
 
     # noinspection PyUnresolvedReferences
     def get_machine_list(self,
-                         retired: bool = False,
+                         state: str = "",
                          keyword: str = None,
                          limit: Optional[int] = None,
                          os_filter: Optional[List[str]] = None,
@@ -571,10 +573,11 @@ class HTBClient:
         result_list: List[MachineInfo] = []
         page_number = 1
         while True:
-            if retired:
-                res = self.htb_http_request.get_request(endpoint=f"machine/list/retired/paginated?per_page=100&page={page_number}{keyword_option}{sort_option}{os_filter_option}{os_difficulty_option}")
-            else:
-                res = self.htb_http_request.get_request(endpoint=f"machine/paginated?per_page=100&page={page_number}{keyword_option}{sort_option}{os_filter_option}{os_difficulty_option}")
+            state_param = ""
+            if state is not None and len(state) > 0:
+                state_param = f"&state={state}"
+
+            res = self.htb_http_request.get_request(endpoint=f"machines?per_page=100&page={page_number}{state_param}{keyword_option}{sort_option}{os_filter_option}{os_difficulty_option}", api_version="v5")
 
             data: list = res["data"]
             if data is None or len(data) == 0:
@@ -582,8 +585,13 @@ class HTBClient:
 
             # Add retired flag because that data does not contain this information
             for x in data:
+                # MachineInfo needs "release" field (since v4 for machine profile provides this field, as well).
+                if "release" not in x:
+                    x["release"] = x.get("releaseDate", None)
+
                 if "retired" not in x:
-                    x["retired"] = retired
+                    retired_date = x.get("retiredDate", None)
+                    x["retired"] = retired_date is not None and dateutil.parser.parse(retired_date).replace(tzinfo=timezone.utc) < datetime.now(tz=timezone.utc)
 
             result_list = result_list + [MachineInfo(_client=self, data=x) for x in data]
 
@@ -604,7 +612,7 @@ class HTBClient:
     def get_unreleased_machines(self) -> List[Tuple["MachineInfo", Optional["MachineInfo"]]]:
         """Get a list of all unreleased machines and the corresponding scheduled retired machine (if available)"""
         from .machine import MachineInfo
-        data: List[dict] = self.htb_http_request.get_request(endpoint=f"machine/unreleased")["data"]
+        data: List[dict] = self.htb_http_request.get_request(endpoint=f"machines?state=unreleased", api_version="v5")["data"]
 
         res = []
         for row in data:

@@ -376,14 +376,13 @@ def test_get_sherlocks_paginates_and_applies_filters(client, stub_http) -> None:
 def test_get_machine_list_paginates_and_adds_retired_flag(client, stub_http, monkeypatch) -> None:
     monkeypatch.setattr("htbapi.client.time.sleep", lambda *_: None)
 
-    endpoint_page1 = "machine/paginated?per_page=100&page=1&keyword=box&sort_type=asc&os[]=linux&difficulty[]=easy"
-    endpoint_page2 = "machine/paginated?per_page=100&page=2&keyword=box&sort_type=asc&os[]=linux&difficulty[]=easy"
+    endpoint_page1 = "machines?per_page=100&page=1&keyword=box&sort_type=asc&os[]=linux&difficulty[]=easy"
+    endpoint_page2 = "machines?per_page=100&page=2&keyword=box&sort_type=asc&os[]=linux&difficulty[]=easy"
 
     stub_http.add_get(endpoint_page1, {"data": [machine_entry(1), machine_entry(2)], "meta": {"last_page": 2}})
     stub_http.add_get(endpoint_page2, {"data": [machine_entry(3)], "meta": {"last_page": 2}})
 
     result = client.get_machine_list(
-        retired=False,
         keyword="box",
         os_filter=["linux"],
         difficulty_filter=["easy"],
@@ -398,7 +397,7 @@ def test_get_machine_list_paginates_and_adds_retired_flag(client, stub_http, mon
 def test_get_machine_list_limit_short_circuits(client, stub_http, monkeypatch) -> None:
     monkeypatch.setattr("htbapi.client.time.sleep", lambda *_: None)
 
-    endpoint_page1 = "machine/paginated?per_page=100&page=1&keyword=box&sort_type=asc"
+    endpoint_page1 = "machines?per_page=100&page=1&keyword=box&sort_type=asc"
     stub_http.add_get(endpoint_page1, {"data": [machine_entry(1), machine_entry(2)], "meta": {"last_page": 5}})
 
     result = client.get_machine_list(keyword="box", limit=1, sort_type="asc")
