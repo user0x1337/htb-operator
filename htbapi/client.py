@@ -41,11 +41,7 @@ class HTBClient:
 
         data = self.htb_http_request.get_request(endpoint=f"user/profile/basic/{user_id}")["profile"]
 
-        # Ranking brackets are only provided for own (authenticated) user. If the username is None, we will definitely retrieve
-        # the information for the own user.
-        ranking_bracket = self.get_user_ranking() if username is None else None
-
-        user: User = User(_client=self, data=data, ranking_bracket=ranking_bracket)
+        user: User = User(_client=self, data=data)
         _user_cache[user_id] = user
         return user
 
@@ -83,16 +79,6 @@ class HTBClient:
                             d["category_id"] in filter_category_list)
                 if filter_difficulty is None or (d["difficulty"].lower() == filter_difficulty.lower())
                 ]
-
-
-    # noinspection PyUnresolvedReferences
-    def get_user_ranking(self) -> "UserRankingHoF":
-        """Get the ranking of the own (authenticated) user."""
-        from .user import UserRankingHoF
-
-        data = self.htb_http_request.get_request(endpoint=f"rankings/user/ranking_bracket")["data"]
-        return UserRankingHoF(data=data, _client=self)
-
 
     # noinspection PyUnresolvedReferences
     def get_prolab_certificate_list(self) -> List["Certificate"]:

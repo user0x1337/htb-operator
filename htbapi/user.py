@@ -53,11 +53,10 @@ class User(client.BaseHtbApiObject):
     team: Team
     respects: int
     university: University
-    ranking_bracket: Optional["UserRankingHoF"]
     badges: Dict[int, datetime]
 
     # noinspection PyUnresolvedReferences
-    def __init__(self, data: dict, _client: "HTBClient", ranking_bracket: "UserRankingHoF"=None):
+    def __init__(self, data: dict, _client: "HTBClient"):
         self._client = _client
         self.id = data['id']
         self.name = data['name']
@@ -82,7 +81,6 @@ class User(client.BaseHtbApiObject):
         self.respects = data.get('respects', 0)
         self.isVip = data.get('isVip', False)
         self.university = University({}, _client) if data.get('university', None) is None else University(data['university'], _client)
-        self.ranking_bracket = ranking_bracket
 
         data = self._client.htb_http_request.get_request(endpoint=f'user/profile/badges/{self.id}')["badges"]
         self.badges = {x["id"]: dateutil.parser.parse(x["pivot"]["created_at"] if "pivot" in x else None) for x in data}
@@ -127,35 +125,3 @@ class User(client.BaseHtbApiObject):
             res = {k: res[k] for k in key_filter if k in res}
 
         return res
-
-class UserRankingHoF(client.BaseHtbApiObject):
-    """User Ranking Hall of Fame for the own (authenticated) user"""
-    rank: int
-    points: int
-    points_for_next_bracket: int
-    current_bracket: str
-    next_bracket: str
-
-    # noinspection PyUnresolvedReferences
-    def __init__(self, data: dict, _client: "HTBClient"):
-        self._client = _client
-        self.id = -1
-        self.rank = data['rank']
-        self.points = data['points']
-        self.points_for_next_bracket = data.get('points_for_next_bracket', 0)
-        self.current_bracket = data['current_bracket']
-        self.next_bracket = data['next_bracket']
-
-    def __repr__(self):
-        return f"<UserRankingHoF '{self.rank}'>"
-
-
-    def to_dict(self, key_filter: list=None):
-        """Returns the object as a dictionary."""
-        return {
-            "Rank": self.rank,
-            "Points": self.points,
-            "Points_Next_Bracket": self.points_for_next_bracket,
-            "Current_Bracket": self.current_bracket,
-            "Next_Bracket": self.next_bracket,
-            }
