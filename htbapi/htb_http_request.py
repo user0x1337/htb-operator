@@ -2,8 +2,7 @@ import time
 from json import JSONDecodeError
 from typing import Optional, Union
 
-import requests
-from urllib3.exceptions import InsecureRequestWarning
+import httpx
 
 from htbapi import RequestException
 
@@ -49,6 +48,7 @@ class HtbHtbHttpRequest(BaseHtbHttpRequest):
     _proxies: Optional[dict]
     _verify_ssl: bool
     _http_headers: dict
+    _client: httpx.Client
 
     def __init__(self,
                  app_token: str,
@@ -66,8 +66,6 @@ class HtbHtbHttpRequest(BaseHtbHttpRequest):
 
         self._proxies = None
         self._verify_ssl = True
-        # noinspection PyUnresolvedReferences
-        requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
         self.set_verify_ssl(verify_ssl)
         if proxy is not None and ("http" in proxy or "https" in proxy):
             self.set_proxies({"http": proxy["http"] if "http" in proxy and len(proxy["http"]) > 0 else None,
@@ -79,14 +77,49 @@ class HtbHtbHttpRequest(BaseHtbHttpRequest):
                               "Referer": "https://app.hackthebox.com/",
                               "Origin": "https://app.hackthebox.com",}
 
+        # build HTTP/2 client
+        self._client = self._build_client()
+
+    def _build_client(self) -> httpx.Client:
+        """Create a configured HTTP/2 client."""
+        transport = None
+        if self._proxies:
+            proxy_url = self._proxies.get("https") or self._proxies.get("http")
+            if proxy_url:
+                transport = httpx.HTTPTransport(proxy=proxy_url)
+
+        # modern signature
+        if transport is not None:
+            return httpx.Client(http2=True,
+                                headers=self._http_headers,
+                                verify=self._verify_ssl,
+                                follow_redirects=True,
+                                max_redirects=2,
+                                transport=transport)
+        else:
+            return httpx.Client(http2=True,
+                                headers=self._http_headers,
+                                verify=self._verify_ssl,
+                                follow_redirects=True,
+                                max_redirects=2)
+
+
 
     def set_proxies(self, proxies: Optional[dict]) -> None:
         """Set proxies."""
         self._proxies = proxies
+        # Recreate client to apply new proxies
+        self._client = self._build_client()
 
     def set_verify_ssl(self, verify_ssl: bool) -> None:
         """Set verify SSL."""
         self._verify_ssl = verify_ssl
+        # Recreate client to apply new SSL setting
+        # (client may not yet exist during __init__, so guard it)
+        try:
+            self._client = self._build_client()
+        except AttributeError:
+            pass
 
     def post_request(self,endpoint: str, json=None, api_version: str = "v4") -> dict:
         """Send post request to HTB API."""
@@ -95,11 +128,8 @@ class HtbHtbHttpRequest(BaseHtbHttpRequest):
 
 
         while True:
-            r = requests.post(url=f"{self._api_base}{api_version}/{endpoint}",
-                              headers= self._http_headers,
-                              json=json,
-                              proxies=self._proxies,
-                              verify=self._verify_ssl)
+            r = self._client.post(url=f"{self._api_base}{api_version}/{endpoint}",
+                                  json=json)
             # Due to rate limit
             if r.status_code == 429:
                 time.sleep(1)
@@ -107,15 +137,17 @@ class HtbHtbHttpRequest(BaseHtbHttpRequest):
             else:
                 break
 
-        if r.status_code != requests.codes.ok:
-            if r.status_code == requests.codes.no_content:
+        if r.status_code != httpx.codes.OK:
+            if r.status_code == httpx.codes.NO_CONTENT:
                 return dict()
 
             if r.content and len(r.content) > 0:
                 try:
                     raise RequestException(r.json())
                 except JSONDecodeError:
-                    raise RequestException(r.content)
+                    # ensure callers expecting a mapping don't break on bytes
+                    text = r.content.decode('utf-8', errors='replace')
+                    raise RequestException({"message": text, "status_code": r.status_code})
             else:
                 raise RequestException(r.status_code)
 
@@ -136,28 +168,54 @@ class HtbHtbHttpRequest(BaseHtbHttpRequest):
         if base is None:
             base = self._api_base
 
-        while True:
-            r = requests.get(url=custom_url if custom_url is not None else f"{base}{api_version}/{endpoint}",
-                             headers= self._http_headers,
-                             proxies=self._proxies,
-                             verify=self._verify_ssl,
-                             stream=download)
-            if r.status_code == 429:
-                time.sleep(1)
-                continue
-            else:
-                break
+        url = custom_url if custom_url is not None else f"{base}{api_version}/{endpoint}"
 
-        if r.status_code != requests.codes.ok:
-            if r.content and len(r.content) > 0:
-                try:
-                    raise RequestException(r.json())
-                except JSONDecodeError:
-                    raise RequestException(r.content)
-            else:
-                raise RequestException(r.status_code)
+        # Stream downloads in chunks to reduce memory usage and support large files
         if download:
-            return r.content
+            while True:
+                with self._client.stream("GET", url) as r:
+                    if r.status_code == 429:
+                        # rate limited, retry after short sleep
+                        time.sleep(1)
+                        continue
+
+                    if r.status_code != httpx.codes.OK:
+                        # read body to include details in exception
+                        body = r.read()
+                        if body:
+                            try:
+                                raise RequestException(r.json())
+                            except JSONDecodeError:
+                                # normalize to a dict so upstream code using .keys() won't fail
+                                text = body.decode('utf-8', errors='replace')
+                                raise RequestException({"message": text, "status_code": r.status_code})
+                        else:
+                            raise RequestException(r.status_code)
+
+                    # status OK: collect bytes in chunks
+                    buf = bytearray()
+                    for chunk in r.iter_bytes():  # default reasonable chunk size
+                        if chunk:
+                            buf.extend(chunk)
+                    return bytes(buf)
         else:
+            while True:
+                r = self._client.get(url=url)
+                if r.status_code == 429:
+                    time.sleep(1)
+                    continue
+                else:
+                    break
+
+            if r.status_code != httpx.codes.OK:
+                if r.content and len(r.content) > 0:
+                    try:
+                        raise RequestException(r.json())
+                    except JSONDecodeError:
+                        text = r.content.decode('utf-8', errors='replace')
+                        raise RequestException({"message": text, "status_code": r.status_code})
+                else:
+                    raise RequestException(r.status_code)
+
             return r.json()
 
