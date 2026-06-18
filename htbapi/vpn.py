@@ -196,6 +196,7 @@ class AccessibleVpnServer(BaseVpnServer):
             self.current_clients = data["assigned_server"]['current_clients']
             self.location = data["assigned_server"]['location']
             self.machine = None
+            self.can_access = True
         else:
             self.id = 0
             self.name = None

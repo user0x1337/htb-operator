@@ -103,7 +103,7 @@ class VpnCommand(BaseCommand):
             products.append("labs")
 
         if len(products) == 0:
-            products = ["labs", "starting_point", "fortresses", "release_arena", "endgames", "prolab"]
+            products = ["labs", "starting_point", "fortresses", "release_arena"]
 
         return products
 

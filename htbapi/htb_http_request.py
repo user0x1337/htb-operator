@@ -74,8 +74,10 @@ class HtbHtbHttpRequest(BaseHtbHttpRequest):
                               "https": proxy["https"] if "https" in proxy and len(proxy["https"]) > 0 else None})
 
         self._http_headers = {"Authorization": f"Bearer {self._app_token}",
-                              "User-Agent": self._user_agent,
-                              "Accept": "application/json"}
+                              "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+                              "Accept": "application/json",
+                              "Referer": "https://app.hackthebox.com/",
+                              "Origin": "https://app.hackthebox.com",}
 
 
     def set_proxies(self, proxies: Optional[dict]) -> None:

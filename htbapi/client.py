@@ -430,7 +430,7 @@ class HTBClient:
             return servers
 
         if products is None or len(products) == 0:
-            products = ["starting_point", "fortresses", "release_arena", "labs", "endgames", "prolab"]
+            products = ["starting_point", "fortresses", "release_arena", "labs"]
 
 
         vpn_servers: dict[int, VpnServerInfo] = dict()
@@ -450,7 +450,7 @@ class HTBClient:
             if _vpn_server_cache is None:
                 _vpn_server_cache = dict()
 
-            data: dict = self.htb_http_request.get_request(endpoint=f"connections/servers?product={product}", api_version="v5")["data"]
+            data: dict = self.htb_http_request.get_request(endpoint=f"connections/servers?product={product}", api_version="v4")["data"]
             servers = parse_data(data, my_location=vpn_location)
             _vpn_server_cache[caching_key] = servers
             if vpn_servers is not None and len(vpn_servers.keys()) > 0:
@@ -475,7 +475,7 @@ class HTBClient:
                     vpn_servers = vpn_servers | _vpn_server_cache.get(caching_key)
                     continue
                 try:
-                    data: dict = self.htb_http_request.get_request(endpoint=f"connections/servers/prolab/{prolab.id}", api_version="v5")["data"]
+                    data: dict = self.htb_http_request.get_request(endpoint=f"connections/servers/prolab/{prolab.id}", api_version="v4")["data"]
                 except RequestException:
                     # Ignore RequestException because we do not have read permission for some resources (e.g., when an account type is free).
                     continue
