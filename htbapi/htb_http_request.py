@@ -40,7 +40,7 @@ class BaseHtbHttpRequest:
     def post_request(self, endpoint: str, json=None, api_version: str = "v4") -> dict:
         raise NotImplementedError()
 
-    def get_request(self, endpoint: Optional[str] = None, download=False, base: str = None, custom_url: Optional[str] = None) -> Union[list, dict, bytes]:
+    def get_request(self, endpoint: Optional[str] = None, download=False, base: str = None, custom_url: Optional[str] = None, api_version: Optional[str] = None) -> Union[list, dict, bytes]:
         raise NotImplementedError()
 
 
@@ -123,15 +123,19 @@ class HtbHtbHttpRequest(BaseHtbHttpRequest):
                     endpoint: Optional[str]=None,
                     download: bool = False,
                     base: Optional[str] = None,
-                    custom_url: Optional[str]=None) -> Union[list, dict, bytes]:
+                    custom_url: Optional[str]=None,
+                    api_version: Optional[str] = None) -> Union[list, dict, bytes]:
         """Send a GET request to the API"""
         assert endpoint is not None or custom_url is not None
+
+        if api_version is None:
+            api_version = self._api_version
 
         if base is None:
             base = self._api_base
 
         while True:
-            r = requests.get(url=custom_url if custom_url is not None else f"{base}{self._api_version}/{endpoint}",
+            r = requests.get(url=custom_url if custom_url is not None else f"{base}{api_version}/{endpoint}",
                              headers= self._http_headers,
                              proxies=self._proxies,
                              verify=self._verify_ssl,

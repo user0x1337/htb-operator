@@ -450,7 +450,7 @@ class HTBClient:
             if _vpn_server_cache is None:
                 _vpn_server_cache = dict()
 
-            data: dict = self.htb_http_request.get_request(endpoint=f"connections/servers?product={product}")["data"]
+            data: dict = self.htb_http_request.get_request(endpoint=f"connections/servers?product={product}", api_version="v5")["data"]
             servers = parse_data(data, my_location=vpn_location)
             _vpn_server_cache[caching_key] = servers
             if vpn_servers is not None and len(vpn_servers.keys()) > 0:
@@ -475,7 +475,7 @@ class HTBClient:
                     vpn_servers = vpn_servers | _vpn_server_cache.get(caching_key)
                     continue
                 try:
-                    data: dict = self.htb_http_request.get_request(endpoint=f"connections/servers/prolab/{prolab.id}")["data"]
+                    data: dict = self.htb_http_request.get_request(endpoint=f"connections/servers/prolab/{prolab.id}", api_version="v5")["data"]
                 except RequestException:
                     # Ignore RequestException because we do not have read permission for some resources (e.g., when an account type is free).
                     continue
@@ -490,25 +490,11 @@ class HTBClient:
         """Get all VPN Servers that are directly accessible without switching the VPN-Server"""
         from .vpn import AccessibleVpnServer
 
-        data: dict = self.htb_http_request.get_request(endpoint=f"connections")["data"]
-        if data is None or len(data.keys()) == 0:
+        data: dict = self.htb_http_request.get_request(endpoint=f"connections", api_version="v5")["data"]
+        if data is None or len(data) == 0:
             return dict()
 
-        prolabs: dict = {}
-        for k, v in data.items():
-            # prolabs are originally deeper in the tree structure. Flat the structure to access the prolabs easily, later.
-            if k == "pro_labs":
-                prolabs = {k:v for k,v in data[k].items() if type(v) == dict}
-            else:
-                data[k]["type"] = k  # key contains e.g. "lab", "endgames", ...
-
-        data.pop("pro_labs", None)
-        for k,v in prolabs.items():
-            data[k] = v
-            data[k]["type"] = "prolabs"
-
-        del prolabs
-        servers =  [AccessibleVpnServer(data=x, _client=self) for x in data.values()]
+        servers: List[AccessibleVpnServer] =  [AccessibleVpnServer(data=x, _client=self) for x in data]
 
         return {k.id: k for k in servers if k.id is not None and k.id > 0}
 

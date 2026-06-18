@@ -140,8 +140,8 @@ class VpnConnection(client.BaseHtbApiObject):
     # noinspection PyUnresolvedReferences
     def __init__(self, data: dict, _client: "HTBClient"):
         self._client = _client
-        self.type = data.get('type')
-        self.name = data.get('location_type_friendly')
+        self.type = data.get('type', '')
+        self.name = data.get('location_type_friendly', '')
         self.server_id = data["server"]['id']
         self.server_hostname = data["server"]['hostname']
         self.server_port = data["server"].get('port', None)
@@ -186,7 +186,7 @@ class AccessibleVpnServer(BaseVpnServer):
     def __init__(self, data: dict, _client: "HTBClient"):
         super().__init__(_client=_client)
 
-        self.type = data.get('type')
+        self.type = data.get('type', '')
         self.is_assigned = True
         self.can_access = data.get('can_access', False)
 
