@@ -2,6 +2,8 @@
 
 This release includes bug fixes and reliability improvements.
 
+### Improvements
+- #41: Improved HTB API request handling with HTTP/2 support and more robust response processing.
+
 ### Fixed
-- Fixed challenge instance startup and shtudown by updating the implementation to use the currently supported HTB API route.
-- Fixed challenge downloads when HTB does not provide a file hash, preventing valid downloads from being incorrectly treated as failed.
+- #44: Fixed VPN server discovery by correcting API version handling and excluding unsupported/deprecated VPN targets.
