@@ -575,7 +575,7 @@ def create_ranking_panel(ranking_dict: dict) -> Panel:
         "Points": ranking_dict['Points'],
         "Team": ranking_dict["Team"]["Rank"],
         "University": ranking_dict["University"]["Rank"],
-        "Ownership": f'{ranking_dict["Ownership"]}% / {ranking_dict["Rank Requirement"]}',
+        "Ownership": f'{ranking_dict["Ownership"]}% / {ranking_dict["Rank Requirement"]}%',
     }
 
     return _create_custom_panel(custom_dict=ranking_dict, panel_title="Ranking Information")
