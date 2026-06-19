@@ -2,8 +2,14 @@
 
 This release includes bug fixes and reliability improvements.
 
+### Added
+- Command `info`: show user XP and streak (#46)
+
 ### Improvements
-- #41: Improved HTB API request handling with HTTP/2 support and more robust response processing.
+- Command `info`: migrated to HTB API v5 (#46)
+- Command `info` -> user activity: switched to HTB API v5 (#46)
+- Command `machine list`: migrated to HTB API v5 (#46)
+- Removed deprecated `RankingBrackets` (#46)
 
 ### Fixed
-- #44: Fixed VPN server discovery by correcting API version handling and excluding unsupported/deprecated VPN targets.
+- Stabilized unit tests (#46)
