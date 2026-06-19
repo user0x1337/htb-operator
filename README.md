@@ -21,7 +21,7 @@
 <b>Misc</b><br>
   <img alt="current version" src="https://img.shields.io/badge/Python_>=3.12-supported-success">
   <br>
-  <img alt="current version" src="https://img.shields.io/badge/HTB--API_v4-supported-success">
+  <img alt="current version" src="https://img.shields.io/badge/HTB--API_v5-supported-success">
   <br><br>
 </div>
 
