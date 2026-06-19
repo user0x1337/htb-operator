@@ -5,7 +5,7 @@ from rich.table import Table
 
 from command.base import BaseCommand
 from console.cli_panel import create_profile_panel, create_ranking_panel, create_misc_panel, \
-    create_advanced_labs_panel, create_activity_panel
+    create_advanced_labs_panel, create_activity_panel, create_level_panel
 from htbapi import User, Activity, FortressUserProfile, ProLabUserProfile, EndgameUserProfile, \
     SherlockUserProfile, MachineOsUserProfile, ChallengeUserProfile
 
@@ -32,10 +32,11 @@ class InfoCommand(BaseCommand):
             challenge_progress: List[ChallengeUserProfile] = self.client.get_challenge_progress_profile_summary(user_id=user.id)
 
             panel_profile = create_profile_panel(user_dict=user.to_dict(key_filter=["ID", "Name", "Team", "University", "Country", "Subscription"]))
-            panel_ranking = create_ranking_panel(ranking_dict=user.to_dict(key_filter=["Ranking", "Ranking_Bracket", "Team", "University", "Points", "Rank", "Ownership", "Next Rank", "Rank Requirement"]))
-            panel_misc = create_misc_panel(misc_dict=user.to_dict(key_filter=["User Bloods", "System Bloods", "User Owns", "System Owns", "Respects", "Public"]))
+            panel_ranking = create_ranking_panel(ranking_dict=user.to_dict(key_filter=["Ranking", "Next rank", "Team", "University", "Points", "Rank", "Ownership", "Rank Requirement"]))
+            panel_level = create_level_panel(xp_level_dict=user.to_dict(key_filter=["Level", "Level Title", "Level Grade", "Streak In Danger", "Streak Completed", "Level Points", "Points Until Next Level", "Streak Counter", "Streak Saver", "Streak Expires At"]))
 
             max_panel_height = max(len(fortress_progress), len(sherlocks_progress))
+            panel_misc = create_misc_panel(misc_dict=user.to_dict(key_filter=["User Bloods", "System Bloods", "User Owns", "System Owns", "Respects", "Public"]))
             panel_fortress = create_advanced_labs_panel(advanced_list=fortress_progress, title="🏰 Fortress Progress", target_height=max_panel_height)
             panel_sherlocks = create_advanced_labs_panel(advanced_list=sherlocks_progress, title="🛡️  Sherlock Progress", target_height=max_panel_height)
 
@@ -48,8 +49,8 @@ class InfoCommand(BaseCommand):
             table = Table.grid(expand=True)
             table.add_column()
             table.add_column()
-            table.add_row(panel_profile, panel_ranking, panel_misc)
-            table.add_row(panel_fortress, panel_sherlocks)
+            table.add_row(panel_profile, panel_ranking, panel_level)
+            table.add_row(panel_misc, panel_fortress, panel_sherlocks)
             table.add_row(panel_prolabs, panel_challenges, panel_machines)
 
             self.console.print(table)

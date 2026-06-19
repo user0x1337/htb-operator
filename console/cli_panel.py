@@ -547,6 +547,22 @@ def create_profile_panel(user_dict: dict) -> Panel:
     return _create_custom_panel(custom_dict=profile_dict, panel_title="Profile")
 
 
+def create_level_panel(xp_level_dict: dict) -> Panel:
+    """Create a panel with ranking information"""
+    assert xp_level_dict is not None
+    assert len(xp_level_dict.keys()) > 0
+
+    level_dict = {
+        "Level": f"{xp_level_dict['Level']} ({xp_level_dict['Level Title']}, Grade: {xp_level_dict['Level Grade']})",
+        "Points / Next Level": f"{xp_level_dict['Level Points']} / {xp_level_dict['Level Points'] + xp_level_dict['Points Until Next Level']} ({abs(xp_level_dict['Level Points'] / (xp_level_dict['Level Points'] + xp_level_dict['Points Until Next Level'])) * 100:.2f}%)",
+        "Streak": xp_level_dict["Streak Counter"],
+        "# Streak Savers": xp_level_dict["Streak Saver"],
+        "Streak Completed": f"{format_bool(xp_level_dict["Streak Completed"], color_true="green", color_false="red")}",
+        "Streak Expires At": f'{xp_level_dict["Streak Expires At"]} UTC' if xp_level_dict["Streak Expires At"] is not None else "?",
+    }
+
+    return _create_custom_panel(custom_dict=level_dict, panel_title="Level Information")
+
 def create_ranking_panel(ranking_dict: dict) -> Panel:
     """Create a panel with ranking information"""
     assert ranking_dict is not None
@@ -554,12 +570,12 @@ def create_ranking_panel(ranking_dict: dict) -> Panel:
 
 
     ranking_dict = {
-        "Rank": "TBD",
-        "Ranking": "TBD",
-        "Points": 0,
-        "Team": "TBD",
-        "University": "TBD",
-        "Ownership": f'TBD',
+        "Rank": f"{ranking_dict['Rank']} (Next: {ranking_dict["Next rank"]})",
+        "HoF Ranking": ranking_dict['Ranking'],
+        "Points": ranking_dict['Points'],
+        "Team": ranking_dict["Team"]["Rank"],
+        "University": ranking_dict["University"]["Rank"],
+        "Ownership": f'{ranking_dict["Ownership"]}% / {ranking_dict["Rank Requirement"]}',
     }
 
     return _create_custom_panel(custom_dict=ranking_dict, panel_title="Ranking Information")

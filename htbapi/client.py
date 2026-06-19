@@ -634,7 +634,6 @@ class HTBClient:
 
         return ActiveMachineInfo(_client=self, data=data)
     
-
     # noinspection PyUnresolvedReferences
     def get_user_activity(self, user_id: int, limit_activity_entries: Optional[int] = 20) -> List["Activity"]:
         """Retrieves a list of `Activity` from the API"""
