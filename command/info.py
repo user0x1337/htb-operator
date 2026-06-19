@@ -22,7 +22,8 @@ class InfoCommand(BaseCommand):
 
     def execute(self):
         user: User = self.client.get_user(self.username)
-        activities: List[Activity] = self.client.get_user_activity(user_id=user.id)
+        activities: List[Activity] = self.client.get_user_activity(user_id=user.id,
+                                                                   limit_activity_entries=20 if not self.args.activity else None)
         if not self.args.activity:
             fortress_progress: List[FortressUserProfile] = self.client.get_fortress_progress_profile_summary(user_id=user.id)
             prolabs_progress: List[ProLabUserProfile] = self.client.get_prolab_progress_profile_summary(user_id=user.id)
@@ -53,5 +54,5 @@ class InfoCommand(BaseCommand):
 
             self.console.print(table)
 
-        panel_activity = create_activity_panel(activity_list=activities, limit_activity_entries=20 if not self.args.activity else None)
+        panel_activity = create_activity_panel(activity_list=activities)
         self.console.print(panel_activity)

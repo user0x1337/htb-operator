@@ -589,18 +589,13 @@ def create_advanced_labs_panel(advanced_list: List, title: str, target_height: i
                                 target_height=target_height)
 
 
-def create_activity_panel(activity_list: List[Activity], limit_activity_entries: Optional[int]=20) -> Panel:
+def create_activity_panel(activity_list: List[Activity]) -> Panel:
     """Create a panel with activity information"""
     assert activity_list is not None
     assert len(activity_list) > 0
 
     # sort list of dicts
     activity_list = sorted(activity_list, key=lambda activity: activity.date, reverse=True)
-
-
-    # Only the recent 20 entries
-    if limit_activity_entries is not None and len(activity_list) > limit_activity_entries:
-        activity_list = activity_list[:limit_activity_entries]
 
     max_date_diff_length = max(len(activity.date_diff) for activity in activity_list)
     max_type_length = max(len(f"{activity.flag_title + " " if activity.object_type == "endgame" 
