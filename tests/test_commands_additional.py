@@ -1,16 +1,45 @@
 from __future__ import annotations
 
 import argparse
+import importlib
+import sys
+import types
+from pathlib import Path
 from datetime import datetime, timezone
 from types import SimpleNamespace
 
-from command.badge import BadgeCommand
-from command.certificate import CertificateCommand
-from command.prolabs import ProlabsCommand
-from command.pwnbox import PwnBoxCommand
-from command.season import SeasonCommand
-from command.sherlock import SherlockCommand
-from htbapi.exception.errors import NoPwnBoxActiveException, RequestException
+# Prevent executing command/__init__.py (side effects) by registering a dummy
+# package with a correct __path__ and importing submodules via importlib.
+if "command" not in sys.modules:
+    pkg = types.ModuleType("command")
+    pkg.__path__ = [str(Path(__file__).resolve().parents[1] / "command")]
+    sys.modules["command"] = pkg
+
+badge_mod = importlib.import_module("command.badge")
+certificate_mod = importlib.import_module("command.certificate")
+prolabs_mod = importlib.import_module("command.prolabs")
+pwnbox_mod = importlib.import_module("command.pwnbox")
+season_mod = importlib.import_module("command.season")
+sherlock_mod = importlib.import_module("command.sherlock")
+
+BadgeCommand = badge_mod.BadgeCommand
+CertificateCommand = certificate_mod.CertificateCommand
+ProlabsCommand = prolabs_mod.ProlabsCommand
+PwnBoxCommand = pwnbox_mod.PwnBoxCommand
+SeasonCommand = season_mod.SeasonCommand
+SherlockCommand = sherlock_mod.SherlockCommand
+
+# Load Request-/PwnBox exceptions without executing htbapi/__init__.py
+try:
+    from htbapi.exception.errors import NoPwnBoxActiveException, RequestException  # type: ignore
+except Exception:
+    if "htbapi" not in sys.modules:
+        htbapi_pkg = types.ModuleType("htbapi")
+        htbapi_pkg.__path__ = [str(Path(__file__).resolve().parents[1] / "htbapi")]
+        sys.modules["htbapi"] = htbapi_pkg
+    errors_mod = importlib.import_module("htbapi.exception.errors")
+    NoPwnBoxActiveException = getattr(errors_mod, "NoPwnBoxActiveException", Exception)
+    RequestException = getattr(errors_mod, "RequestException", Exception)
 
 
 class LoggerStub:

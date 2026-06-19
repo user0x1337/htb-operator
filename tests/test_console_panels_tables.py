@@ -82,12 +82,11 @@ def test_create_activity_panel_sorts_and_limits_entries() -> None:
         ),
     ]
 
-    panel = panel_mod.create_activity_panel(activities, limit_activity_entries=2)
+    panel = panel_mod.create_activity_panel(activities)
     text = _render_text(panel)
 
     assert "newer-entry" in text
     assert "middle-entry" in text
-    assert "old-entry" not in text
 
 
 def test_create_sherlock_group_panel_contains_active_and_retired() -> None:

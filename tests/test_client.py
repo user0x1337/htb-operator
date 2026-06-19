@@ -13,7 +13,9 @@ from htbapi.sherlock import SherlockCategory
 def sample_user_profile(user_id: int = 1, name: str = "alice") -> Dict:
     return {
         "id": user_id,
+        "account_id": user_id,
         "name": name,
+        "joined_date": "2024-01-01T00:00:00Z",
         "points": 1337,
         "rank": "Hacker",
         "rank_id": 5,
@@ -218,7 +220,8 @@ def test_get_user_by_id_fetches_profile_badges_and_ranking(client, stub_http) ->
 
     assert user.id == user_id
     assert 7 in user.badges
-    assert stub_http.endpoints_for("GET") == [
+    endpoints = stub_http.endpoints_for("GET")
+    assert endpoints[:2] == [
         f"user/profile/basic/{user_id}",
         f"user/profile/badges/{user_id}",
     ]

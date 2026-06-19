@@ -1,11 +1,68 @@
 from __future__ import annotations
 
 import argparse
+import importlib
+import sys
+import types
+from pathlib import Path
 
 import pytest
 
-import command.info as info_mod
-from command.info import InfoCommand
+# Prevent executing command/__init__.py (and its side effects requiring extra
+# third‑party dependencies) by registering a dummy "command" package object
+# with a correct __path__ before importing.
+if "command" not in sys.modules:
+    pkg = types.ModuleType("command")
+    pkg.__path__ = [str(Path(__file__).resolve().parents[1] / "command")]
+    sys.modules["command"] = pkg
+
+# Also stub the "htbapi" package to avoid pulling httpx dependencies at import time.
+if "htbapi" not in sys.modules:
+    htbapi_stub = types.ModuleType("htbapi")
+
+    class HTBClient:  # type: ignore
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+    class User:  # type: ignore
+        pass
+
+    class Activity:  # type: ignore
+        pass
+
+    class FortressUserProfile:  # type: ignore
+        pass
+
+    class ProLabUserProfile:  # type: ignore
+        pass
+
+    class EndgameUserProfile:  # type: ignore
+        pass
+
+    class SherlockUserProfile:  # type: ignore
+        pass
+
+    class MachineOsUserProfile:  # type: ignore
+        pass
+
+    class ChallengeUserProfile:  # type: ignore
+        pass
+
+    # Export the symbols that command.info / command.base import
+    htbapi_stub.HTBClient = HTBClient
+    htbapi_stub.User = User
+    htbapi_stub.Activity = Activity
+    htbapi_stub.FortressUserProfile = FortressUserProfile
+    htbapi_stub.ProLabUserProfile = ProLabUserProfile
+    htbapi_stub.EndgameUserProfile = EndgameUserProfile
+    htbapi_stub.SherlockUserProfile = SherlockUserProfile
+    htbapi_stub.MachineOsUserProfile = MachineOsUserProfile
+    htbapi_stub.ChallengeUserProfile = ChallengeUserProfile
+
+    sys.modules["htbapi"] = htbapi_stub
+
+info_mod = importlib.import_module("command.info")
+InfoCommand = info_mod.InfoCommand
 
 
 class LoggerStub:
@@ -47,7 +104,7 @@ class InfoClientStub:
     def get_user(self, username=None):
         return self.user
 
-    def get_user_activity(self, user_id: int):
+    def get_user_activity(self, user_id: int, limit_activity_entries=None):
         return ["activity"]
 
     def get_fortress_progress_profile_summary(self, user_id: int):

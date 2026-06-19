@@ -1,11 +1,24 @@
 from __future__ import annotations
 
 import hashlib
+import importlib
+import sys
+import types
+from pathlib import Path
 
 import pytest
 
-from htbapi.challenge import ChallengeList
-from htbapi.exception.errors import RequestException
+# Load htbapi submodules without executing htbapi/__init__.py
+if "htbapi" not in sys.modules:
+    htbapi_pkg = types.ModuleType("htbapi")
+    htbapi_pkg.__path__ = [str(Path(__file__).resolve().parents[1] / "htbapi")]
+    sys.modules["htbapi"] = htbapi_pkg
+
+challenge_mod = importlib.import_module("htbapi.challenge")
+errors_mod = importlib.import_module("htbapi.exception.errors")
+
+ChallengeList = challenge_mod.ChallengeList
+RequestException = errors_mod.RequestException
 
 
 def make_challenge(client, challenge_id: int = 10, name: str = "Web 101") -> ChallengeList:
