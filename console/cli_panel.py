@@ -327,33 +327,6 @@ def create_machine_info_panel(machine_info: dict) -> Table | Panel | Group:
     top_10_table.add_column("Date own user", width=10)
     top_10_table.add_column("Date own root", width=10)
 
-    for i, user_own in enumerate(machine_info["machine_top_owns"][:10]):
-        position = i + 1
-        username = f'{user_own["username"]}'
-        rank = user_own["rank_text"]
-        if user_own["is_user_blood"] or user_own["is_root_blood"]:
-            username = f'[bold red]{user_own["username"]}[/bold red]'
-            position = f'[bold red]{i + 1}[/bold red]'
-            rank = f'[bold red]{user_own["rank_text"]}[/bold red]'
-
-
-        top_10_table.add_row(f'{position}.',
-                             f'{username}',
-                             f'{rank}',
-                             f'{format_bool(user_own["is_user_blood"], color_true="green")}',
-                             f'{format_bool(user_own["is_root_blood"], color_true="green")}',
-                             f'{user_own["user_own_date"].strftime("%Y-%m-%d %H:%M")} UTC',
-                             f'{user_own["own_date"].strftime("%Y-%m-%d %H:%M")} UTC'
-                             )
-    for i in range(len(top_10_table.rows), 11):
-        top_10_table.add_row()
-
-    p_top_10 = Panel(top_10_table,
-                     title=f"[bold yellow]Top 10 Users[/bold yellow]",
-                     expand=True,
-                     border_style="yellow",
-                     title_align="left")
-
     activity_table = Table(expand=True, show_lines=False, box=None)
     activity_table.add_column("#", width=1)
     activity_table.add_column("User", width=7)
@@ -431,8 +404,7 @@ def create_machine_info_panel(machine_info: dict) -> Table | Panel | Group:
 
     table = Table.grid(expand=True)
     table.add_column()
-    table.add_column()
-    table.add_row(p_basic, p_top_10)
+    table.add_row(p_basic)
 
     if p_machine_info_status and p_changelog:
         return Group(table, p_changelog, p_machine_info_status, p_activity)

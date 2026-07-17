@@ -100,7 +100,6 @@ class MachineInfo(MachineBase):
     show_go_vip_server: bool
     ownRank: int
     machine_mode: Optional[str]
-    machine_top_owns: List["MachineTopOwns"]
     machine_activity: List["MachineActivity"]
     changelog: List["MachineChangelog"]
 
@@ -152,11 +151,7 @@ class MachineInfo(MachineBase):
         Args:
             item: The name of the property to retrieve
         """
-        if item == "machine_top_owns":
-            data: dict = self._client.htb_http_request.get_request(endpoint=f"machine/owns/top/{self.id}")["info"]
-            new_obj = [MachineTopOwns(data=x, _client=self._client, machine_info=self) for x in data]
-            new_obj.sort(key=lambda x: x.position)
-        elif item == "machine_activity":
+        if item == "machine_activity":
             data: dict = self._client.htb_http_request.get_request(endpoint=f"machine/activity/{self.id}")
             if "info" not in data:
                 new_obj = []
@@ -222,7 +217,6 @@ class MachineInfo(MachineBase):
             "machine_mode": self.machine_mode,
         }
         if details:
-            res["machine_top_owns"] = [x.to_dict() for x in self.machine_top_owns]
             res["machine_activity"] = [x.to_dict() for x in self.machine_activity]
             res["changelog"] = [x.to_dict() for x in self.changelog]
 
@@ -345,66 +339,6 @@ class MachineMaker(client.BaseHtbApiObject):
             "id": self.id,
             "name": self.name,
             "is_respected": self.is_respected
-        }
-
-
-class MachineTopOwns(client.BaseHtbApiObject):
-    username: str
-    rank_id: int
-    rank_text: str
-    own_date: datetime
-    user_own_date: datetime
-    user_own_time: str
-    root_own_tine: str
-    is_user_blood: bool
-    is_root_blood: bool
-    position: int
-    machine: MachineInfo
-    user: User
-
-    # noinspection PyUnresolvedReferences
-    def __init__(self, data: dict, _client: "HTBClient", machine_info: MachineInfo):
-        assert machine_info is not None
-
-        self.id = data.get('id')
-        self._client = _client
-        self.machine = machine_info
-        self.username = data.get('name')
-        self.rank_id = data.get('rank_id')
-        self.rank_text = data.get('rank_text')
-        self.own_date = dateutil.parser.parse(data.get('own_date')).replace(tzinfo=timezone.utc)
-        self.user_own_date = dateutil.parser.parse(data.get('user_own_date')).replace(tzinfo=timezone.utc)
-        self.user_own_time = data.get('user_own_time')
-        self.root_own_tine = data.get('root_own_tine')
-        self.is_user_blood = data.get('is_user_blood', False)
-        self.is_root_blood = data.get('is_root_blood', False)
-        self.position = data.get('position')
-
-    def __repr__(self):
-        return f"<MachineTopOwns '{self.username} | {self.id} | {self.machine}'>"
-
-    def __getattr__(self, item):
-        if item == 'user':
-            new_obj = self._client.get_user(user_id=self.id)
-        else:
-            raise AttributeError
-
-        setattr(self, item, new_obj)
-        return new_obj
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "username": self.username,
-            "rank_id": self.rank_id,
-            "rank_text": self.rank_text,
-            "own_date": self.own_date,
-            "user_own_date": self.user_own_date,
-            "user_own_time": self.user_own_time,
-            "root_own_tine": self.root_own_tine,
-            "is_user_blood": self.is_user_blood,
-            "is_root_blood": self.is_root_blood,
-            "position": self.position
         }
 
 

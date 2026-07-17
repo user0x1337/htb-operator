@@ -613,7 +613,7 @@ class HTBClient:
 
 
     # noinspection PyUnresolvedReferences
-    def get_machine(self, machine_id_or_name: int | str) -> "MachineInfo":
+    def get_machine(self, machine_id_or_name: int | str | None) -> "MachineInfo":
         """Retrieve a machine object for the given machine ID or name."""
         from .machine import MachineInfo
 
