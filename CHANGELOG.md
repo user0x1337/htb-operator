@@ -1,15 +1,12 @@
 # Changelog
 
-This release includes bug fixes and reliability improvements.
+This release includes bug fixes.
 
 ### Added
-- Command `info`: show user XP and streak (#46)
+- None
 
 ### Improvements
-- Command `info`: migrated to HTB API v5 (#46)
-- Command `info` -> user activity: switched to HTB API v5 (#46)
-- Command `machine list`: migrated to HTB API v5 (#46)
-- Removed deprecated `RankingBrackets` (#46)
+- None
 
 ### Fixed
-- Stabilized unit tests (#46)
+- Fixed the `machine info` command after HTB removed an API endpoint (#48).
