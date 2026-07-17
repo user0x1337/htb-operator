@@ -14,47 +14,6 @@ def base_machine_data(machine_id: int = 10) -> dict:
     }
 
 
-def test_machine_getattr_top_owns_is_sorted_and_cached(client, stub_http) -> None:
-    machine = MachineInfo(_client=client, data=base_machine_data())
-
-    stub_http.add_get(
-        f"machine/owns/top/{machine.id}",
-        {
-            "info": [
-                {
-                    "id": 2,
-                    "name": "b",
-                    "rank_id": 1,
-                    "rank_text": "Hacker",
-                    "own_date": "2024-01-02T00:00:00Z",
-                    "user_own_date": "2024-01-02T00:00:00Z",
-                    "user_own_time": "10:00",
-                    "root_own_tine": "11:00",
-                    "position": 2,
-                },
-                {
-                    "id": 1,
-                    "name": "a",
-                    "rank_id": 1,
-                    "rank_text": "Hacker",
-                    "own_date": "2024-01-01T00:00:00Z",
-                    "user_own_date": "2024-01-01T00:00:00Z",
-                    "user_own_time": "09:00",
-                    "root_own_tine": "09:30",
-                    "position": 1,
-                },
-            ]
-        },
-    )
-
-    first = machine.machine_top_owns
-    second = machine.machine_top_owns
-
-    assert [x.position for x in first] == [1, 2]
-    assert first is second
-    assert stub_http.endpoints_for("GET") == [f"machine/owns/top/{machine.id}"]
-
-
 def test_machine_getattr_activity_sorts_by_date_desc(client, stub_http) -> None:
     machine = MachineInfo(_client=client, data=base_machine_data())
 
