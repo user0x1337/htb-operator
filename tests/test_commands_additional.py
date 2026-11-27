@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import argparse
 import importlib
+import platform
 import sys
 import types
 from pathlib import Path
 from datetime import datetime, timezone
 from types import SimpleNamespace
+
+import pytest
 
 # Prevent executing command/__init__.py (side effects) by registering a dummy
 # package with a correct __path__ and importing submodules via importlib.
@@ -17,6 +20,7 @@ if "command" not in sys.modules:
 
 badge_mod = importlib.import_module("command.badge")
 certificate_mod = importlib.import_module("command.certificate")
+challenge_mod = importlib.import_module("command.challenge")
 prolabs_mod = importlib.import_module("command.prolabs")
 pwnbox_mod = importlib.import_module("command.pwnbox")
 season_mod = importlib.import_module("command.season")
@@ -177,6 +181,34 @@ class SeasonListStub:
 
     def to_dict(self) -> dict:
         return {"id": self.id, "name": self.name}
+
+
+@pytest.mark.parametrize(
+    ("os_release", "install_hint"),
+    [
+        ({"ID": "parrot", "VERSION_ID": "7.4"}, "Run `sudo apt install libarchive13t64` on Parrot OS."),
+        ({"ID": "parrot", "VERSION_ID": "6.4"}, "Run `sudo apt install libarchive13` on Parrot OS."),
+        ({"ID": "parrot", "VERSION_ID": "8.0"}, "Install libarchive for your system."),
+        ({"ID": "ubuntu", "VERSION_ID": "24.04"}, "Install libarchive for your system."),
+    ],
+)
+def test_challenge_download_reports_libarchive_install_hint(monkeypatch, tmp_path, os_release, install_hint):
+    monkeypatch.setattr(platform, "freedesktop_os_release", lambda: os_release)
+    monkeypatch.setitem(sys.modules, "libarchive", None)
+    archive = tmp_path / "challenge.zip"
+    archive.touch()
+    challenge = SimpleNamespace(
+        name="Example", downloadable=True, download_sha256=None, download=lambda path: archive,
+    )
+    cli = CLIStub(client=SimpleNamespace(get_challenge=lambda challenge_id_or_name: challenge))
+    args = argparse.Namespace(id=1, path=tmp_path, unzip=True, clear=True, start_instance=False)
+    command = challenge_mod.ChallengeCommand(cli, args)
+    monkeypatch.setattr(command, "animate_spinner", lambda *_: None)
+
+    command.download()
+
+    assert install_hint in cli.logger.errors[0]
+    assert archive.is_file()
 
 
 def test_badge_execute_missing_command_logs_error() -> None:

@@ -46,6 +46,17 @@ It is strongly recommended to use a virtual environment. Use [pipx](https://pipx
 pipx install htb-operator
 ```
 
+### Parrot OS (including WSL2)
+
+Extracting challenge ZIP files requires the system `libarchive` library. Install the package for your Parrot version inside Parrot. The `VERSION_ID` field in `/etc/os-release` shows your version.
+
+| Parrot OS version | Install command |
+| --- | --- |
+| 7.x (Debian 13) | `sudo apt install libarchive13t64` |
+| 6.x (Debian 12) | `sudo apt install libarchive13` |
+
+If `LIBARCHIVE` points to an invalid library, unset it with `unset LIBARCHIVE` to use the system library.
+
 # Configuration
 You need an HTB API token:
 

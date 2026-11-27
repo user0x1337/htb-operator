@@ -1,8 +1,8 @@
 import argparse
 import hashlib
 import os
+import platform
 import threading
-from libarchive import file_reader
 from pathlib import Path
 from typing import Optional, List
 
@@ -13,6 +13,22 @@ from console import create_challenge_info_panel, create_table_challenge_list
 from htbapi import ChallengeInfo, RequestException, UnknownDirectoryException, ChallengeList, Category
 
 DEFAULT_HTB_DOWNLOAD_PASSWORD = "hackthebox"
+
+
+def _libarchive_install_hint() -> str:
+    try:
+        os_release = platform.freedesktop_os_release()
+    except OSError:
+        os_release = {}
+
+    if os_release.get("ID") == "parrot":
+        major_version = os_release.get("VERSION_ID", "").split(".", 1)[0]
+        package = {"6": "libarchive13", "7": "libarchive13t64"}.get(major_version)
+        if package:
+            return f"Run `sudo apt install {package}` on Parrot OS."
+
+    return "Install libarchive for your system."
+
 
 class ChallengeCommand(BaseCommand):
     challenge_command: Optional[str]
@@ -124,6 +140,16 @@ class ChallengeCommand(BaseCommand):
             print(f'\r{Fore.CYAN}[+] Integrity check skipped for challenge "{challenge_download_info.name}". No hash value is provided by the HTB API.{Style.RESET_ALL}')
 
         if self.args.unzip:
+            try:
+                from libarchive import file_reader
+            except (ImportError, OSError, AttributeError) as exc:
+                self.logger.error(
+                    f'Cannot extract "{filepath}" because libarchive could not be loaded. '
+                    f'{_libarchive_install_hint()} Check LIBARCHIVE if you set it. '
+                    f'The downloaded archive was retained. Details: {exc}'
+                )
+                return None
+
             base_dir = os.path.dirname(os.path.abspath(filepath))
             with file_reader(path=filepath, passphrase=DEFAULT_HTB_DOWNLOAD_PASSWORD) as entries:
                 for entry in entries:
