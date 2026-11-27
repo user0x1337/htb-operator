@@ -1,9 +1,51 @@
 from __future__ import annotations
 
+import subprocess
+from types import SimpleNamespace
+from unittest.mock import Mock
+
 import pytest
 
 from htbapi.exception.errors import CannotSwitchWithActive, RequestException
 from htbapi.vpn import VpnServerInfo, BaseVpnServer
+
+
+@pytest.mark.parametrize(
+    ("lines", "expected_message"),
+    [
+        (
+            [
+                "net_route_v6_add: Network is unreachable\n",
+                "net_addr_v6_add: fd00::1/64 dev tun_htb\n",
+                "2026-11-27 08:34:01 Linux can't add IPv6 to interface tun_htb\n",
+                "Exiting due to fatal error\n",
+            ],
+            "Linux can't add IPv6 to interface tun_htb",
+        ),
+        (["Exiting due to fatal error\n"], "OpenVPN exited before completing VPN setup (exit code 1)."),
+    ],
+)
+def test_vpn_start_logs_only_the_last_relevant_error(monkeypatch, lines, expected_message):
+    from colorama import Fore, Style
+    from command.vpn import VpnCommand
+
+    process = Mock(stdout=iter(lines), wait=Mock(return_value=1))
+    launch = Mock(return_value=process)
+    monkeypatch.setattr(subprocess, "Popen", launch)
+    command = SimpleNamespace(
+        vpn_id=10,
+        accessible_vpn_servers={10: Mock(download=Mock(return_value="test.ovpn"))},
+        client=SimpleNamespace(get_active_connections=lambda: []),
+        get_next_free_tun_interface=lambda: "tun_htb",
+        target_path=None,
+        tcp=False,
+        logger=Mock(),
+    )
+
+    VpnCommand.start_vpn(command)
+
+    assert launch.call_args.kwargs["stderr"] == subprocess.STDOUT
+    command.logger.error.assert_called_once_with(f"{Fore.RED}{expected_message}{Style.RESET_ALL}")
 
 
 def vpn_server_data(server_id: int = 10, assigned: bool = False) -> dict:

@@ -353,10 +353,12 @@ class MachineCommand(BaseCommand):
 
     def try_execute_scripts(self):
         """Try to execute the custom user scripts"""
+        import getpass
+
         if self.scripts is None or len(self.scripts) == 0:
             return None
 
-        active_machine: ActiveMachineInfo = self.client.get_active_machine()
+        active_machine: Optional[ActiveMachineInfo] = self.client.get_active_machine()
         machine: Optional[MachineInfo] = None
         if active_machine is not None:
             machine: Optional[MachineInfo] = self.htb_cli.client.get_machine(machine_id_or_name=active_machine.id)
@@ -368,11 +370,13 @@ class MachineCommand(BaseCommand):
         os.environ["HTB_MACHINE_INFO"] = machine.info_status if machine is not None and machine.info_status is not None else ""
         os.environ["HTB_MACHINE_HOSTNAME"] = f'{active_machine.name.strip().lower()}.htb' if active_machine is not None else ""
 
-        self.logger.warning(f'{Fore.LIGHTYELLOW_EX}Running script as user "{os.getlogin()}"{Style.RESET_ALL}')
+        self.logger.warning(f'{Fore.LIGHTYELLOW_EX}Running script as user "{getpass.getuser()}"{Style.RESET_ALL}')
         script_file_list = self.scripts.split(",")
         for script in script_file_list:
             self.execute_script(script=script)
             self.logger.info(f'{Fore.GREEN}Script execution finished{Style.RESET_ALL}')
+
+        return None
 
 
     def list(self):

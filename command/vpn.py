@@ -300,11 +300,12 @@ class VpnCommand(BaseCommand):
                                         "--config", vpn_server.download(path=self.target_path, tcp=self.tcp),
                                         "--dev", available_tun],
                                        stdout=subprocess.PIPE,
-                                       stderr=subprocess.DEVNULL,
+                                       stderr=subprocess.STDOUT,
                                        env=os.environ.copy(),
                                        start_new_session=True,
                                        text=True)
 
+            last_error = None
             for line in process.stdout:
                 if "Peer Connection Initiated" in line:
                     self.logger.info(f'{Fore.GREEN}Establishing VPN connection...{Style.RESET_ALL}')
@@ -316,12 +317,16 @@ class VpnCommand(BaseCommand):
                 elif "Initialization Sequence Completed" in line:
                     self.logger.info(
                         f'{Fore.GREEN}OpenVPN started for server "{vpn_server.name}" on interface {available_tun} with process id "{process.pid}".{Style.RESET_ALL}')
-                    break
-                elif "ERROR" in line:
-                    self.logger.error(f'{Fore.RED}{line.strip()}{Style.RESET_ALL}')
-                elif "Exiting due to fatal error" in line:
-                    self.logger.error(f'{Fore.RED}{line.strip()}{Style.RESET_ALL}')
-                    break
+                    return None
+                elif "Exiting due to fatal error" not in line and re.search(
+                    r"\b(?:error|failed|failure|fatal|cannot|can't|denied|unreachable|unable)\b", line, re.IGNORECASE
+                ):
+                    last_error = re.sub(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\s+", "", line.strip())
+
+            exit_code = process.wait()
+            if last_error is None:
+                last_error = f'OpenVPN exited before completing VPN setup (exit code {exit_code}).'
+            self.logger.error(f'{Fore.RED}{last_error}{Style.RESET_ALL}')
         except Exception as e:
             self.logger.error(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
 
